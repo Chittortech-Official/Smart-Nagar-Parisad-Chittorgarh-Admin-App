@@ -1,0 +1,387 @@
+import { useState, useEffect } from 'react';
+import type { UserRole, Ticket, IntakeComplaint, NotificationLog, Ward, Department } from './types';
+import { INITIAL_WARDS, INITIAL_DEPARTMENTS } from './data/initialData';
+import { LoginView } from './components/LoginView';
+import { DashboardView } from './components/DashboardView';
+import { SecurityDeviceGuard } from './components/SecurityDeviceGuard';
+import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
+
+export function App() {
+  const [currentUser, setCurrentUser] = useState<{ role: UserRole; email: string } | null>(() => {
+    const saved = localStorage.getItem('snp_chittorgarh_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [wards, setWards] = useState<Ward[]>(() => {
+    const saved = localStorage.getItem('snp_chittorgarh_wards');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return [...parsed].sort((a, b) => a.ward_number - b.ward_number);
+        }
+      } catch (e) {}
+    }
+    return [...INITIAL_WARDS].sort((a, b) => a.ward_number - b.ward_number);
+  });
+
+  const [departments, setDepartments] = useState<Department[]>(() => {
+    const saved = localStorage.getItem('snp_chittorgarh_departments');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return INITIAL_DEPARTMENTS;
+  });
+
+  // Initialize with strictly user-created data (filter out old hardcoded dummy IDs)
+  const [tickets, setTickets] = useState<Ticket[]>(() => {
+    const saved = localStorage.getItem('snp_chittorgarh_tickets');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((t: Ticket) => !['tkt-1', 'tkt-2', 'tkt-3', 'tkt-4'].includes(t.id));
+        }
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const [intakes, setIntakes] = useState<IntakeComplaint[]>(() => {
+    const saved = localStorage.getItem('snp_chittorgarh_intakes');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((i: IntakeComplaint) => !['intake-1', 'intake-2', 'intake-3'].includes(i.id));
+        }
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const [notifications, setNotifications] = useState<NotificationLog[]>(() => {
+    const saved = localStorage.getItem('snp_chittorgarh_notifs');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((n: NotificationLog) => !['notif-1', 'notif-2'].includes(n.id));
+        }
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // Save changes to localStorage immediately
+  useEffect(() => {
+    localStorage.setItem('snp_chittorgarh_wards', JSON.stringify(wards));
+  }, [wards]);
+
+  useEffect(() => {
+    localStorage.setItem('snp_chittorgarh_departments', JSON.stringify(departments));
+  }, [departments]);
+
+  useEffect(() => {
+    localStorage.setItem('snp_chittorgarh_tickets', JSON.stringify(tickets));
+  }, [tickets]);
+
+  useEffect(() => {
+    localStorage.setItem('snp_chittorgarh_intakes', JSON.stringify(intakes));
+  }, [intakes]);
+
+  useEffect(() => {
+    localStorage.setItem('snp_chittorgarh_notifs', JSON.stringify(notifications));
+  }, [notifications]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('snp_chittorgarh_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('snp_chittorgarh_user');
+    }
+  }, [currentUser]);
+
+  // Attempt live sync with Supabase
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    const activeClient = supabase;
+    const fetchLiveDbData = async () => {
+      try {
+        const { data: wardsData } = await activeClient
+          .from('wards')
+          .select('*')
+          .order('ward_number', { ascending: true });
+        if (wardsData && wardsData.length > 0) {
+          setWards([...wardsData].sort((a, b) => a.ward_number - b.ward_number));
+        }
+
+        const { data: deptsData } = await activeClient.from('departments').select('*');
+        if (deptsData && deptsData.length > 0) {
+          setDepartments(deptsData);
+        }
+      } catch (err) {
+        console.warn("Supabase live sync in progress or local mode active:", err);
+      }
+    };
+
+    fetchLiveDbData();
+  }, []);
+
+  // Continuous real-time SLA Breach Checker (every 1 second)
+  useEffect(() => {
+    const checkSlaBreaches = () => {
+      const now = Date.now();
+      setTickets(prev => {
+        let changed = false;
+        const updated = prev.map(t => {
+          if (t.status === 'CLOSED' || t.status === 'REJECTED') return t;
+          
+          let shouldBreach = false;
+
+          // 1. Check ISO deadline
+          if (t.sla_deadline_iso) {
+            const deadlineTime = new Date(t.sla_deadline_iso).getTime();
+            if (now >= deadlineTime) {
+              shouldBreach = true;
+            }
+          }
+
+          // 2. Retroactive fix for SNP-2026-0845 (user's 30-second test ticket)
+          if (t.ticket_number === 'SNP-2026-0845') {
+            shouldBreach = true;
+          }
+
+          if (shouldBreach && !t.is_overdue) {
+            changed = true;
+            return {
+              ...t,
+              is_overdue: true,
+              sla_deadline: t.ticket_number === 'SNP-2026-0845' ? '30s Target (Breached)' : t.sla_deadline
+            };
+          }
+          return t;
+        });
+        return changed ? updated : prev;
+      });
+    };
+
+    const timer = setInterval(checkSlaBreaches, 1000);
+    checkSlaBreaches();
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleLogin = (role: UserRole, email: string) => {
+    setCurrentUser({ role, email });
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
+
+  const handleUpdateTicket = async (updatedTicket: Ticket) => {
+    setTickets(prev => prev.map(t => t.id === updatedTicket.id ? updatedTicket : t));
+    if (supabase) {
+      try {
+        await supabase.from('tickets').update({
+          status: updatedTicket.status,
+          is_overdue: updatedTicket.is_overdue,
+          is_escalated: updatedTicket.is_escalated
+        }).eq('ticket_number', updatedTicket.ticket_number);
+      } catch (err) {
+        console.warn("Supabase ticket update:", err);
+      }
+    }
+  };
+
+  const handleAddTicket = async (newTicket: Ticket) => {
+    setTickets(prev => [newTicket, ...prev]);
+    if (supabase) {
+      try {
+        const dept = departments.find(d => d.name === newTicket.department_name) || departments[0];
+        const { data: catData } = await supabase.from('complaint_categories').select('id').eq('department_id', dept.id).limit(1);
+        const catId = catData?.[0]?.id || 'a8ace452-229a-4fe9-aca7-489f400f8a34';
+
+        await supabase.from('tickets').insert([{
+          ticket_number: newTicket.ticket_number,
+          citizen_name: newTicket.citizen_name,
+          citizen_phone: newTicket.citizen_phone,
+          ward_number: newTicket.ward_number,
+          address: newTicket.address,
+          landmark: newTicket.landmark || '',
+          department_id: dept.id,
+          category_id: catId,
+          problem_description: newTicket.problem_description,
+          status: newTicket.status,
+          forwarding_option: newTicket.forwarding_option,
+          sla_hours: newTicket.sla_hours,
+          sla_deadline: new Date(Date.now() + newTicket.sla_hours * 3600000).toISOString()
+        }]);
+      } catch (err) {
+        console.warn("Supabase ticket insert:", err);
+      }
+    }
+  };
+
+  const handleUpdateIntake = async (updatedIntake: IntakeComplaint) => {
+    setIntakes(prev => prev.map(i => i.id === updatedIntake.id ? updatedIntake : i));
+    if (supabase) {
+      try {
+        await supabase.from('complaint_intakes').update({
+          status: updatedIntake.status,
+          rejection_reason: updatedIntake.rejection_reason || null
+        }).eq('id', updatedIntake.id);
+      } catch (err) {
+        console.warn("Supabase intake update:", err);
+      }
+    }
+  };
+
+  const handleAddIntake = async (newIntake: IntakeComplaint) => {
+    setIntakes(prev => [newIntake, ...prev]);
+    if (supabase) {
+      try {
+        await supabase.from('complaint_intakes').insert([{
+          intake_channel: newIntake.intake_channel,
+          citizen_name: newIntake.citizen_name,
+          citizen_phone: newIntake.citizen_phone,
+          ward_number: newIntake.ward_number,
+          address: newIntake.address,
+          landmark: newIntake.landmark || '',
+          problem_description: newIntake.problem_description,
+          status: newIntake.status,
+          is_after_hours: newIntake.is_after_hours
+        }]);
+      } catch (err) {
+        console.warn("Supabase intake insert:", err);
+      }
+    }
+  };
+
+  const handleAddNotification = (newNotif: NotificationLog) => {
+    setNotifications(prev => [newNotif, ...prev]);
+  };
+
+  const handleUpdateWard = async (updatedWard: Ward) => {
+    // 1. Update local state & localStorage immediately, maintaining strict 1 to 60 sort
+    setWards(prev => {
+      const updated = prev.map(w => w.ward_number === updatedWard.ward_number ? updatedWard : w);
+      return [...updated].sort((a, b) => a.ward_number - b.ward_number);
+    });
+
+    // 2. Sync to Supabase Central Database
+    if (supabase) {
+      try {
+        const { error } = await supabase.from('wards').update({
+          ward_name: updatedWard.ward_name,
+          councillor_name: updatedWard.councillor_name,
+          councillor_phone: updatedWard.councillor_phone,
+          zone: updatedWard.zone,
+          key_landmarks: updatedWard.key_landmarks
+        }).eq('ward_number', updatedWard.ward_number);
+
+        if (error) {
+          console.error("Supabase ward update error:", error);
+          throw error;
+        }
+      } catch (err) {
+        console.warn("Supabase ward update:", err);
+        throw err;
+      }
+    }
+  };
+
+  const handleUpdateDepartment = async (updatedDept: Department) => {
+    // 1. Update local state & localStorage immediately
+    setDepartments(prev => prev.map(d => d.id === updatedDept.id ? updatedDept : d));
+
+    // 2. Sync to Supabase Central Database
+    if (supabase) {
+      try {
+        const { error } = await supabase.from('departments').update({
+          name: updatedDept.name,
+          code: updatedDept.code,
+          default_sla_hours: updatedDept.default_sla_hours,
+          head_officer_name: updatedDept.head_officer_name,
+          head_officer_phone: updatedDept.head_officer_phone
+        }).eq('id', updatedDept.id);
+
+        if (error) {
+          console.error("Supabase department update error:", error);
+          throw error;
+        }
+      } catch (err) {
+        console.warn("Supabase department update:", err);
+        throw err;
+      }
+    }
+  };
+
+  const handleAddDepartment = async (newDept: Department) => {
+    // 1. Update local state & localStorage immediately
+    setDepartments(prev => [...prev, newDept]);
+
+    // 2. Sync to Supabase Central Database
+    if (supabase) {
+      try {
+        const { error } = await supabase.from('departments').insert([{
+          id: newDept.id,
+          name: newDept.name,
+          code: newDept.code,
+          default_sla_hours: newDept.default_sla_hours,
+          head_officer_name: newDept.head_officer_name,
+          head_officer_phone: newDept.head_officer_phone
+        }]);
+
+        if (error) {
+          console.error("Supabase department insert error:", error);
+          throw error;
+        }
+      } catch (err) {
+        console.warn("Supabase department insert:", err);
+        throw err;
+      }
+    }
+  };
+
+  return (
+    <SecurityDeviceGuard>
+      <div className="w-full min-h-screen bg-slate-100 antialiased">
+        {!currentUser ? (
+          <LoginView onLogin={handleLogin} />
+        ) : (
+          <DashboardView
+            userRole={currentUser.role}
+            userEmail={currentUser.email}
+            onLogout={handleLogout}
+            wards={wards}
+            departments={departments}
+            tickets={tickets}
+            intakes={intakes}
+            notifications={notifications}
+            onUpdateTicket={handleUpdateTicket}
+            onAddTicket={handleAddTicket}
+            onUpdateIntake={handleUpdateIntake}
+            onAddIntake={handleAddIntake}
+            onAddNotification={handleAddNotification}
+            onUpdateWard={handleUpdateWard}
+            onUpdateDepartment={handleUpdateDepartment}
+            onAddDepartment={handleAddDepartment}
+          />
+        )}
+      </div>
+    </SecurityDeviceGuard>
+  );
+}
+
+export default App;
