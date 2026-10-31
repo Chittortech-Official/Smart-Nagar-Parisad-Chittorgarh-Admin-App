@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.models.*
@@ -57,8 +58,9 @@ fun MainScreen(
         bottomBar = {
             if (selectedTicket == null && !showNotifications && !showSlaScreen) {
                 NavigationBar(
+                    modifier = Modifier.height(62.dp),
                     containerColor = Color.White,
-                    tonalElevation = 8.dp
+                    tonalElevation = 6.dp
                 ) {
                     val tabs = listOf(
                         BottomTab.Home,
@@ -72,8 +74,14 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = { currentTab = tab },
-                            icon = { Icon(tab.icon, contentDescription = tab.title) },
-                            label = { Text(tab.title, fontSize = 10.sp) },
+                            icon = { Icon(tab.icon, contentDescription = tab.title, modifier = Modifier.size(20.dp)) },
+                            label = {
+                                Text(
+                                    tab.title,
+                                    fontSize = 10.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = SnpPrimary,
                                 selectedTextColor = SnpPrimary,

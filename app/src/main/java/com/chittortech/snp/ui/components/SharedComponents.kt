@@ -149,19 +149,26 @@ fun SnpTopBar(
                 Brush.horizontalGradient(listOf(SnpGradStart, SnpGradEnd))
             )
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 14.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
-        Column(modifier = Modifier.align(Alignment.CenterStart)) {
-            Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(end = 44.dp)
+        ) {
+            Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
             if (subtitle.isNotBlank()) {
-                Text(subtitle, fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f))
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(subtitle, fontSize = 11.sp, color = Color.White.copy(alpha = 0.85f), maxLines = 1)
             }
         }
         IconButton(
             onClick = onNotificationClick,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier
+                .size(36.dp)
+                .align(Alignment.CenterEnd)
         ) {
-            Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = Color.White)
+            Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = Color.White, modifier = Modifier.size(20.dp))
         }
     }
 }

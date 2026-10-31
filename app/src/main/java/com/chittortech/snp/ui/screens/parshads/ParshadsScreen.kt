@@ -46,11 +46,11 @@ fun ParshadsScreen(
             val official = OfficialParshadDirectory.getParshad(wNum)
             Ward(
                 wardNumber = wNum,
-                wardName = dbWard?.wardName ?: "Ward $wNum - Nagar Parishad Chittorgarh",
+                wardName = "Ward $wNum",
                 councillorName = official?.councillorName ?: dbWard?.councillorName ?: "Designated Parshad",
                 councillorPhone = dbWard?.councillorPhone,
-                zone = dbWard?.zone ?: "Central Zone",
-                keyLandmarks = dbWard?.keyLandmarks
+                zone = null,
+                keyLandmarks = null
             )
         }
     }
@@ -275,13 +275,6 @@ fun ParshadsScreen(
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = TextPrimary
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = ward.wardName,
-                                            fontSize = 11.sp,
-                                            color = TextSecondary,
-                                            maxLines = 1
                                         )
                                     }
 
