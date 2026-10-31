@@ -264,7 +264,7 @@ fun ParshadsScreen(
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
-                                                .clip(SnpSquareShape)
+                                                .clip(SnpBadgeShape)
                                                 .background(partyBg)
                                                 .padding(horizontal = 8.dp, vertical = 3.dp)
                                         ) {
@@ -286,7 +286,7 @@ fun ParshadsScreen(
                                     official?.category?.let { cat ->
                                         Box(
                                             modifier = Modifier
-                                                .clip(SnpSquareShape)
+                                                .clip(SnpBadgeShape)
                                                 .background(Color(0xFFF8FAFC))
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {

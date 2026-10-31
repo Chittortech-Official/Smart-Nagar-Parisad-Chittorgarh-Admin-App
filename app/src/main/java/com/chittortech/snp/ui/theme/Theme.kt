@@ -8,15 +8,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-// 100% Square Shaped Boxes & Cards across the entire application
-val SnpSquareShape = RoundedCornerShape(0.dp)
+// Decent, elegant modern rounded shape (10.dp) for executive cards & boxes
+val SnpCardShape = RoundedCornerShape(10.dp)
+val SnpSquareShape = SnpCardShape
+val SnpBadgeShape = RoundedCornerShape(6.dp)
 
 val SnpShapes = Shapes(
-    extraSmall = SnpSquareShape,
-    small = SnpSquareShape,
-    medium = SnpSquareShape,
-    large = SnpSquareShape,
-    extraLarge = SnpSquareShape
+    extraSmall = RoundedCornerShape(4.dp),
+    small = SnpBadgeShape,
+    medium = SnpCardShape,
+    large = SnpCardShape,
+    extraLarge = RoundedCornerShape(16.dp)
 )
 
 private val LightColorScheme = lightColorScheme(
