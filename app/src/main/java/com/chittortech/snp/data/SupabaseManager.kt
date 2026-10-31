@@ -38,9 +38,22 @@ object SupabaseManager {
 
     suspend fun getDepartments(): List<Department> {
         return try {
-            client.postgrest["departments"]
+            val list = client.postgrest["departments"]
                 .select()
                 .decodeList<Department>()
+            // Only keep official Chittorgarh municipal departments, filtering out junk test entries
+            list.filter { dept ->
+                val code = dept.code.trim().uppercase()
+                val name = dept.name.trim()
+                val officer = dept.headOfficerName.orEmpty()
+                !name.contains("hh", ignoreCase = true) &&
+                !name.contains("ccc", ignoreCase = true) &&
+                !name.contains("[[") &&
+                !name.contains("''") &&
+                !officer.contains("[[") &&
+                name.length >= 3 &&
+                code != "HH" && code != "CC" && code != "'"
+            }
         } catch (e: Exception) {
             emptyList()
         }

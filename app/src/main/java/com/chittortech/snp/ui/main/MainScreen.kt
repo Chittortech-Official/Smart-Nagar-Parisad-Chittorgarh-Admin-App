@@ -60,9 +60,9 @@ fun MainScreen(
         bottomBar = {
             if (selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen) {
                 NavigationBar(
-                    modifier = Modifier.height(62.dp),
                     containerColor = Color.White,
-                    tonalElevation = 6.dp
+                    tonalElevation = 6.dp,
+                    windowInsets = WindowInsets.navigationBars
                 ) {
                     val tabs = listOf(
                         BottomTab.Home,
@@ -76,12 +76,12 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = { currentTab = tab },
-                            icon = { Icon(tab.icon, contentDescription = tab.title, modifier = Modifier.size(20.dp)) },
+                            icon = { Icon(tab.icon, contentDescription = tab.title, modifier = Modifier.size(22.dp)) },
                             label = {
                                 Text(
                                     tab.title,
-                                    fontSize = 10.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                 )
                             },
                             colors = NavigationBarItemDefaults.colors(

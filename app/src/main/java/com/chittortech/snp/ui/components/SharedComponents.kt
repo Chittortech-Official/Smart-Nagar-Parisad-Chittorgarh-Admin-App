@@ -149,6 +149,7 @@ fun SnpTopBar(
                 Brush.horizontalGradient(listOf(SnpGradStart, SnpGradEnd))
             )
             .statusBarsPadding()
+            .displayCutoutPadding()
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Column(

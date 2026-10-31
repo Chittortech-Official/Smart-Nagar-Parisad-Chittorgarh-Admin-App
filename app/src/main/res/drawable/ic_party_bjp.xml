@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- BJP Lotus Petals (Saffron) -->
+    <path
+        android:fillColor="#FF9933"
+        android:pathData="M12,3 C10.5,6.5 10.5,10.5 12,14 C13.5,10.5 13.5,6.5 12,3 Z"/>
+    <path
+        android:fillColor="#FF7700"
+        android:pathData="M12,14 C9.5,11.5 7.5,8 8,4.5 C6,7.5 6.5,12 12,14 Z"/>
+    <path
+        android:fillColor="#FF7700"
+        android:pathData="M12,14 C14.5,11.5 16.5,8 16,4.5 C18,7.5 17.5,12 12,14 Z"/>
+    <path
+        android:fillColor="#E65100"
+        android:pathData="M12,15 C8.5,14 4.5,11 4,8 C3,11.5 5.5,16 12,17 Z"/>
+    <path
+        android:fillColor="#E65100"
+        android:pathData="M12,15 C15.5,14 19.5,11 20,8 C21,11.5 18.5,16 12,17 Z"/>
+    <!-- Lotus Base Leaves (Green) -->
+    <path
+        android:fillColor="#138808"
+        android:pathData="M12,17 C9,17 5,18.5 2,21 C6,20.5 9,19 12,18 C15,19 18,20.5 22,21 C19,18.5 15,17 12,17 Z"/>
+</vector>
+

@@ -1,6 +1,7 @@
 package com.chittortech.snp.ui.screens.parshads
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -11,8 +12,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.HowToVote
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -21,9 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.R
 import com.chittortech.snp.data.OfficialParshadDirectory
 import com.chittortech.snp.data.models.Ward
 import com.chittortech.snp.ui.components.EmptyState
@@ -94,7 +95,7 @@ fun ParshadsScreen(
                 .padding(paddingValues)
                 .background(SnpBackground)
         ) {
-            // Party Filter Strip
+            // Party Filter Strip with Official Symbols
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,15 +104,24 @@ fun ParshadsScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 listOf(
-                    "All" to "All (60)",
-                    "भाजपा" to "भाजपा (33)",
-                    "कांग्रेस" to "कांग्रेस (23)",
-                    "निर्दलीय" to "निर्दलीय (4)"
-                ).forEach { (key, label) ->
+                    Triple("All", "All (60)", null),
+                    Triple("भाजपा", "भाजपा (33)", R.drawable.ic_party_bjp),
+                    Triple("कांग्रेस", "कांग्रेस (23)", R.drawable.ic_party_inc),
+                    Triple("निर्दलीय", "निर्दलीय (4)", R.drawable.ic_party_ind)
+                ).forEach { (key, label, logoRes) ->
                     val isSelected = selectedPartyFilter == key
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedPartyFilter = key },
+                        leadingIcon = logoRes?.let { res ->
+                            {
+                                Image(
+                                    painter = painterResource(res),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        },
                         label = {
                             Text(
                                 label,
@@ -180,11 +190,11 @@ fun ParshadsScreen(
                     items(filteredWards, key = { it.wardNumber }) { ward ->
                         val official = OfficialParshadDirectory.getParshad(ward.wardNumber)
 
-                        val (partyBg, partyFg) = when (official?.party) {
-                            "भाजपा" -> Pair(Color(0xFFFFF3E0), Color(0xFFE65100))
-                            "कांग्रेस" -> Pair(Color(0xFFE1F5FE), Color(0xFF0277BD))
-                            "निर्दलीय" -> Pair(Color(0xFFF1F5F9), Color(0xFF475569))
-                            else -> Pair(SnpPrimaryLight, SnpPrimary)
+                        val (partyBg, partyFg, partyLogo) = when (official?.party) {
+                            "भाजपा" -> Triple(Color(0xFFFFF3E0), Color(0xFFE65100), R.drawable.ic_party_bjp)
+                            "कांग्रेस" -> Triple(Color(0xFFE1F5FE), Color(0xFF0277BD), R.drawable.ic_party_inc)
+                            "निर्दलीय" -> Triple(Color(0xFFF1F5F9), Color(0xFF475569), R.drawable.ic_party_ind)
+                            else -> Triple(SnpPrimaryLight, SnpPrimary, R.drawable.ic_party_bjp)
                         }
 
                         Surface(
@@ -199,7 +209,7 @@ fun ParshadsScreen(
                                     .fillMaxWidth()
                                     .padding(14.dp)
                             ) {
-                                // Top row: Ward number + Party Badge + Category Badge
+                                // Top row: Ward number + Party Badge with Symbol + Category Badge
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -212,13 +222,20 @@ fun ParshadsScreen(
                                             fontWeight = FontWeight.Bold,
                                             color = SnpPrimary
                                         )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Box(
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(6.dp))
                                                 .background(partyBg)
-                                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                                                .padding(horizontal = 8.dp, vertical = 3.dp)
                                         ) {
+                                            Image(
+                                                painter = painterResource(partyLogo),
+                                                contentDescription = official?.party,
+                                                modifier = Modifier.size(15.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(5.dp))
                                             Text(
                                                 text = official?.party ?: "Ward Council",
                                                 fontSize = 11.sp,
@@ -245,25 +262,25 @@ fun ParshadsScreen(
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
 
-                                // Main row: Avatar + Name + Ward Area
+                                // Main row: Party Symbol Emblem Avatar + Councillor Name
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(42.dp)
+                                            .size(46.dp)
                                             .clip(CircleShape)
-                                            .background(partyBg),
+                                            .background(partyBg)
+                                            .padding(9.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(
-                                            Icons.Default.Person,
-                                            contentDescription = null,
-                                            tint = partyFg,
-                                            modifier = Modifier.size(22.dp)
+                                        Image(
+                                            painter = painterResource(partyLogo),
+                                            contentDescription = official?.party,
+                                            modifier = Modifier.fillMaxSize()
                                         )
                                     }
 
@@ -318,4 +335,3 @@ fun ParshadsScreen(
         }
     }
 }
-

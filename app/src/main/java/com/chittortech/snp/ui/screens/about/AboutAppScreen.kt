@@ -264,3 +264,4 @@ private fun ModuleBullet(title: String, desc: String) {
         Text(desc, fontSize = 11.sp, color = TextSecondary, modifier = Modifier.padding(start = 14.dp, top = 2.dp))
     }
 }
+
