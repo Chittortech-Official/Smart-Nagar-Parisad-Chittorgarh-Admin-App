@@ -47,9 +47,9 @@ fun SnpLoginScreen(
             isLoading = true
             errorMessage = null
             if (cleanEmail == "chairman@chittorgarh.gov.in") {
-                onLoginSuccess("chairman@chittorgarh.gov.in", "CHAIRMAN", "Hon. Sabhapati (Chairman)")
+                onLoginSuccess("chairman@chittorgarh.gov.in", "CHAIRMAN", "Anil Inani")
             } else if (cleanEmail == "vicechairman@chittorgarh.gov.in") {
-                onLoginSuccess("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Hon. Up-Sabhapati (Vice Chairman)")
+                onLoginSuccess("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Sudarshan Rampuria")
             } else {
                 errorMessage = "Access restricted. Only Chairman & Vice Chairman credentials authorized."
                 isLoading = false
@@ -219,22 +219,22 @@ fun SnpLoginScreen(
                     ) {
                         OutlinedButton(
                             onClick = {
-                                onDirectDemoLogin("chairman@chittorgarh.gov.in", "CHAIRMAN", "Hon. Sabhapati (Chairman)")
+                                onDirectDemoLogin("chairman@chittorgarh.gov.in", "CHAIRMAN", "Anil Inani")
                             },
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Sabhapati", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpPrimary)
+                            Text("Chairman", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpPrimary)
                         }
 
                         OutlinedButton(
                             onClick = {
-                                onDirectDemoLogin("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Hon. Up-Sabhapati (Vice Chairman)")
+                                onDirectDemoLogin("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Sudarshan Rampuria")
                             },
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Up-Sabhapati", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpGold)
+                            Text("Vice Chairman", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpGold)
                         }
                     }
                 }

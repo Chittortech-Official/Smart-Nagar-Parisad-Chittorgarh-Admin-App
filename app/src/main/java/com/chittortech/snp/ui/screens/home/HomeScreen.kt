@@ -47,7 +47,7 @@ fun HomeScreen(
         topBar = {
             SnpTopBar(
                 title = authorityName,
-                subtitle = if (authorityRole == "CHAIRMAN") "Sabhapati • Nagar Parishad Chittorgarh" else "Up-Sabhapati • Nagar Parishad Chittorgarh",
+                subtitle = if (authorityRole == "CHAIRMAN") "Chairman • Nagar Parishad Chittorgarh" else "Vice Chairman • Nagar Parishad Chittorgarh",
                 onNotificationClick = onNotificationClick
             )
         }
@@ -108,9 +108,7 @@ fun HomeScreen(
                         icon = Icons.Default.FiberNew,
                         iconBg = SnpBlueLight,
                         iconTint = SnpBlue,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(96.dp)
+                        modifier = Modifier.weight(1f)
                     )
                     KpiCard(
                         title = "Pending Action",
@@ -119,9 +117,7 @@ fun HomeScreen(
                         icon = Icons.Default.PendingActions,
                         iconBg = SnpAmberLight,
                         iconTint = SnpAmber,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(96.dp)
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
@@ -136,9 +132,7 @@ fun HomeScreen(
                         icon = Icons.Default.Engineering,
                         iconBg = SnpPrimaryLight,
                         iconTint = SnpPrimary,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(96.dp)
+                        modifier = Modifier.weight(1f)
                     )
                     KpiCard(
                         title = "Closed Today",
@@ -147,9 +141,7 @@ fun HomeScreen(
                         icon = Icons.Default.TaskAlt,
                         iconBg = SnpGreenLight,
                         iconTint = SnpGreen,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(96.dp)
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -170,18 +162,19 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("${stats.overdueComplaints}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = SnpRed)
                             Text("SLA Overdue", fontSize = 11.sp, color = TextSecondary)
                         }
-                        Divider(modifier = Modifier.height(36.dp).width(1.dp), color = SnpBorder)
+                        Box(modifier = Modifier.height(36.dp).width(1.dp).background(SnpBorder))
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("${stats.escalatedComplaints}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = SnpAmber)
                             Text("Escalated", fontSize = 11.sp, color = TextSecondary)
                         }
-                        Divider(modifier = Modifier.height(36.dp).width(1.dp), color = SnpBorder)
+                        Box(modifier = Modifier.height(36.dp).width(1.dp).background(SnpBorder))
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("${stats.monthClosed}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = SnpGreen)
                             Text("Month Closed", fontSize = 11.sp, color = TextSecondary)

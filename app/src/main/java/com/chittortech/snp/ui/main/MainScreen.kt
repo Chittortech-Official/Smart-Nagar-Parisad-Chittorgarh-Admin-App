@@ -2,6 +2,7 @@ package com.chittortech.snp.ui.main
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,7 +24,7 @@ import com.chittortech.snp.ui.theme.*
 
 sealed class BottomTab(val route: String, val title: String, val icon: ImageVector) {
     object Home : BottomTab("home", "Home", Icons.Default.Dashboard)
-    object Complaints : BottomTab("complaints", "Complaints", Icons.Default.Assignment)
+    object Complaints : BottomTab("complaints", "Complaints", Icons.AutoMirrored.Filled.Assignment)
     object Parshads : BottomTab("parshads", "Parshads", Icons.Default.People)
     object Departments : BottomTab("departments", "Depts", Icons.Default.Apartment)
     object More : BottomTab("more", "More", Icons.Default.MoreHoriz)

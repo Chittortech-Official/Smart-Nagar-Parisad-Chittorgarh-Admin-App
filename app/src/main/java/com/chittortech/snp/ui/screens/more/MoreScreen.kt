@@ -78,7 +78,7 @@ fun MoreScreen(
                     Column {
                         Text(authorityName, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                         Text(
-                            if (authorityRole == "CHAIRMAN") "Sabhapati (Chairman)" else "Up-Sabhapati (Vice Chairman)",
+                            if (authorityRole == "CHAIRMAN") "Chairman" else "Vice Chairman",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = SnpPrimary
@@ -103,21 +103,21 @@ fun MoreScreen(
                         subtitle = "Track overdue complaints & breaches",
                         onClick = onNavigateToSla
                     )
-                    Divider(color = SnpBorder)
+                    HorizontalDivider(color = SnpBorder)
                     MoreMenuItem(
                         icon = Icons.Default.NotificationsNone,
                         title = "Notification History",
                         subtitle = "SMS, WhatsApp and authority logs",
                         onClick = onNavigateToNotifications
                     )
-                    Divider(color = SnpBorder)
+                    HorizontalDivider(color = SnpBorder)
                     MoreMenuItem(
                         icon = Icons.Default.Security,
                         title = "Security & Encryption",
                         subtitle = "Supabase RLS & AES-256 Cloud Protection",
                         onClick = {}
                     )
-                    Divider(color = SnpBorder)
+                    HorizontalDivider(color = SnpBorder)
                     MoreMenuItem(
                         icon = Icons.Default.Info,
                         title = "About Application",
