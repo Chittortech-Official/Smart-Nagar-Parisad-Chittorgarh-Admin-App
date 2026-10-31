@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "7685535660",
+    "project_id": "chittor-tech",
+    "storage_bucket": "chittor-tech.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:7685535660:android:c394806a6c0ef4978bac09",
+        "android_client_info": {
+          "package_name": "com.chittortech.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjfLMuwyo4SY_uTjbMSPsEYagnydMPntE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
