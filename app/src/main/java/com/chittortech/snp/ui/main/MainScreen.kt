@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.models.*
+import com.chittortech.snp.ui.screens.about.AboutAppScreen
 import com.chittortech.snp.ui.screens.complaints.ComplaintDetailScreen
 import com.chittortech.snp.ui.screens.complaints.ComplaintsScreen
 import com.chittortech.snp.ui.screens.departments.DepartmentsScreen
@@ -49,6 +50,7 @@ fun MainScreen(
     var selectedTicket by remember { mutableStateOf<Ticket?>(null) }
     var showNotifications by remember { mutableStateOf(false) }
     var showSlaScreen by remember { mutableStateOf(false) }
+    var showAboutScreen by remember { mutableStateOf(false) }
 
     val overdueTickets = remember(tickets) {
         tickets.filter { it.isOverdue || it.status.equals("OVERDUE", ignoreCase = true) }
@@ -56,7 +58,7 @@ fun MainScreen(
 
     Scaffold(
         bottomBar = {
-            if (selectedTicket == null && !showNotifications && !showSlaScreen) {
+            if (selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen) {
                 NavigationBar(
                     modifier = Modifier.height(62.dp),
                     containerColor = Color.White,
@@ -117,7 +119,12 @@ fun MainScreen(
                     SlaScreen(
                         overdueTickets = overdueTickets,
                         onTicketClick = { selectedTicket = it },
-                        onNotificationClick = { showNotifications = true }
+                        onBack = { showSlaScreen = false }
+                    )
+                }
+                showAboutScreen -> {
+                    AboutAppScreen(
+                        onBack = { showAboutScreen = false }
                     )
                 }
                 else -> {
@@ -159,6 +166,7 @@ fun MainScreen(
                                 authorityEmail = authorityEmail,
                                 onNavigateToSla = { showSlaScreen = true },
                                 onNavigateToNotifications = { showNotifications = true },
+                                onNavigateToAbout = { showAboutScreen = true },
                                 onLogout = onLogout,
                                 onNotificationClick = { showNotifications = true }
                             )

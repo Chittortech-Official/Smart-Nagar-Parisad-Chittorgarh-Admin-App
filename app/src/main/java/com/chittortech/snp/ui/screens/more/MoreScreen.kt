@@ -31,6 +31,7 @@ fun MoreScreen(
     authorityEmail: String,
     onNavigateToSla: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onNavigateToAbout: () -> Unit,
     onLogout: () -> Unit,
     onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -107,22 +108,15 @@ fun MoreScreen(
                     MoreMenuItem(
                         icon = Icons.Default.NotificationsNone,
                         title = "Notification History",
-                        subtitle = "SMS, WhatsApp and authority logs",
+                        subtitle = "Executive alert stream & delivery logs",
                         onClick = onNavigateToNotifications
-                    )
-                    HorizontalDivider(color = SnpBorder)
-                    MoreMenuItem(
-                        icon = Icons.Default.Security,
-                        title = "Security & Encryption",
-                        subtitle = "Supabase RLS & AES-256 Cloud Protection",
-                        onClick = {}
                     )
                     HorizontalDivider(color = SnpBorder)
                     MoreMenuItem(
                         icon = Icons.Default.Info,
                         title = "About Application",
-                        subtitle = "Smart Nagar Parishad v1.0.0 by ChittorTech",
-                        onClick = {}
+                        subtitle = "SNPCMA v1.0.0 • ChittorTech Official",
+                        onClick = onNavigateToAbout
                     )
                 }
             }
