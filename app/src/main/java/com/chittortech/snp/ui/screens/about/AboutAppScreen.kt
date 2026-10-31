@@ -207,7 +207,7 @@ fun AboutAppScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Website: chittortech.com • Support: support@chittortech.com",
+                        text = "Website: chittortech.in • Email: contact@chittortech.in",
                         fontSize = 11.sp,
                         color = TextMuted
                     )
