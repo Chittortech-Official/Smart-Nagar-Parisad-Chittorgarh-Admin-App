@@ -1,6 +1,5 @@
 package com.chittortech.snp.data
 
-import com.chittortech.snp.BuildConfig
 import com.chittortech.snp.data.models.*
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -16,9 +15,12 @@ import kotlinx.coroutines.flow.flow
 
 object SupabaseManager {
 
+    private const val SUPABASE_URL = "https://qvrhgytkufajcpletbfp.supabase.co"
+    private const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2cmhneXRrdWZhamNwbGV0YmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NjkyMzYsImV4cCI6MjEwODA0NTIzNn0.x79eSX3uJdV2PSpV4zBLa6xuYaGaQZrs8IDk0YA0ymU"
+
     val client: SupabaseClient = createSupabaseClient(
-        supabaseUrl = BuildConfig.SUPABASE_URL,
-        supabaseKey = BuildConfig.SUPABASE_ANON_KEY
+        supabaseUrl = SUPABASE_URL,
+        supabaseKey = SUPABASE_ANON_KEY
     ) {
         install(Postgrest)
         install(Realtime)
