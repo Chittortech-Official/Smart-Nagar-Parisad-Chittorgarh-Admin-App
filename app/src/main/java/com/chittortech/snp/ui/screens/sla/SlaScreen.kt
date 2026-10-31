@@ -187,6 +187,7 @@ fun SlaScreen(
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedFilter = key },
+                        shape = SnpSquareShape,
                         label = { Text(label, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = SnpRed,
@@ -215,7 +216,7 @@ fun SlaScreen(
                 ) {
                     items(filteredList, key = { it.id.ifEmpty { it.ticketNumber } }) { ticket ->
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = SnpSquareShape,
                             color = SnpCardWhite,
                             shadowElevation = 2.dp,
                             border = BorderStroke(1.dp, SnpRed.copy(alpha = 0.35f)),
@@ -229,7 +230,7 @@ fun SlaScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(6.dp))
+                                            .clip(SnpSquareShape)
                                             .background(Color(0xFFFEF2F2))
                                             .padding(horizontal = 8.dp, vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically
@@ -252,7 +253,7 @@ fun SlaScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(ticket.ticketNumber, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = SnpRed)
-                                    Surface(shape = RoundedCornerShape(6.dp), color = SnpRedLight) {
+                                    Surface(shape = SnpSquareShape, color = SnpRedLight) {
                                         Text(
                                             "OVERDUE SLA",
                                             fontSize = 9.sp,
@@ -291,7 +292,7 @@ fun SlaScreen(
                                         )
                                     }
                                     Surface(
-                                        shape = RoundedCornerShape(8.dp),
+                                        shape = SnpSquareShape,
                                         color = SnpPrimaryLight,
                                         modifier = Modifier.clickable { onTicketClick(ticket) }
                                     ) {

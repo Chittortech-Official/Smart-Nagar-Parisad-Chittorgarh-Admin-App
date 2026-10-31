@@ -110,7 +110,7 @@ fun DepartmentsScreen(
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(14.dp),
+                    shape = SnpSquareShape,
                     color = SnpCardWhite,
                     shadowElevation = 1.dp,
                     border = BorderStroke(1.dp, SnpBorder),
@@ -126,7 +126,7 @@ fun DepartmentsScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(36.dp)
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .clip(SnpSquareShape)
                                         .background(SnpPrimaryLight),
                                     contentAlignment = Alignment.Center
                                 ) {

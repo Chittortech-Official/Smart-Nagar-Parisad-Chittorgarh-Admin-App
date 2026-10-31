@@ -1,5 +1,6 @@
 package com.chittortech.snp.ui.main
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
@@ -47,10 +48,49 @@ fun MainScreen(
     modifier: Modifier = Modifier
 ) {
     var currentTab by remember { mutableStateOf<BottomTab>(BottomTab.Home) }
+    val tabHistory = remember { mutableStateListOf<BottomTab>() }
+
     var selectedTicket by remember { mutableStateOf<Ticket?>(null) }
     var showNotifications by remember { mutableStateOf(false) }
     var showSlaScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
+
+    fun navigateToTab(tab: BottomTab) {
+        if (currentTab != tab) {
+            tabHistory.add(currentTab)
+            currentTab = tab
+        }
+    }
+
+    val canHandleBack = selectedTicket != null ||
+            showAboutScreen ||
+            showSlaScreen ||
+            showNotifications ||
+            tabHistory.isNotEmpty() ||
+            currentTab != BottomTab.Home
+
+    BackHandler(enabled = canHandleBack) {
+        when {
+            selectedTicket != null -> {
+                selectedTicket = null
+            }
+            showAboutScreen -> {
+                showAboutScreen = false
+            }
+            showSlaScreen -> {
+                showSlaScreen = false
+            }
+            showNotifications -> {
+                showNotifications = false
+            }
+            tabHistory.isNotEmpty() -> {
+                currentTab = tabHistory.removeAt(tabHistory.lastIndex)
+            }
+            currentTab != BottomTab.Home -> {
+                currentTab = BottomTab.Home
+            }
+        }
+    }
 
     val overdueTickets = remember(tickets) {
         tickets.filter { it.isOverdue || it.status.equals("OVERDUE", ignoreCase = true) }
@@ -75,7 +115,7 @@ fun MainScreen(
                         val isSelected = currentTab == tab
                         NavigationBarItem(
                             selected = isSelected,
-                            onClick = { currentTab = tab },
+                            onClick = { navigateToTab(tab) },
                             icon = { Icon(tab.icon, contentDescription = tab.title, modifier = Modifier.size(22.dp)) },
                             label = {
                                 Text(
@@ -135,7 +175,7 @@ fun MainScreen(
                                 authorityName = authorityName,
                                 stats = stats,
                                 recentTickets = tickets,
-                                onViewAllComplaints = { currentTab = BottomTab.Complaints },
+                                onViewAllComplaints = { navigateToTab(BottomTab.Complaints) },
                                 onTicketClick = { selectedTicket = it },
                                 onNotificationClick = { showNotifications = true }
                             )

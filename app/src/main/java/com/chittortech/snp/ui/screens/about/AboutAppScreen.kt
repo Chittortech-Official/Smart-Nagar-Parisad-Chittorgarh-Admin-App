@@ -60,7 +60,7 @@ fun AboutAppScreen(
         ) {
             // Header Card
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -73,7 +73,7 @@ fun AboutAppScreen(
                     Box(
                         modifier = Modifier
                             .size(76.dp)
-                            .clip(CircleShape)
+                            .clip(SnpSquareShape)
                             .background(SnpPrimaryLight)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
@@ -106,7 +106,7 @@ fun AboutAppScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Surface(
-                        shape = RoundedCornerShape(8.dp),
+                        shape = SnpSquareShape,
                         color = SnpGreenLight,
                         modifier = Modifier.padding(top = 4.dp)
                     ) {
@@ -123,7 +123,7 @@ fun AboutAppScreen(
 
             // Executive Purpose Card
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -157,7 +157,7 @@ fun AboutAppScreen(
 
             // Key Modules Card
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -180,7 +180,7 @@ fun AboutAppScreen(
 
             // Engineering Credits Card
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -234,7 +234,7 @@ private fun AboutInfoRow(
         Box(
             modifier = Modifier
                 .size(32.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(SnpSquareShape)
                 .background(SnpPrimaryLight),
             contentAlignment = Alignment.Center
         ) {

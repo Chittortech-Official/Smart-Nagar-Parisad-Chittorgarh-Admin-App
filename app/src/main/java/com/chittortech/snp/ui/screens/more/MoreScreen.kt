@@ -56,7 +56,7 @@ fun MoreScreen(
         ) {
             // Profile Card
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -69,7 +69,7 @@ fun MoreScreen(
                     Box(
                         modifier = Modifier
                             .size(52.dp)
-                            .clip(CircleShape)
+                            .clip(SnpSquareShape)
                             .background(SnpPrimaryLight),
                         contentAlignment = Alignment.Center
                     ) {
@@ -91,7 +91,7 @@ fun MoreScreen(
 
             // Menu Options
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -125,7 +125,7 @@ fun MoreScreen(
             Button(
                 onClick = onLogout,
                 colors = ButtonDefaults.buttonColors(containerColor = SnpRedLight),
-                shape = RoundedCornerShape(14.dp),
+                shape = SnpSquareShape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)

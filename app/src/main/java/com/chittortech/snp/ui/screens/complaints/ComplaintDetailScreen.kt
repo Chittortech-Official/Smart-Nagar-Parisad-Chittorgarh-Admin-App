@@ -1,5 +1,6 @@
 package com.chittortech.snp.ui.screens.complaints
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -55,9 +56,10 @@ fun ComplaintDetailScreen(
         ) {
             // Header Card
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -80,9 +82,10 @@ fun ComplaintDetailScreen(
 
             // Location & Ward
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -97,9 +100,10 @@ fun ComplaintDetailScreen(
 
             // Citizen Info
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -111,9 +115,10 @@ fun ComplaintDetailScreen(
 
             // Timelines & SLA
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

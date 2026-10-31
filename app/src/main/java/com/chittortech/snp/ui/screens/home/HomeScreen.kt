@@ -74,6 +74,7 @@ fun HomeScreen(
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedFilter = filter },
+                        shape = SnpSquareShape,
                         label = { Text(filter, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = SnpPrimary,
@@ -150,9 +151,10 @@ fun HomeScreen(
 
             // ── Critical Alerts (Overdue & Escalations) ─────────────────────────
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = SnpSquareShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -197,8 +199,9 @@ fun HomeScreen(
 
                 if (recentTickets.isEmpty()) {
                     Surface(
-                        shape = RoundedCornerShape(14.dp),
+                        shape = SnpSquareShape,
                         color = Color.White,
+                        border = BorderStroke(1.dp, SnpBorder),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(modifier = Modifier.padding(24.dp), contentAlignment = Alignment.Center) {
@@ -208,7 +211,7 @@ fun HomeScreen(
                 } else {
                     recentTickets.take(6).forEach { ticket ->
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = SnpSquareShape,
                             color = SnpCardWhite,
                             shadowElevation = 1.dp,
                             border = BorderStroke(1.dp, SnpBorder),

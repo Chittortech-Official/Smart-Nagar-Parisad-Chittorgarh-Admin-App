@@ -83,7 +83,7 @@ fun SnpLoginScreen(
                     Box(
                         modifier = Modifier
                             .size(72.dp)
-                            .clip(RoundedCornerShape(18.dp))
+                            .clip(SnpSquareShape)
                             .background(Color.White)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
@@ -118,7 +118,7 @@ fun SnpLoginScreen(
 
             // Card
             Surface(
-                shape = RoundedCornerShape(24.dp),
+                shape = SnpSquareShape,
                 color = Color.White,
                 shadowElevation = 4.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -151,7 +151,7 @@ fun SnpLoginScreen(
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = SnpSquareShape
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -173,7 +173,7 @@ fun SnpLoginScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { handleSignIn() }),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = SnpSquareShape
                     )
 
                     errorMessage?.let {
@@ -186,7 +186,7 @@ fun SnpLoginScreen(
                     Button(
                         onClick = handleSignIn,
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(14.dp),
+                        shape = SnpSquareShape,
                         colors = ButtonDefaults.buttonColors(containerColor = SnpPrimary),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -221,7 +221,7 @@ fun SnpLoginScreen(
                             onClick = {
                                 onDirectDemoLogin("chairman@chittorgarh.gov.in", "CHAIRMAN", "Anil Inani")
                             },
-                            shape = RoundedCornerShape(10.dp),
+                            shape = SnpSquareShape,
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Chairman", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpPrimary)
@@ -231,7 +231,7 @@ fun SnpLoginScreen(
                             onClick = {
                                 onDirectDemoLogin("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Sudarshan Rampuria")
                             },
-                            shape = RoundedCornerShape(10.dp),
+                            shape = SnpSquareShape,
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Vice Chairman", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpGold)

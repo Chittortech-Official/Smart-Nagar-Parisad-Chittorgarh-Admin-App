@@ -34,7 +34,7 @@ fun StatusBadge(status: String, modifier: Modifier = Modifier) {
     }
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(SnpSquareShape)
             .background(bg)
             .padding(horizontal = 8.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
@@ -56,7 +56,7 @@ fun KpiCard(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
+        shape = SnpSquareShape,
         colors = CardDefaults.cardColors(containerColor = SnpCardWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = BorderStroke(1.dp, SnpBorder)
@@ -74,7 +74,7 @@ fun KpiCard(
                 Box(
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(SnpSquareShape)
                         .background(iconBg),
                     contentAlignment = Alignment.Center
                 ) {

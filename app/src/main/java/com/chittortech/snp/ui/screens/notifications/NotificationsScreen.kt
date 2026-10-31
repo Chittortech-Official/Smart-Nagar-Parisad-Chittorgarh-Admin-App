@@ -147,6 +147,7 @@ fun NotificationsScreen(
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedFilter = key },
+                        shape = SnpSquareShape,
                         label = { Text(label, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = SnpPrimary,
@@ -182,7 +183,7 @@ fun NotificationsScreen(
                         }
 
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = SnpSquareShape,
                             color = SnpCardWhite,
                             shadowElevation = 1.dp,
                             border = BorderStroke(1.dp, if (isCritical) SnpRed.copy(alpha = 0.35f) else SnpBorder),
@@ -197,7 +198,7 @@ fun NotificationsScreen(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Box(
                                             modifier = Modifier
-                                                .clip(RoundedCornerShape(6.dp))
+                                                .clip(SnpSquareShape)
                                                 .background(badgeBg)
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
@@ -244,7 +245,7 @@ fun NotificationsScreen(
                                         fontWeight = FontWeight.SemiBold,
                                         color = TextSecondary
                                     )
-                                    Surface(shape = RoundedCornerShape(4.dp), color = SnpGreenLight) {
+                                    Surface(shape = SnpSquareShape, color = SnpGreenLight) {
                                         Text(
                                             text = "✓ ${notif.status}",
                                             fontSize = 9.sp,

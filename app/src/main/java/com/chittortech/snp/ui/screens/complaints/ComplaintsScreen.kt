@@ -85,7 +85,7 @@ fun ComplaintsScreen(
                     }
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
+                shape = SnpSquareShape,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
@@ -110,6 +110,7 @@ fun ComplaintsScreen(
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedStatus = status },
+                        shape = SnpSquareShape,
                         label = { Text(status.replace("_", " "), fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = SnpPrimary,
@@ -140,7 +141,7 @@ fun ComplaintsScreen(
                 ) {
                     items(filteredTickets, key = { it.id.ifEmpty { it.ticketNumber } }) { ticket ->
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = SnpSquareShape,
                             color = SnpCardWhite,
                             shadowElevation = 1.dp,
                             border = BorderStroke(1.dp, SnpBorder),
@@ -158,7 +159,7 @@ fun ComplaintsScreen(
                                         Text(ticket.ticketNumber, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = SnpPrimary)
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Surface(
-                                            shape = RoundedCornerShape(6.dp),
+                                            shape = SnpSquareShape,
                                             color = SnpPrimaryLight
                                         ) {
                                             Text(
