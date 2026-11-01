@@ -83,6 +83,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.8.6")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     // Arch Components
     implementation(libs.androidx.lifecycle.runtime.compose)

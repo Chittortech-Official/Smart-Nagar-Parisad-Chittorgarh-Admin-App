@@ -22,6 +22,22 @@ object SnpNotificationManager {
     const val CHANNEL_SLA_OVERDUE_ID = "snp_sla_overdue_alerts"
     const val CHANNEL_NEW_COMPLAINTS_ID = "snp_new_complaints_alerts"
 
+    private const val PREFS_NAME = "snp_notification_dedup_prefs"
+    private const val KEY_NOTIFIED_KEYS = "notified_keys"
+
+    fun isAlreadyNotified(context: Context, key: String): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val set = prefs.getStringSet(KEY_NOTIFIED_KEYS, emptySet()) ?: emptySet()
+        return set.contains(key)
+    }
+
+    fun markAsNotified(context: Context, key: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val currentSet = prefs.getStringSet(KEY_NOTIFIED_KEYS, emptySet())?.toMutableSet() ?: mutableSetOf()
+        currentSet.add(key)
+        prefs.edit().putStringSet(KEY_NOTIFIED_KEYS, currentSet).apply()
+    }
+
     fun initNotificationChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -76,6 +92,8 @@ object SnpNotificationManager {
         isEmergency: Boolean = false
     ) {
         if (!hasNotificationPermission(context)) return
+        if (isAlreadyNotified(context, ticketNumber)) return
+        markAsNotified(context, ticketNumber)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -120,6 +138,9 @@ object SnpNotificationManager {
         categoryTitle: String
     ) {
         if (!hasNotificationPermission(context)) return
+        val dedupKey = "${ticketNumber}_overdue"
+        if (isAlreadyNotified(context, dedupKey)) return
+        markAsNotified(context, dedupKey)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
