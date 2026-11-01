@@ -133,6 +133,7 @@ fun MainScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen) {
                 NavigationBar(
@@ -176,7 +177,7 @@ fun MainScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             when {
                 selectedTicket != null -> {
