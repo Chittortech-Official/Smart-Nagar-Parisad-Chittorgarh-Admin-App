@@ -56,6 +56,8 @@ fun MainScreen(
     notifications: List<NotificationLog>,
     stats: DashboardStats,
     deptStats: List<DepartmentStats>,
+    hasShownWelcomeNotification: Boolean = false,
+    onWelcomeDismissed: () -> Unit = {},
     onLogout: () -> Unit,
     onRefresh: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -68,10 +70,13 @@ fun MainScreen(
     var showSlaScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
 
-    var showWelcomeNotification by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(8000)
-        showWelcomeNotification = false
+    var showWelcomeNotification by remember { mutableStateOf(!hasShownWelcomeNotification) }
+    LaunchedEffect(hasShownWelcomeNotification) {
+        if (!hasShownWelcomeNotification) {
+            kotlinx.coroutines.delay(8000)
+            showWelcomeNotification = false
+            onWelcomeDismissed()
+        }
     }
 
     val greetingTitle = when {
@@ -342,7 +347,10 @@ fun MainScreen(
                             modifier = Modifier.size(24.dp)
                         ) {
                             IconButton(
-                                onClick = { showWelcomeNotification = false },
+                                onClick = {
+                                    showWelcomeNotification = false
+                                    onWelcomeDismissed()
+                                },
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 Icon(

@@ -23,7 +23,7 @@ import com.chittortech.snp.ui.theme.*
 
 @Composable
 fun SnpLoadingScreen(
-    message: String = "Synchronizing data from the backend...",
+    message: String = "डेटा लोड हो रहा है...",
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -53,19 +53,19 @@ fun SnpLoadingScreen(
             // Clean Official Rajasthan Government Logo (Seamless & Borderless, Zero Box Edges)
             Image(
                 painter = painterResource(R.drawable.rajasthan_logo),
-                contentDescription = "Rajasthan Sarkar Logo",
+                contentDescription = "राजस्थान सरकार",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .height(90.dp)
+                    .height(92.dp)
                     .scale(scale)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // State & Civic Identity Header (Minimal & Elegant)
+            // State & Civic Identity Header in Hindi
             Text(
-                text = "Rajasthan Sarkar",
-                fontSize = 19.sp,
+                text = "राजस्थान सरकार",
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
                 textAlign = TextAlign.Center
@@ -74,8 +74,8 @@ fun SnpLoadingScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Nagar Parishad Chittorgarh",
-                fontSize = 15.sp,
+                text = "नगर परिषद चित्तौड़गढ़",
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = SnpPrimary,
                 textAlign = TextAlign.Center
@@ -92,17 +92,17 @@ fun SnpLoadingScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Clean Synchronization Message
+            // Clean Synchronization Message in Hindi
             Text(
-                text = "Synchronizing data from the backend...",
-                fontSize = 12.sp,
+                text = message,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextSecondary,
                 textAlign = TextAlign.Center
             )
         }
 
-        // Bottom ChittorTech Branding
+        // Bottom ChittorTech Branding in Hindi
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -111,8 +111,8 @@ fun SnpLoadingScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "By ChittorTech",
-                fontSize = 11.sp,
+                text = "चित्तौड़टेक द्वारा संचालित",
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextMuted,
                 letterSpacing = 0.5.sp

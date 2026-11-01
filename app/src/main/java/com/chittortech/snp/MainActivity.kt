@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
                 var departments by remember { mutableStateOf<List<Department>>(emptyList()) }
                 var notifications by remember { mutableStateOf<List<NotificationLog>>(emptyList()) }
                 var isLoadingData by remember { mutableStateOf(false) }
+                var hasShownWelcomeNotification by remember { mutableStateOf(false) }
 
                 fun refreshData() {
                     scope.launch {
@@ -129,7 +130,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     isLoadingData -> {
-                        SnpLoadingScreen(message = "Synchronizing data from the backend...")
+                        SnpLoadingScreen(message = "सर्वर से डेटा लोड हो रहा है...")
                     }
                     else -> {
                         val (email, role, name) = currentUser!!
@@ -143,10 +144,13 @@ class MainActivity : ComponentActivity() {
                             notifications = notifications,
                             stats = dashboardStats,
                             deptStats = deptStats,
+                            hasShownWelcomeNotification = hasShownWelcomeNotification,
+                            onWelcomeDismissed = { hasShownWelcomeNotification = true },
                             onRefresh = { refreshData() },
                             onLogout = {
                                 SnpSessionManager.clearSession(this@MainActivity)
                                 currentUser = null
+                                hasShownWelcomeNotification = false
                             }
                         )
                     }
