@@ -147,18 +147,18 @@ fun AboutAppScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = "SNPCMA",
-                        fontSize = 22.sp,
+                        text = "गढ़-सेवा (GarhSeva)",
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = SnpPrimary,
                         letterSpacing = 0.5.sp
                     )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
 
                     Text(
-                        text = "Smart Nagar Parishad Chittorgarh Monitoring App",
-                        fontSize = 13.sp,
+                        text = "नगर परिषद चित्तौड़गढ़ • प्रशासनिक कमांड सेंटर",
+                        fontSize = 13.5.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TextPrimary,
                         textAlign = TextAlign.Center

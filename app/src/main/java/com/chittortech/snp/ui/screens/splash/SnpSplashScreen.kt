@@ -86,21 +86,22 @@ fun SnpSplashScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "स्मार्ट नगर परिषद चित्तौड़गढ़",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
+                text = "गढ़-सेवा (GarhSeva)",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
                 color = SnpPrimary,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                letterSpacing = 0.5.sp
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "CHAIRMAN & VICE CHAIRMAN COMMAND CENTER",
-                fontSize = 11.sp,
+                text = "नगर परिषद चित्तौड़गढ़ • कमांड सेंटर",
+                fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF64748B),
-                letterSpacing = 1.sp,
+                letterSpacing = 0.5.sp,
                 textAlign = TextAlign.Center
             )
         }

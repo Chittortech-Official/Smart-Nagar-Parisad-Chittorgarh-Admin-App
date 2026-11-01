@@ -98,18 +98,20 @@ fun SnpLoginScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = "स्मार्ट नगर परिषद चित्तौड़गढ़",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        text = "गढ़-सेवा (GarhSeva)",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        letterSpacing = 0.5.sp
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Official Authority Command Portal",
-                        fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.9f)
+                        text = "नगर परिषद चित्तौड़गढ़ • कमांड सेंटर",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White.copy(alpha = 0.95f)
                     )
                 }
             }
@@ -118,13 +120,13 @@ fun SnpLoginScreen(
 
             // Card
             Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color.White,
-                shadowElevation = 4.dp,
-                border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(20.dp),
+                color = SnpCardWhite,
+                shadowElevation = 4.dp,
+                border = BorderStroke(1.dp, SnpBorder)
             ) {
                 Column(modifier = Modifier.padding(22.dp)) {
                     Text(
@@ -141,7 +143,6 @@ fun SnpLoginScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Email
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
@@ -151,12 +152,11 @@ fun SnpLoginScreen(
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = RoundedCornerShape(12.dp)
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Password
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -165,7 +165,10 @@ fun SnpLoginScreen(
                         leadingIcon = { Icon(Icons.Default.Lock, null, tint = SnpPrimary) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null)
+                                Icon(
+                                    if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                    contentDescription = "Toggle Password"
+                                )
                             }
                         },
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -173,7 +176,7 @@ fun SnpLoginScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { handleSignIn() }),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = RoundedCornerShape(12.dp)
                     )
 
                     errorMessage?.let {
@@ -184,38 +187,38 @@ fun SnpLoginScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Button(
-                        onClick = handleSignIn,
+                        onClick = { handleSignIn() },
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SnpPrimary),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
                     ) {
                         if (isLoading) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
                             Text("Sign In to Command Center", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     // Quick access demo buttons for both authorities
                     Text(
                         text = "QUICK SECURE ACCESS",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextMuted,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         OutlinedButton(
                             onClick = {
@@ -243,7 +246,7 @@ fun SnpLoginScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             Text(
-                text = "Smart Chittorgarh Nagar Parishad © 2026\nDesigned & Developed by ChittorTech Official",
+                text = "गढ़-सेवा • नगर परिषद चित्तौड़गढ़ © 2026\nDesigned & Developed by ChittorTech",
                 fontSize = 11.sp,
                 color = Color(0xFF94A3B8),
                 textAlign = TextAlign.Center,
@@ -253,4 +256,3 @@ fun SnpLoginScreen(
         }
     }
 }
-
