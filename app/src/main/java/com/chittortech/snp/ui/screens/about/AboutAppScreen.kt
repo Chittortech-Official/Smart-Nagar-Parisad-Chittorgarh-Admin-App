@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -93,46 +92,46 @@ fun AboutAppScreen(
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Dual Seals: Rajasthan Govt + ChittorTech
+                    // Dual Badges: Rajasthan Govt + ChittorTech (Large, Crisp, Unclipped)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Surface(
-                            shape = CircleShape,
+                            shape = RoundedCornerShape(16.dp),
                             color = Color.White,
                             shadowElevation = 3.dp,
-                            border = BorderStroke(1.dp, SnpGold),
-                            modifier = Modifier.size(54.dp)
+                            border = BorderStroke(1.2.dp, SnpGold.copy(alpha = 0.7f)),
+                            modifier = Modifier.size(width = 82.dp, height = 74.dp)
                         ) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(5.dp),
+                                    .padding(6.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.rajasthan_logo),
-                                    contentDescription = "Rajasthan Government",
+                                    contentDescription = "Rajasthan Government Emblem",
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(18.dp))
 
                         Surface(
-                            shape = CircleShape,
+                            shape = RoundedCornerShape(16.dp),
                             color = Color.White,
                             shadowElevation = 3.dp,
-                            border = BorderStroke(1.dp, SnpBorder),
-                            modifier = Modifier.size(54.dp)
+                            border = BorderStroke(1.2.dp, SnpPrimary.copy(alpha = 0.35f)),
+                            modifier = Modifier.size(width = 82.dp, height = 74.dp)
                         ) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(6.dp),
+                                    .padding(8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Image(
@@ -193,7 +192,7 @@ fun AboutAppScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "OFFICIAL RELEASE • v1.0.0 (Production)",
+                                text = "v1.0.0 (Production Build)",
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SnpGreen
@@ -333,7 +332,7 @@ fun AboutAppScreen(
                 }
             }
 
-            // ─── Engineering & Technology Credits ─────────────────────────────
+            // ─── Engineering & Technology Credits (ChittorTech ONLY) ───────────
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -356,8 +355,8 @@ fun AboutAppScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "ChittorTech Official",
-                                fontSize = 16.sp,
+                                text = "ChittorTech",
+                                fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SnpPrimary
                             )
@@ -369,7 +368,7 @@ fun AboutAppScreen(
                             modifier = Modifier.padding(4.dp)
                         ) {
                             Text(
-                                text = "VERIFIED DEVELOPER",
+                                text = "CIVIC TECH",
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SnpPrimary,
@@ -393,25 +392,30 @@ fun AboutAppScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Portal: chittortech.in",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = TextMuted
-                        )
-                        Text(
-                            text = "contact@chittortech.in",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = TextMuted
-                        )
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Language, contentDescription = null, tint = SnpPrimary, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Website: chittortech.in",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextPrimary
+                            )
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Email, contentDescription = null, tint = SnpPrimary, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Email: contact@chittortech.in",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextPrimary
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = "© 2026 ChittorTech. All rights reserved.",
@@ -423,7 +427,8 @@ fun AboutAppScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            // Generous breathing room so card is NEVER cut off
+            Spacer(modifier = Modifier.navigationBarsPadding().height(40.dp))
         }
     }
 }

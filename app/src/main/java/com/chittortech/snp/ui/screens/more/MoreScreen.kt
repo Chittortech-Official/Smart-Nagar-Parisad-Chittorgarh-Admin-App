@@ -30,10 +30,10 @@ fun MoreScreen(
     authorityRole: String,
     authorityEmail: String,
     onNavigateToSla: () -> Unit,
-    onNavigateToNotifications: () -> Unit,
+    onNavigateToNotifications: () -> Unit = {},
     onNavigateToAbout: () -> Unit,
     onLogout: () -> Unit,
-    onNotificationClick: () -> Unit,
+    onNotificationClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -42,8 +42,8 @@ fun MoreScreen(
             .background(SnpBackground)
     ) {
         SnpTopBar(
-            title = "Administrative Controls",
-            subtitle = "Settings, Security & Overview",
+            title = "Settings",
+            subtitle = "Executive Controls & Administration",
             onNotificationClick = onNotificationClick
         )
 
@@ -56,10 +56,10 @@ fun MoreScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             // Profile Card
-            Surface(
-                shape = SnpSquareShape,
-                color = SnpCardWhite,
-                shadowElevation = 2.dp,
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -69,79 +69,102 @@ fun MoreScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(52.dp)
-                            .clip(SnpSquareShape)
+                            .size(54.dp)
+                            .clip(RoundedCornerShape(14.dp))
                             .background(SnpPrimaryLight),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.AccountBalance, null, tint = SnpPrimary, modifier = Modifier.size(28.dp))
+                        Icon(
+                            Icons.Default.AccountBalance,
+                            contentDescription = null,
+                            tint = SnpPrimary,
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
                     Column {
-                        Text(authorityName, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                         Text(
-                            if (authorityRole == "CHAIRMAN") "Chairman" else "Vice Chairman",
+                            text = authorityName,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = if (authorityRole.equals("CHAIRMAN", ignoreCase = true)) {
+                                "Hon. Chairman • सभापति"
+                            } else {
+                                "Hon. Vice Chairman • उपसभापति"
+                            },
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = SnpPrimary
                         )
-                        Text(authorityEmail, fontSize = 11.sp, color = TextMuted)
+                        Spacer(modifier = Modifier.height(1.dp))
+                        Text(
+                            text = authorityEmail,
+                            fontSize = 11.sp,
+                            color = TextMuted
+                        )
                     }
                 }
             }
 
-            // Menu Options
-            Surface(
-                shape = SnpSquareShape,
-                color = SnpCardWhite,
-                shadowElevation = 2.dp,
+            // Settings Options Card (Clean, NO Notification History)
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
-                    MoreMenuItem(
+                    SettingsMenuItem(
                         icon = Icons.Default.WarningAmber,
+                        iconTint = Color(0xFFDC2626),
                         title = "SLA & Escalation Monitor",
-                        subtitle = "Track overdue complaints & breaches",
+                        subtitle = "11 categories & overdue escalation rules",
                         onClick = onNavigateToSla
                     )
-                    HorizontalDivider(color = SnpBorder)
-                    MoreMenuItem(
-                        icon = Icons.Default.NotificationsNone,
-                        title = "Notification History",
-                        subtitle = "Executive alert stream & delivery logs",
-                        onClick = onNavigateToNotifications
-                    )
-                    HorizontalDivider(color = SnpBorder)
-                    MoreMenuItem(
+                    HorizontalDivider(color = SnpBorder.copy(alpha = 0.6f))
+                    SettingsMenuItem(
                         icon = Icons.Default.Info,
+                        iconTint = SnpPrimary,
                         title = "About Application",
-                        subtitle = "SNPCMA v1.0.0 • ChittorTech Official",
+                        subtitle = "ChittorTech • Command Center Details",
                         onClick = onNavigateToAbout
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.height(4.dp))
+
             // Logout Button
             Button(
                 onClick = onLogout,
                 colors = ButtonDefaults.buttonColors(containerColor = SnpRedLight),
-                shape = SnpSquareShape,
+                shape = RoundedCornerShape(14.dp),
+                border = BorderStroke(1.dp, SnpRed.copy(alpha = 0.3f)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
                 Icon(Icons.AutoMirrored.Filled.Logout, null, tint = SnpRed)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Logout from Command Center", color = SnpRed, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(
+                    text = "Logout from Command Center",
+                    color = SnpRed,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.5.sp
+                )
             }
         }
     }
 }
 
 @Composable
-private fun MoreMenuItem(
+private fun SettingsMenuItem(
     icon: ImageVector,
+    iconTint: Color,
     title: String,
     subtitle: String,
     onClick: () -> Unit
@@ -150,16 +173,37 @@ private fun MoreMenuItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = SnpPrimary, modifier = Modifier.size(24.dp))
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(iconTint.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = iconTint, modifier = Modifier.size(20.dp))
+        }
         Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
-            Text(subtitle, fontSize = 11.sp, color = TextSecondary)
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+            Text(
+                text = subtitle,
+                fontSize = 11.5.sp,
+                color = TextSecondary
+            )
         }
-        Icon(Icons.Default.ChevronRight, null, tint = TextMuted)
+        Icon(
+            Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = TextMuted,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }
-

@@ -38,12 +38,18 @@ import com.chittortech.snp.ui.screens.parshads.ParshadsScreen
 import com.chittortech.snp.ui.screens.sla.SlaScreen
 import com.chittortech.snp.ui.theme.*
 
-sealed class BottomTab(val route: String, val title: String, val icon: ImageVector) {
-    object Home : BottomTab("home", "Home", Icons.Default.Dashboard)
-    object Complaints : BottomTab("complaints", "Complaints", Icons.AutoMirrored.Filled.Assignment)
-    object Parshads : BottomTab("parshads", "Parshads", Icons.Default.People)
-    object Departments : BottomTab("departments", "Depts", Icons.Default.Apartment)
-    object More : BottomTab("more", "More", Icons.Default.MoreHoriz)
+sealed class BottomTab(
+    val route: String,
+    val title: String,
+    val icon: ImageVector,
+    val selectedColor: Color,
+    val unselectedColor: Color
+) {
+    object Home : BottomTab("home", "Home", Icons.Default.Dashboard, Color(0xFF1E40AF), Color(0xFF3B82F6))
+    object Complaints : BottomTab("complaints", "Complaints", Icons.AutoMirrored.Filled.Assignment, Color(0xFFDC2626), Color(0xFFEF4444))
+    object Parshads : BottomTab("parshads", "Parshads", Icons.Default.People, Color(0xFF047857), Color(0xFF10B981))
+    object Departments : BottomTab("departments", "Depts", Icons.Default.Apartment, Color(0xFF7C3AED), Color(0xFF8B5CF6))
+    object Settings : BottomTab("settings", "Settings", Icons.Default.Settings, Color(0xFFD97706), Color(0xFFF59E0B))
 }
 
 @Composable
@@ -152,27 +158,33 @@ fun MainScreen(
                         BottomTab.Complaints,
                         BottomTab.Parshads,
                         BottomTab.Departments,
-                        BottomTab.More
+                        BottomTab.Settings
                     )
                     tabs.forEach { tab ->
                         val isSelected = currentTab == tab
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = { navigateToTab(tab) },
-                            icon = { Icon(tab.icon, contentDescription = tab.title, modifier = Modifier.size(22.dp)) },
+                            icon = {
+                                Icon(
+                                    tab.icon,
+                                    contentDescription = tab.title,
+                                    modifier = Modifier.size(23.dp)
+                                )
+                            },
                             label = {
                                 Text(
                                     tab.title,
                                     fontSize = 11.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
                                 )
                             },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = SnpPrimary,
-                                selectedTextColor = SnpPrimary,
-                                indicatorColor = SnpPrimaryLight,
-                                unselectedIconColor = TextMuted,
-                                unselectedTextColor = TextMuted
+                                selectedIconColor = tab.selectedColor,
+                                selectedTextColor = tab.selectedColor,
+                                indicatorColor = tab.selectedColor.copy(alpha = 0.16f),
+                                unselectedIconColor = tab.unselectedColor.copy(alpha = 0.70f),
+                                unselectedTextColor = tab.unselectedColor.copy(alpha = 0.85f)
                             )
                         )
                     }
@@ -247,7 +259,7 @@ fun MainScreen(
                                 onRefreshClick = onRefresh
                             )
                         }
-                        BottomTab.More -> {
+                        BottomTab.Settings -> {
                             MoreScreen(
                                 authorityName = authorityName,
                                 authorityRole = authorityRole,
