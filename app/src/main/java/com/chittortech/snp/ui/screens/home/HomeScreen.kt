@@ -39,25 +39,27 @@ fun HomeScreen(
     onViewAllComplaints: () -> Unit,
     onTicketClick: (Ticket) -> Unit,
     onNotificationClick: () -> Unit,
+    onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var selectedFilter by remember { mutableStateOf("All Time") }
     val filterOptions = listOf("Today", "Yesterday", "Last 7 Days", "This Month", "All Time")
 
-    Scaffold(
-        topBar = {
-            SnpTopBar(
-                title = authorityName,
-                subtitle = if (authorityRole == "CHAIRMAN") "Chairman • Nagar Parishad Chittorgarh" else "Vice Chairman • Nagar Parishad Chittorgarh",
-                onNotificationClick = onNotificationClick
-            )
-        }
-    ) { paddingValues ->
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SnpBackground)
+    ) {
+        SnpTopBar(
+            title = authorityName,
+            subtitle = if (authorityRole == "CHAIRMAN") "Chairman • Nagar Parishad Chittorgarh" else "Vice Chairman • Nagar Parishad Chittorgarh",
+            onNotificationClick = onNotificationClick,
+            onRefreshClick = onRefreshClick
+        )
+
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .background(SnpBackground)
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(16.dp))

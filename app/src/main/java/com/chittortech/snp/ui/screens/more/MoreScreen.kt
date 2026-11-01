@@ -36,19 +36,20 @@ fun MoreScreen(
     onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        topBar = {
-            SnpTopBar(
-                title = "Administrative Controls",
-                subtitle = "Settings, Security & Overview",
-                onNotificationClick = onNotificationClick
-            )
-        }
-    ) { paddingValues ->
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SnpBackground)
+    ) {
+        SnpTopBar(
+            title = "Administrative Controls",
+            subtitle = "Settings, Security & Overview",
+            onNotificationClick = onNotificationClick
+        )
+
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(SnpBackground)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),

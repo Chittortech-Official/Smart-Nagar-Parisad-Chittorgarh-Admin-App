@@ -33,6 +33,7 @@ fun ComplaintsScreen(
     tickets: List<Ticket>,
     onTicketClick: (Ticket) -> Unit,
     onNotificationClick: () -> Unit,
+    onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -57,21 +58,17 @@ fun ComplaintsScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            SnpTopBar(
-                title = "Complaints Central",
-                subtitle = "Total ${tickets.size} Registered Tickets",
-                onNotificationClick = onNotificationClick
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(SnpBackground)
-        ) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SnpBackground)
+    ) {
+        SnpTopBar(
+            title = "Complaints Central",
+            subtitle = "Total ${tickets.size} Registered Tickets",
+            onNotificationClick = onNotificationClick,
+            onRefreshClick = onRefreshClick
+        )
             // Search Bar
             OutlinedTextField(
                 value = searchQuery,
@@ -138,15 +135,18 @@ fun ComplaintsScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp)
+                    contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
-                    items(filteredTickets, key = { it.id.ifEmpty { it.ticketNumber } }) { ticket ->
+                    items(
+                        items = filteredTickets,
+                        key = { it.id.ifEmpty { it.ticketNumber } },
+                        contentType = { "complaint_ticket" }
+                    ) { ticket ->
                         val catMeta = OfficialCategoriesDirectory.getCategoryMeta(ticket.categoryId, ticket.problemDescription)
 
                         Surface(
                             shape = SnpCardShape,
                             color = SnpCardWhite,
-                            shadowElevation = 1.dp,
                             border = BorderStroke(1.dp, SnpBorder),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -210,6 +210,5 @@ fun ComplaintsScreen(
                 }
             }
         }
-    }
 }
 

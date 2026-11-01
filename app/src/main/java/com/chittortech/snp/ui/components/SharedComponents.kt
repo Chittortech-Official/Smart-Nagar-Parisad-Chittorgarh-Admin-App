@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -140,6 +141,7 @@ fun SnpTopBar(
     title: String,
     subtitle: String = "",
     onNotificationClick: () -> Unit = {},
+    onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -155,7 +157,7 @@ fun SnpTopBar(
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(end = 44.dp)
+                .padding(end = if (onRefreshClick != null) 80.dp else 44.dp)
         ) {
             Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
             if (subtitle.isNotBlank()) {
@@ -163,13 +165,35 @@ fun SnpTopBar(
                 Text(subtitle, fontSize = 11.sp, color = Color.White.copy(alpha = 0.85f), maxLines = 1)
             }
         }
-        IconButton(
-            onClick = onNotificationClick,
-            modifier = Modifier
-                .size(36.dp)
-                .align(Alignment.CenterEnd)
+        Row(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = Color.White, modifier = Modifier.size(20.dp))
+            if (onRefreshClick != null) {
+                IconButton(
+                    onClick = onRefreshClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(2.dp))
+            }
+            IconButton(
+                onClick = onNotificationClick,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    Icons.Default.Notifications,
+                    contentDescription = "Notifications",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }

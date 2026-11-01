@@ -14,6 +14,7 @@ import com.chittortech.snp.data.SnpSessionManager
 import com.chittortech.snp.data.SnpSessionResult
 import com.chittortech.snp.data.SupabaseManager
 import com.chittortech.snp.data.models.*
+import com.chittortech.snp.ui.components.SnpLoadingScreen
 import com.chittortech.snp.ui.main.MainScreen
 import com.chittortech.snp.ui.screens.auth.SnpLoginScreen
 import com.chittortech.snp.ui.screens.splash.SnpSplashScreen
@@ -128,9 +129,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     isLoadingData -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = SnpPrimary)
-                        }
+                        SnpLoadingScreen(message = "Synchronizing Live Municipal Records...")
                     }
                     else -> {
                         val (email, role, name) = currentUser!!
@@ -144,6 +143,7 @@ class MainActivity : ComponentActivity() {
                             notifications = notifications,
                             stats = dashboardStats,
                             deptStats = deptStats,
+                            onRefresh = { refreshData() },
                             onLogout = {
                                 SnpSessionManager.clearSession(this@MainActivity)
                                 currentUser = null

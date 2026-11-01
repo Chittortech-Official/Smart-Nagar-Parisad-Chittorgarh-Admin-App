@@ -45,6 +45,7 @@ fun MainScreen(
     stats: DashboardStats,
     deptStats: List<DepartmentStats>,
     onLogout: () -> Unit,
+    onRefresh: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var currentTab by remember { mutableStateOf<BottomTab>(BottomTab.Home) }
@@ -177,26 +178,30 @@ fun MainScreen(
                                 recentTickets = tickets,
                                 onViewAllComplaints = { navigateToTab(BottomTab.Complaints) },
                                 onTicketClick = { selectedTicket = it },
-                                onNotificationClick = { showNotifications = true }
+                                onNotificationClick = { showNotifications = true },
+                                onRefreshClick = onRefresh
                             )
                         }
                         BottomTab.Complaints -> {
                             ComplaintsScreen(
                                 tickets = tickets,
                                 onTicketClick = { selectedTicket = it },
-                                onNotificationClick = { showNotifications = true }
+                                onNotificationClick = { showNotifications = true },
+                                onRefreshClick = onRefresh
                             )
                         }
                         BottomTab.Parshads -> {
                             ParshadsScreen(
                                 wards = wards,
-                                onNotificationClick = { showNotifications = true }
+                                onNotificationClick = { showNotifications = true },
+                                onRefreshClick = onRefresh
                             )
                         }
                         BottomTab.Departments -> {
                             DepartmentsScreen(
                                 departments = deptStats,
-                                onNotificationClick = { showNotifications = true }
+                                onNotificationClick = { showNotifications = true },
+                                onRefreshClick = onRefresh
                             )
                         }
                         BottomTab.More -> {

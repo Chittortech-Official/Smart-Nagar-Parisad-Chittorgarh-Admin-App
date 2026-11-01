@@ -29,6 +29,7 @@ import com.chittortech.snp.ui.theme.*
 fun DepartmentsScreen(
     departments: List<DepartmentStats>,
     onNotificationClick: () -> Unit,
+    onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Official 6 Municipal Departments fallback list
@@ -79,25 +80,31 @@ fun DepartmentsScreen(
         if (filtered.isNotEmpty()) filtered else officialFallback
     }
 
-    Scaffold(
-        topBar = {
-            SnpTopBar(
-                title = "Municipal Departments",
-                subtitle = "6 Official City Departments • Health & SLA",
-                onNotificationClick = onNotificationClick
-            )
-        }
-    ) { paddingValues ->
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SnpBackground)
+    ) {
+        SnpTopBar(
+            title = "Municipal Departments",
+            subtitle = "6 Official City Departments • Health & SLA",
+            onNotificationClick = onNotificationClick,
+            onRefreshClick = onRefreshClick
+        )
+
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(SnpBackground)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            items(cleanDepartments, key = { it.department.code }) { ds ->
+            items(
+                items = cleanDepartments,
+                key = { it.department.code },
+                contentType = { "dept_card" }
+            ) { ds ->
                 val dept = ds.department
                 val (deptIcon, deptHindi) = when (dept.code.uppercase()) {
                     "SAN" -> Pair(Icons.Default.CleaningServices, "स्वास्थ्य एवं स्वच्छता विभाग")
@@ -112,7 +119,6 @@ fun DepartmentsScreen(
                 Surface(
                     shape = SnpSquareShape,
                     color = SnpCardWhite,
-                    shadowElevation = 1.dp,
                     border = BorderStroke(1.dp, SnpBorder),
                     modifier = Modifier.fillMaxWidth()
                 ) {

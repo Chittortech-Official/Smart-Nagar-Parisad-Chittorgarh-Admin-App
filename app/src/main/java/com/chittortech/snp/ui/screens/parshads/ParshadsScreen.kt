@@ -37,69 +37,85 @@ import com.chittortech.snp.ui.theme.*
 fun ParshadsScreen(
     wards: List<Ward>,
     onNotificationClick: () -> Unit,
+    onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedPartyFilter by remember { mutableStateOf("All") }
 
-    // Merge Supabase wards with the official 2026 election dataset
-    val fullWardsList = remember(wards) {
-        (1..60).map { wNum ->
+    // Precompute UI model to ensure ultra-fast 120Hz stutter-free scrolling
+    val displayList = remember(wards, searchQuery, selectedPartyFilter) {
+        val query = searchQuery.trim().lowercase()
+        (1..60).mapNotNull { wNum ->
             val dbWard = wards.find { it.wardNumber == wNum }
             val official = OfficialParshadDirectory.getParshad(wNum)
-            Ward(
-                wardNumber = wNum,
-                wardName = "Ward $wNum",
-                councillorName = official?.councillorName ?: dbWard?.councillorName ?: "Designated Parshad",
-                councillorPhone = dbWard?.councillorPhone,
-                zone = null,
-                keyLandmarks = null
-            )
-        }
-    }
 
-    val filteredWards = remember(fullWardsList, searchQuery, selectedPartyFilter) {
-        fullWardsList.filter { w ->
-            val official = OfficialParshadDirectory.getParshad(w.wardNumber)
+            val party = official?.party ?: "Ward Council"
             val matchesParty = when (selectedPartyFilter) {
-                "भाजपा" -> official?.party == "भाजपा"
-                "कांग्रेस" -> official?.party == "कांग्रेस"
-                "निर्दलीय" -> official?.party == "निर्दलीय"
+                "भाजपा" -> party == "भाजपा"
+                "कांग्रेस" -> party == "कांग्रेस"
+                "निर्दलीय" -> party == "निर्दलीय"
                 else -> true
             }
 
-            val query = searchQuery.trim().lowercase()
-            val matchesSearch = query.isBlank() ||
-                    w.wardNumber.toString() == query ||
-                    (official?.councillorName?.lowercase()?.contains(query) == true) ||
-                    (w.councillorName?.lowercase()?.contains(query) == true) ||
-                    (official?.party?.lowercase()?.contains(query) == true) ||
-                    (official?.category?.lowercase()?.contains(query) == true) ||
-                    (official?.runnerUp?.lowercase()?.contains(query) == true) ||
-                    w.wardName.lowercase().contains(query)
+            val councillorName = official?.councillorName ?: dbWard?.councillorName ?: "Designated Parshad"
+            val category = official?.category ?: "सामान्य"
+            val runnerUp = official?.runnerUp ?: "-"
+            val votes = official?.votes ?: "-"
+            val margin = official?.margin ?: "-"
 
-            matchesParty && matchesSearch
+            val matchesSearch = query.isBlank() ||
+                    wNum.toString() == query ||
+                    councillorName.lowercase().contains(query) ||
+                    party.lowercase().contains(query) ||
+                    category.lowercase().contains(query) ||
+                    runnerUp.lowercase().contains(query)
+
+            if (matchesParty && matchesSearch) {
+                val (partyBg, partyFg, partyLogo) = when (party) {
+                    "भाजपा" -> Triple(Color(0xFFFFF3E0), Color(0xFFE65100), R.drawable.ic_party_bjp)
+                    "कांग्रेस" -> Triple(Color(0xFFE1F5FE), Color(0xFF0277BD), R.drawable.ic_party_inc)
+                    "निर्दलीय" -> Triple(Color(0xFFF1F5F9), Color(0xFF475569), R.drawable.ic_party_ind)
+                    else -> Triple(SnpPrimaryLight, SnpPrimary, R.drawable.ic_party_bjp)
+                }
+
+                ParshadItemUiModel(
+                    wardNumber = wNum,
+                    councillorName = councillorName,
+                    councillorPhone = dbWard?.councillorPhone,
+                    party = party,
+                    category = category,
+                    runnerUp = runnerUp,
+                    votes = votes,
+                    margin = margin,
+                    partyBg = partyBg,
+                    partyFg = partyFg,
+                    partyLogo = partyLogo
+                )
+            } else null
         }
     }
 
-    Scaffold(
-        topBar = {
-            SnpTopBar(
-                title = "Parshad Directory",
-                subtitle = "60 Wards • BJP 33 · INC 23 · IND 4",
-                onNotificationClick = onNotificationClick
-            )
-        }
-    ) { paddingValues ->
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SnpBackground)
+    ) {
+        SnpTopBar(
+            title = "Parshad Directory",
+            subtitle = "60 Wards • BJP 33 · INC 23 · IND 4",
+            onNotificationClick = onNotificationClick,
+            onRefreshClick = onRefreshClick
+        )
+
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(SnpBackground),
-            contentPadding = PaddingValues(bottom = 24.dp)
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             // Party Filter Strip with Official Symbols (Scrolls naturally, NOT sticky)
-            item {
+            item(key = "party_filters") {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -156,7 +172,7 @@ fun ParshadsScreen(
             }
 
             // Compact Single-Line Search Bar (Scrolls naturally, NOT sticky)
-            item {
+            item(key = "search_bar") {
                 Surface(
                     shape = SnpSquareShape,
                     color = Color.White,
@@ -218,157 +234,170 @@ fun ParshadsScreen(
                 Spacer(modifier = Modifier.height(4.dp))
             }
 
-            if (filteredWards.isEmpty()) {
-                item {
+            if (displayList.isEmpty()) {
+                item(key = "empty_state") {
                     EmptyState(message = "No councillor found matching your search.")
                 }
             } else {
-                items(filteredWards, key = { it.wardNumber }) { ward ->
-                        val official = OfficialParshadDirectory.getParshad(ward.wardNumber)
-
-                        val (partyBg, partyFg, partyLogo) = when (official?.party) {
-                            "भाजपा" -> Triple(Color(0xFFFFF3E0), Color(0xFFE65100), R.drawable.ic_party_bjp)
-                            "कांग्रेस" -> Triple(Color(0xFFE1F5FE), Color(0xFF0277BD), R.drawable.ic_party_inc)
-                            "निर्दलीय" -> Triple(Color(0xFFF1F5F9), Color(0xFF475569), R.drawable.ic_party_ind)
-                            else -> Triple(SnpPrimaryLight, SnpPrimary, R.drawable.ic_party_bjp)
-                        }
-
-                        Surface(
-                            shape = SnpSquareShape,
-                            color = SnpCardWhite,
-                            shadowElevation = 1.dp,
-                            border = BorderStroke(1.dp, SnpBorder),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 5.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(14.dp)
-                            ) {
-                                // Top row: Ward number + Party Badge with Symbol + Category Badge
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = "Ward ${ward.wardNumber}",
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = SnpPrimary
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .clip(SnpBadgeShape)
-                                                .background(partyBg)
-                                                .padding(horizontal = 8.dp, vertical = 3.dp)
-                                        ) {
-                                            Image(
-                                                painter = painterResource(partyLogo),
-                                                contentDescription = official?.party,
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(5.dp))
-                                            Text(
-                                                text = official?.party ?: "Ward Council",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = partyFg
-                                            )
-                                        }
-                                    }
-
-                                    official?.category?.let { cat ->
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(SnpBadgeShape)
-                                                .background(Color(0xFFF8FAFC))
-                                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                                        ) {
-                                            Text(
-                                                text = cat,
-                                                fontSize = 10.sp,
-                                                color = TextMuted,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(10.dp))
-
-                                // Main row: Party Symbol Emblem Avatar + Councillor Name
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(46.dp)
-                                            .clip(CircleShape)
-                                            .background(partyBg)
-                                            .padding(9.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Image(
-                                            painter = painterResource(partyLogo),
-                                            contentDescription = official?.party,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = official?.councillorName ?: ward.councillorName ?: "Designated Parshad",
-                                            fontSize = 15.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = TextPrimary
-                                        )
-                                    }
-
-                                    ward.councillorPhone?.let { phone ->
-                                        IconButton(onClick = {}) {
-                                            Icon(Icons.Default.Phone, contentDescription = "Call", tint = SnpGreen)
-                                        }
-                                    }
-                                }
-
-                                // Runner-up and Vote Margin
-                                official?.let { off ->
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    HorizontalDivider(color = SnpBorder.copy(alpha = 0.5f))
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "2nd: ${off.runnerUp}",
-                                            fontSize = 10.sp,
-                                            color = TextMuted,
-                                            maxLines = 1,
-                                            modifier = Modifier.weight(1f, fill = false)
-                                        )
-                                        Text(
-                                            text = "Votes: ${off.votes} (${off.margin})",
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = TextSecondary
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+                items(
+                    items = displayList,
+                    key = { it.wardNumber },
+                    contentType = { "parshad_card" }
+                ) { item ->
+                    ParshadCard(item = item)
                 }
             }
         }
     }
+}
+
+// ─── 120Hz Ultra Smooth Dedicated Card ───────────────────────────────────────
+data class ParshadItemUiModel(
+    val wardNumber: Int,
+    val councillorName: String,
+    val councillorPhone: String?,
+    val party: String,
+    val category: String,
+    val runnerUp: String,
+    val votes: String,
+    val margin: String,
+    val partyBg: Color,
+    val partyFg: Color,
+    val partyLogo: Int
+)
+
+@Composable
+private fun ParshadCard(
+    item: ParshadItemUiModel,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = SnpSquareShape,
+        color = SnpCardWhite,
+        border = BorderStroke(1.dp, SnpBorder),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp)
+        ) {
+            // Top row: Ward number + Party Badge with Symbol + Category Badge
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Ward ${item.wardNumber}",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SnpPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(SnpBadgeShape)
+                            .background(item.partyBg)
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(item.partyLogo),
+                            contentDescription = item.party,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = item.party,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = item.partyFg
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(SnpBadgeShape)
+                        .background(Color(0xFFF8FAFC))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = item.category,
+                        fontSize = 10.sp,
+                        color = TextMuted,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Main row: Modern Ward Monogram Avatar + Councillor Name
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(item.partyBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "W${item.wardNumber}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = item.partyFg
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.councillorName,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                }
+
+                item.councillorPhone?.let {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Phone, contentDescription = "Call", tint = SnpGreen)
+                    }
+                }
+            }
+
+            // Runner-up and Vote Margin
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = SnpBorder.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "2nd: ${item.runnerUp}",
+                    fontSize = 10.sp,
+                    color = TextMuted,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                Text(
+                    text = "Votes: ${item.votes} (${item.margin})",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextSecondary
+                )
+            }
+        }
+    }
+}
