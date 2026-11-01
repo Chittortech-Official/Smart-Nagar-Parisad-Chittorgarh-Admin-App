@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.ui.theme.*
@@ -317,64 +318,78 @@ fun ControlRoomScreen(
                         HorizontalDivider(color = SnpBorder.copy(alpha = 0.5f))
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Bottom Actions: Phone Number + Call Button + Copy Button
+                        // Phone Number
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.Phone,
-                                    contentDescription = null,
-                                    tint = SnpPrimary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = contact.formattedPhone,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = SnpPrimary
-                                )
-                            }
+                            Icon(
+                                Icons.Default.Phone,
+                                contentDescription = null,
+                                tint = SnpPrimary,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = contact.formattedPhone,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = SnpPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
 
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                // Copy Button
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = SnpSurfaceVariant,
-                                    border = BorderStroke(1.dp, SnpBorder),
-                                    modifier = Modifier.clickable {
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Responsive 50/50 Full-Width Action Buttons (Copy & Call)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            // Copy Button
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = SnpSurfaceVariant,
+                                border = BorderStroke(1.dp, SnpBorder),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable {
                                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                         val clip = ClipData.newPlainText("Phone Number", contact.phoneNumber)
                                         clipboard.setPrimaryClip(clip)
                                         Toast.makeText(context, "${contact.formattedPhone} copied", Toast.LENGTH_SHORT).show()
                                     }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Box(
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "Copy",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = TextSecondary
-                                        )
-                                    }
+                                    Icon(
+                                        Icons.Default.ContentCopy,
+                                        contentDescription = null,
+                                        tint = TextSecondary,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "Copy",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = TextSecondary
+                                    )
                                 }
+                            }
 
-                                // Direct Dial Call Button
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = Color(0xFFF0FDF4),
-                                    border = BorderStroke(1.dp, Color(0xFFBBF7D0)),
-                                    modifier = Modifier.clickable {
+                            // Call Helpline Button
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(0xFFF0FDF4),
+                                border = BorderStroke(1.dp, Color(0xFFBBF7D0)),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable {
                                         try {
                                             val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contact.phoneNumber}"))
                                             context.startActivity(intent)
@@ -382,25 +397,25 @@ fun ControlRoomScreen(
                                             Toast.makeText(context, "Could not open dialer", Toast.LENGTH_SHORT).show()
                                         }
                                     }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Call,
-                                            contentDescription = null,
-                                            tint = Color(0xFF16A34A),
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Text(
-                                            text = "Call",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF15803D)
-                                        )
-                                    }
+                                    Icon(
+                                        Icons.Default.Call,
+                                        contentDescription = null,
+                                        tint = Color(0xFF16A34A),
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "Call Helpline",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF15803D)
+                                    )
                                 }
                             }
                         }
