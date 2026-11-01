@@ -159,7 +159,7 @@ fun SnpTopBar(
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(end = if (onRefreshClick != null) 80.dp else 44.dp)
+                .padding(end = if (onRefreshClick != null) 44.dp else 12.dp)
                 .then(
                     if (onTitleClick != null) Modifier.clickable(onClick = onTitleClick) else Modifier
                 )
@@ -170,31 +170,16 @@ fun SnpTopBar(
                 Text(subtitle, fontSize = 11.sp, color = Color.White.copy(alpha = 0.85f), maxLines = 1)
             }
         }
-        Row(
-            modifier = Modifier.align(Alignment.CenterEnd),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (onRefreshClick != null) {
-                IconButton(
-                    onClick = onRefreshClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(2.dp))
-            }
+        if (onRefreshClick != null) {
             IconButton(
-                onClick = onNotificationClick,
-                modifier = Modifier.size(36.dp)
+                onClick = onRefreshClick,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(36.dp)
             ) {
                 Icon(
-                    Icons.Default.Notifications,
-                    contentDescription = "Notifications",
+                    Icons.Default.Refresh,
+                    contentDescription = "Refresh",
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
