@@ -2,6 +2,7 @@ package com.chittortech.snp.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -142,6 +143,7 @@ fun SnpTopBar(
     subtitle: String = "",
     onNotificationClick: () -> Unit = {},
     onRefreshClick: (() -> Unit)? = null,
+    onTitleClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -158,6 +160,9 @@ fun SnpTopBar(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(end = if (onRefreshClick != null) 80.dp else 44.dp)
+                .then(
+                    if (onTitleClick != null) Modifier.clickable(onClick = onTitleClick) else Modifier
+                )
         ) {
             Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
             if (subtitle.isNotBlank()) {

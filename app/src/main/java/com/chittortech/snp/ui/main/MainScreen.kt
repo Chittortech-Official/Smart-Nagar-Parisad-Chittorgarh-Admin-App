@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -70,10 +71,15 @@ fun MainScreen(
     var showSlaScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
 
-    var showWelcomeNotification by remember { mutableStateOf(!hasShownWelcomeNotification) }
+    var showWelcomeNotification by remember { mutableStateOf(false) }
     LaunchedEffect(hasShownWelcomeNotification) {
         if (!hasShownWelcomeNotification) {
-            kotlinx.coroutines.delay(8000)
+            // Settle HomeScreen for 500ms so the user sees the screen first
+            kotlinx.coroutines.delay(500)
+            // Expand the Dynamic Island smoothly from the top camera notch
+            showWelcomeNotification = true
+            // Display for 9.5 seconds
+            kotlinx.coroutines.delay(9500)
             showWelcomeNotification = false
             onWelcomeDismissed()
         }
@@ -215,7 +221,8 @@ fun MainScreen(
                                 onViewAllComplaints = { navigateToTab(BottomTab.Complaints) },
                                 onTicketClick = { selectedTicket = it },
                                 onNotificationClick = { showNotifications = true },
-                                onRefreshClick = onRefresh
+                                onRefreshClick = onRefresh,
+                                onHeaderClick = { showWelcomeNotification = true }
                             )
                         }
                         BottomTab.Complaints -> {
@@ -263,13 +270,16 @@ fun MainScreen(
                     expandFrom = Alignment.Top,
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
+                        stiffness = 280f
                     )
-                ) + fadeIn(),
+                ) + fadeIn(animationSpec = tween(350)),
                 exit = shrinkVertically(
                     shrinkTowards = Alignment.Top,
-                    animationSpec = tween(350)
-                ) + fadeOut(),
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ) + fadeOut(animationSpec = tween(300)),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
@@ -278,10 +288,10 @@ fun MainScreen(
                     .zIndex(100f)
             ) {
                 Surface(
-                    shape = RoundedCornerShape(26.dp),
-                    color = Color(0xFF0A0F1D), // Obsidian pitch black Dynamic Island
-                    shadowElevation = 14.dp,
-                    border = BorderStroke(1.2.dp, SnpGold.copy(alpha = 0.75f)),
+                    shape = RoundedCornerShape(28.dp),
+                    color = Color(0xFF070B14), // Premium Obsidian pitch black Dynamic Island
+                    shadowElevation = 16.dp,
+                    border = BorderStroke(1.4.dp, SnpGold),
                     modifier = Modifier.wrapContentSize()
                 ) {
                     Row(
@@ -293,7 +303,7 @@ fun MainScreen(
                             shape = CircleShape,
                             color = Color.White,
                             border = BorderStroke(1.dp, SnpGold),
-                            modifier = Modifier.size(38.dp)
+                            modifier = Modifier.size(40.dp)
                         ) {
                             Box(
                                 modifier = Modifier
@@ -319,23 +329,39 @@ fun MainScreen(
                             ) {
                                 Text(
                                     text = greetingTitle,
-                                    fontSize = 13.5.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.ExtraBold,
                                     color = Color.White
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Box(
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
-                                        .size(7.dp)
-                                        .background(Color(0xFF10B981), CircleShape)
-                                )
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0xFF064E3B))
+                                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(5.dp)
+                                            .background(Color(0xFF10B981), CircleShape)
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = "LIVE",
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFF10B981),
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = greetingSubtitle,
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = Color(0xFFCBD5E1),
+                                color = Color(0xFFE2E8F0),
                                 lineHeight = 14.sp
                             )
                         }
@@ -357,7 +383,7 @@ fun MainScreen(
                                 Icon(
                                     Icons.Default.Close,
                                     contentDescription = "Close",
-                                    tint = Color(0xFF94A3B8),
+                                    tint = Color(0xFFCBD5E1),
                                     modifier = Modifier.size(13.dp)
                                 )
                             }

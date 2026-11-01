@@ -40,6 +40,7 @@ fun HomeScreen(
     onTicketClick: (Ticket) -> Unit,
     onNotificationClick: () -> Unit,
     onRefreshClick: (() -> Unit)? = null,
+    onHeaderClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var selectedFilter by remember { mutableStateOf("All Time") }
@@ -54,7 +55,8 @@ fun HomeScreen(
             title = authorityName,
             subtitle = if (authorityRole == "CHAIRMAN") "Chairman • Nagar Parishad Chittorgarh" else "Vice Chairman • Nagar Parishad Chittorgarh",
             onNotificationClick = onNotificationClick,
-            onRefreshClick = onRefreshClick
+            onRefreshClick = onRefreshClick,
+            onTitleClick = onHeaderClick
         )
 
         Column(
