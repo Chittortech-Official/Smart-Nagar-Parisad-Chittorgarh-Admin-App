@@ -32,6 +32,7 @@ fun MoreScreen(
     onNavigateToSla: () -> Unit,
     onNavigateToNotifications: () -> Unit = {},
     onNavigateToAbout: () -> Unit,
+    onNavigateToContact: () -> Unit,
     onLogout: () -> Unit,
     onNotificationClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -132,6 +133,14 @@ fun MoreScreen(
                         title = "About Application",
                         subtitle = "ChittorTech • Command Center Details",
                         onClick = onNavigateToAbout
+                    )
+                    HorizontalDivider(color = SnpBorder.copy(alpha = 0.6f))
+                    SettingsMenuItem(
+                        icon = Icons.Default.HeadsetMic,
+                        iconTint = Color(0xFF0D9488),
+                        title = "Contact Developers",
+                        subtitle = "Email, WhatsApp & Direct Phone Support",
+                        onClick = onNavigateToContact
                     )
                 }
             }

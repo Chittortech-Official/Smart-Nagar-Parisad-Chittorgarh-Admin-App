@@ -59,21 +59,24 @@ fun KpiCard(
     value: String,
     subtitle: String = "",
     icon: ImageVector,
+    cardBg: Color = SnpCardWhite,
+    borderColor: Color = SnpBorder,
     iconBg: Color = SnpPrimaryLight,
     iconTint: Color = SnpPrimary,
+    valueColor: Color = TextPrimary,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier,
-        shape = SnpCardShape,
-        colors = CardDefaults.cardColors(containerColor = SnpCardWhite),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = cardBg),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, SnpBorder)
+        border = BorderStroke(1.dp, borderColor)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -82,28 +85,28 @@ fun KpiCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(iconBg),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(18.dp))
+                    Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = value,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = valueColor,
                 maxLines = 1
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = title,
-                fontSize = 12.sp,
-                color = TextSecondary,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.5.sp,
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -112,7 +115,7 @@ fun KpiCard(
                 Text(
                     text = subtitle,
                     fontSize = 11.sp,
-                    color = TextMuted,
+                    color = TextSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

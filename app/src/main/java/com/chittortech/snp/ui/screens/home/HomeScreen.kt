@@ -123,8 +123,11 @@ fun HomeScreen(
                         value = "${stats.todayRegistered}",
                         subtitle = "New Complaints",
                         icon = Icons.Default.FiberNew,
-                        iconBg = SnpBlueLight,
-                        iconTint = SnpBlue,
+                        cardBg = Color(0xFFEFF6FF), // Soft Rich Blue
+                        borderColor = Color(0xFFBFDBFE),
+                        iconBg = Color(0xFFDBEAFE),
+                        iconTint = Color(0xFF1D4ED8),
+                        valueColor = Color(0xFF1E40AF),
                         modifier = Modifier.weight(1f)
                     )
                     KpiCard(
@@ -132,8 +135,11 @@ fun HomeScreen(
                         value = "${stats.pendingComplaints}",
                         subtitle = "Under Inspection",
                         icon = Icons.Default.PendingActions,
-                        iconBg = SnpAmberLight,
-                        iconTint = SnpAmber,
+                        cardBg = Color(0xFFFFFBEB), // Soft Warm Amber
+                        borderColor = Color(0xFFFDE68A),
+                        iconBg = Color(0xFFFEF3C7),
+                        iconTint = Color(0xFFD97706),
+                        valueColor = Color(0xFFB45309),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -147,8 +153,11 @@ fun HomeScreen(
                         value = "${stats.inProgressComplaints}",
                         subtitle = "Assigned to Ward",
                         icon = Icons.Default.Engineering,
-                        iconBg = SnpPrimaryLight,
-                        iconTint = SnpPrimary,
+                        cardBg = Color(0xFFF5F3FF), // Soft Regal Purple
+                        borderColor = Color(0xFFDDD6FE),
+                        iconBg = Color(0xFFEDE9FE),
+                        iconTint = Color(0xFF7C3AED),
+                        valueColor = Color(0xFF6D28D9),
                         modifier = Modifier.weight(1f)
                     )
                     KpiCard(
@@ -156,8 +165,11 @@ fun HomeScreen(
                         value = "${stats.todayClosed}",
                         subtitle = "Resolved & Verified",
                         icon = Icons.Default.TaskAlt,
-                        iconBg = SnpGreenLight,
-                        iconTint = SnpGreen,
+                        cardBg = Color(0xFFF0FDF4), // Soft Mint Green
+                        borderColor = Color(0xFFBBF7D0),
+                        iconBg = Color(0xFFDCFCE7),
+                        iconTint = Color(0xFF16A34A),
+                        valueColor = Color(0xFF15803D),
                         modifier = Modifier.weight(1f)
                     )
                 }
