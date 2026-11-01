@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.OfficialCategoriesDirectory
@@ -423,9 +424,23 @@ fun ComplaintDetailScreen(
 private fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
     ) {
-        Text(label, fontSize = 12.sp, color = TextSecondary)
-        Text(value, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = TextSecondary,
+            modifier = Modifier.weight(0.38f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = value,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextPrimary,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(0.62f)
+        )
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.R
@@ -350,7 +351,9 @@ private fun ParshadCard(
                         text = item.category,
                         fontSize = 10.sp,
                         color = TextMuted,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -422,13 +425,16 @@ private fun ParshadCard(
                     fontSize = 10.sp,
                     color = TextMuted,
                     maxLines = 1,
-                    modifier = Modifier.weight(1f, fill = false)
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Votes: ${item.votes} (${item.margin})",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextSecondary
+                    color = TextSecondary,
+                    maxLines = 1
                 )
             }
         }

@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.models.Department
@@ -291,10 +292,12 @@ private fun DeptStatItem(
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
-                fontSize = 9.5.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textColor.copy(alpha = 0.85f),
-                maxLines = 1
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

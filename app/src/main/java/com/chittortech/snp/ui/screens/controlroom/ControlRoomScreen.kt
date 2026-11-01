@@ -298,8 +298,11 @@ fun ControlRoomScreen(
                                 text = contact.designation,
                                 fontSize = 11.sp,
                                 color = TextMuted,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
                                 color = contact.badgeBg
@@ -309,6 +312,8 @@ fun ControlRoomScreen(
                                     fontSize = 9.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = contact.badgeFg,
+                                    softWrap = false,
+                                    maxLines = 1,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
