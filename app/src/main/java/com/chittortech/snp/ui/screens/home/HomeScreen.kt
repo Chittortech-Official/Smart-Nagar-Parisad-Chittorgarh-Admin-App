@@ -249,10 +249,10 @@ fun HomeScreen(
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Text(
-                                            text = "${catMeta.emoji} ${catMeta.name}",
+                                            text = "${catMeta.departmentCode} • ${catMeta.name}",
                                             fontSize = 10.sp,
-                                            fontWeight = FontWeight.Normal,
-                                            color = TextMuted,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = SnpPrimary,
                                             maxLines = 1
                                         )
                                     }

@@ -96,8 +96,20 @@ fun ComplaintDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(categoryMeta.emoji, fontSize = 20.sp)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                shape = SnpBadgeShape,
+                                color = SnpPrimaryLight,
+                                border = BorderStroke(1.dp, SnpPrimary.copy(alpha = 0.3f))
+                            ) {
+                                Text(
+                                    text = categoryMeta.departmentCode,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SnpPrimary,
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
                                     text = categoryMeta.name,

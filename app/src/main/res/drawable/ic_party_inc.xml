@@ -1,12 +1,12 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="32dp"
-    android:height="32dp"
+    android:width="48dp"
+    android:height="48dp"
     android:viewportWidth="860"
     android:viewportHeight="860">
     <!-- Circle Base -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 0,430 a 430,430 0 1,0 860,0 a 430,430 0 1,0 -860,0 Z" />
+        android:pathData="M 430,0 A 430,430 0 1,0 430,860 A 430,430 0 1,0 430,0 Z" />
     <!-- Saffron top bar -->
     <path
         android:fillColor="#F37022"

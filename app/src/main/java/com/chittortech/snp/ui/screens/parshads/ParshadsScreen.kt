@@ -59,15 +59,33 @@ fun ParshadsScreen(
             }
 
             val councillorName = official?.councillorName ?: dbWard?.councillorName ?: "Designated Parshad"
+            val nameEnglish = official?.nameEnglish ?: ""
             val category = official?.category ?: "सामान्य"
             val runnerUp = official?.runnerUp ?: "-"
             val votes = official?.votes ?: "-"
             val margin = official?.margin ?: "-"
 
+            val cleanQuery = query.removePrefix("ward").removePrefix("w").trim()
+            val matchesWardNumber = wNum.toString() == query ||
+                    wNum.toString() == cleanQuery ||
+                    "ward $wNum" == query ||
+                    "ward$wNum" == query ||
+                    "w$wNum" == query ||
+                    "w $wNum" == query
+
+            val matchesPartyText = when {
+                query == "bjp" || query.startsWith("bjp") || query == "bhajpa" -> party == "भाजपा"
+                query == "inc" || query == "congress" || query.startsWith("cong") -> party == "कांग्रेस"
+                query == "ind" || query == "nir" || query.startsWith("indep") -> party == "निर्दलीय"
+                else -> false
+            }
+
             val matchesSearch = query.isBlank() ||
-                    wNum.toString() == query ||
+                    matchesWardNumber ||
                     councillorName.lowercase().contains(query) ||
+                    nameEnglish.lowercase().contains(query) ||
                     party.lowercase().contains(query) ||
+                    matchesPartyText ||
                     category.lowercase().contains(query) ||
                     runnerUp.lowercase().contains(query)
 
@@ -82,6 +100,7 @@ fun ParshadsScreen(
                 ParshadItemUiModel(
                     wardNumber = wNum,
                     councillorName = councillorName,
+                    nameEnglish = nameEnglish,
                     councillorPhone = dbWard?.councillorPhone,
                     party = party,
                     category = category,
@@ -208,7 +227,7 @@ fun ParshadsScreen(
                             decorationBox = { innerTextField ->
                                 if (searchQuery.isEmpty()) {
                                     Text(
-                                        text = "Search by Ward # or Parshad Name...",
+                                        text = "Search in Hindi or English (उदा. अनिल / Anil / Ward 15)...",
                                         fontSize = 12.sp,
                                         color = TextMuted
                                     )
@@ -255,6 +274,7 @@ fun ParshadsScreen(
 data class ParshadItemUiModel(
     val wardNumber: Int,
     val councillorName: String,
+    val nameEnglish: String,
     val councillorPhone: String?,
     val party: String,
     val category: String,
@@ -337,24 +357,29 @@ private fun ParshadCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Main row: Modern Ward Monogram Avatar + Councillor Name
+            // Main row: Official Party Logo Avatar + Councillor Name (Hindi + English)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(item.partyBg),
-                    contentAlignment = Alignment.Center
+                Surface(
+                    shape = CircleShape,
+                    color = Color.White,
+                    border = BorderStroke(1.5.dp, item.partyFg.copy(alpha = 0.35f)),
+                    modifier = Modifier.size(46.dp)
                 ) {
-                    Text(
-                        text = "W${item.wardNumber}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = item.partyFg
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(item.partyLogo),
+                            contentDescription = item.party,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -366,6 +391,14 @@ private fun ParshadCard(
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
+                    if (item.nameEnglish.isNotBlank() && item.nameEnglish != item.councillorName) {
+                        Text(
+                            text = item.nameEnglish,
+                            fontSize = 11.sp,
+                            color = TextMuted,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
 
                 item.councillorPhone?.let {

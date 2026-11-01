@@ -179,10 +179,10 @@ fun ComplaintsScreen(
                                             color = SnpSurfaceVariant
                                         ) {
                                             Text(
-                                                "${catMeta.emoji} ${catMeta.name}",
+                                                "${catMeta.departmentCode} • ${catMeta.name}",
                                                 fontSize = 10.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = TextSecondary,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = SnpPrimary,
                                                 maxLines = 1,
                                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                             )

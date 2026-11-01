@@ -1,18 +1,28 @@
 package com.chittortech.snp.ui.main
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import com.chittortech.snp.R
 import com.chittortech.snp.data.models.*
 import com.chittortech.snp.ui.screens.about.AboutAppScreen
 import com.chittortech.snp.ui.screens.complaints.ComplaintDetailScreen
@@ -55,6 +65,24 @@ fun MainScreen(
     var showNotifications by remember { mutableStateOf(false) }
     var showSlaScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
+
+    var showWelcomeNotification by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(6500)
+        showWelcomeNotification = false
+    }
+
+    val greetingTitle = when {
+        authorityName.contains("Anil", ignoreCase = true) || authorityRole.equals("CHAIRMAN", ignoreCase = true) -> "🙏 नमस्ते अनिल जी!"
+        authorityName.contains("Sudarshan", ignoreCase = true) || authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) -> "🙏 नमस्ते सुदर्शन जी!"
+        else -> "🙏 नमस्ते $authorityName जी!"
+    }
+
+    val greetingSubtitle = if (authorityRole.equals("CHAIRMAN", ignoreCase = true)) {
+        "माननीय सभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
+    } else {
+        "माननीय उपसभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
+    }
 
     fun navigateToTab(tab: BottomTab) {
         if (currentTab != tab) {
@@ -214,6 +242,90 @@ fun MainScreen(
                                 onNavigateToAbout = { showAboutScreen = true },
                                 onLogout = onLogout,
                                 onNotificationClick = { showNotifications = true }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ─── Executive Welcome Banner (Sliding from Top) ───────────────────
+            AnimatedVisibility(
+                visible = showWelcomeNotification && selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen,
+                enter = slideInVertically(
+                    initialOffsetY = { -it },
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                ) + fadeIn(),
+                exit = slideOutVertically(
+                    targetOffsetY = { -it },
+                    animationSpec = tween(400)
+                ) + fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(start = 14.dp, end = 14.dp, top = 8.dp)
+                    .zIndex(100f)
+            ) {
+                Surface(
+                    shape = SnpCardShape,
+                    color = Color.White,
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(1.5.dp, SnpGold),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = SnpPrimaryLight,
+                            border = BorderStroke(1.dp, SnpGold.copy(alpha = 0.5f)),
+                            modifier = Modifier.size(38.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.rajasthan_logo),
+                                    contentDescription = "Rajasthan Government Logo",
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = greetingTitle,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = SnpPrimary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = greetingSubtitle,
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = TextSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { showWelcomeNotification = false },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = TextMuted,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
