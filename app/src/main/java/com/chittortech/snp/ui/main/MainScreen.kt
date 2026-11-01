@@ -6,6 +6,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -78,14 +79,22 @@ fun MainScreen(
     var showAboutScreen by remember { mutableStateOf(false) }
 
     var showWelcomeNotification by remember { mutableStateOf(false) }
+    var isIslandExpanded by remember { mutableStateOf(false) }
+
     LaunchedEffect(hasShownWelcomeNotification) {
         if (!hasShownWelcomeNotification) {
-            // Settle HomeScreen for 500ms so the user sees the screen first
-            kotlinx.coroutines.delay(500)
-            // Expand the Dynamic Island smoothly from the top camera notch
+            // Settle HomeScreen for 400ms
+            kotlinx.coroutines.delay(400)
             showWelcomeNotification = true
-            // Display for 9.5 seconds
-            kotlinx.coroutines.delay(9500)
+            // Expand fluidly like Apple Dynamic Island
+            kotlinx.coroutines.delay(350)
+            isIslandExpanded = true
+            // Stay expanded for 8.5 seconds
+            kotlinx.coroutines.delay(8500)
+            // Morph smoothly back into compact notch pill
+            isIslandExpanded = false
+            // After 3.5 seconds in compact pill, slide smoothly into notch
+            kotlinx.coroutines.delay(3500)
             showWelcomeNotification = false
             onWelcomeDismissed()
         }
@@ -234,7 +243,10 @@ fun MainScreen(
                                 onTicketClick = { selectedTicket = it },
                                 onNotificationClick = { showNotifications = true },
                                 onRefreshClick = onRefresh,
-                                onHeaderClick = { showWelcomeNotification = true }
+                                onHeaderClick = {
+                                    showWelcomeNotification = true
+                                    isIslandExpanded = true
+                                }
                             )
                         }
                         BottomTab.Complaints -> {
@@ -275,23 +287,23 @@ fun MainScreen(
                 }
             }
 
-            // ─── Executive Dynamic Island Welcome Pill (Expanding from Notch) ───
+            // ─── Executive Dynamic Island Welcome Pill (Apple Responsive Morph) ───
             AnimatedVisibility(
                 visible = showWelcomeNotification && selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen,
                 enter = expandVertically(
                     expandFrom = Alignment.Top,
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = 280f
+                        stiffness = 300f
                     )
-                ) + fadeIn(animationSpec = tween(350)),
+                ) + fadeIn(animationSpec = tween(300)),
                 exit = shrinkVertically(
                     shrinkTowards = Alignment.Top,
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioNoBouncy,
                         stiffness = Spring.StiffnessMedium
                     )
-                ) + fadeOut(animationSpec = tween(300)),
+                ) + fadeOut(animationSpec = tween(250)),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
@@ -300,104 +312,134 @@ fun MainScreen(
                     .zIndex(100f)
             ) {
                 Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = Color(0xFF070B14), // Premium Obsidian pitch black Dynamic Island
+                    shape = RoundedCornerShape(32.dp),
+                    color = Color(0xFF000000), // True Apple Dynamic Island Pitch Black
                     shadowElevation = 16.dp,
-                    border = BorderStroke(1.4.dp, SnpGold),
-                    modifier = Modifier.wrapContentSize()
+                    border = BorderStroke(1.2.dp, SnpGold.copy(alpha = 0.9f)),
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .animateContentSize(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
+                        .clickable { isIslandExpanded = !isIslandExpanded }
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(start = 10.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.White,
-                            border = BorderStroke(1.dp, SnpGold),
-                            modifier = Modifier.size(40.dp)
+                    if (!isIslandExpanded) {
+                        // ─── Collapsed State (Compact Notch Pill) ──────────────
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(3.dp),
-                                contentAlignment = Alignment.Center
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.White,
+                                border = BorderStroke(0.8.dp, SnpGold),
+                                modifier = Modifier.size(24.dp)
                             ) {
-                                Image(
-                                    painter = painterResource(R.drawable.rajasthan_logo),
-                                    contentDescription = "Rajasthan Government",
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        Column(
-                            modifier = Modifier.weight(1f, fill = false)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = greetingTitle,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
+                                Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(Color(0xFF064E3B))
-                                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                                        .fillMaxSize()
+                                        .padding(2.dp),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(5.dp)
-                                            .background(Color(0xFF10B981), CircleShape)
-                                    )
-                                    Spacer(modifier = Modifier.width(3.dp))
-                                    Text(
-                                        text = "LIVE",
-                                        fontSize = 8.5.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = Color(0xFF10B981),
-                                        letterSpacing = 0.5.sp
+                                    Image(
+                                        painter = painterResource(R.drawable.rajasthan_logo),
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxSize()
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(2.dp))
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
                             Text(
-                                text = greetingSubtitle,
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color(0xFFE2E8F0),
-                                lineHeight = 14.sp
+                                text = "गढ़-सेवा • $greetingTitle",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+
+                            Spacer(modifier = Modifier.width(6.dp))
+
+                            Icon(
+                                Icons.Default.ExpandMore,
+                                contentDescription = "Expand",
+                                tint = SnpGold,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0x33FFFFFF),
-                            modifier = Modifier.size(24.dp)
+                    } else {
+                        // ─── Expanded State (Full Dynamic Island Card) ─────────
+                        Row(
+                            modifier = Modifier
+                                .padding(start = 12.dp, end = 12.dp, top = 9.dp, bottom = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(
-                                onClick = {
-                                    showWelcomeNotification = false
-                                    onWelcomeDismissed()
-                                },
-                                modifier = Modifier.fillMaxSize()
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.White,
+                                border = BorderStroke(1.2.dp, SnpGold),
+                                modifier = Modifier.size(42.dp)
                             ) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = "Close",
-                                    tint = Color(0xFFCBD5E1),
-                                    modifier = Modifier.size(13.dp)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(R.drawable.rajasthan_logo),
+                                        contentDescription = "Rajasthan Government",
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(
+                                modifier = Modifier.weight(1f, fill = false)
+                            ) {
+                                Text(
+                                    text = greetingTitle,
+                                    fontSize = 14.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = greetingSubtitle,
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color(0xFFE2E8F0),
+                                    lineHeight = 14.5.sp
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Surface(
+                                shape = CircleShape,
+                                color = Color(0x33FFFFFF),
+                                modifier = Modifier.size(26.dp)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        showWelcomeNotification = false
+                                        onWelcomeDismissed()
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Icon(
+                                        Icons.Default.Close,
+                                        contentDescription = "Close",
+                                        tint = Color(0xFFCBD5E1),
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
                             }
                         }
                     }
