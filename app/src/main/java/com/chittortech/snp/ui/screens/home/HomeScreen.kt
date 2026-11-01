@@ -51,12 +51,13 @@ fun HomeScreen(
     val filterOptions = listOf("Today", "Yesterday", "Last 5 Days")
 
     val filteredTickets = remember(recentTickets, selectedFilter) {
-        when (selectedFilter) {
+        val list = when (selectedFilter) {
             "Today" -> recentTickets.filter { DateUtils.isToday(it.registrationTime) }
             "Yesterday" -> recentTickets.filter { DateUtils.isYesterday(it.registrationTime) }
             "Last 5 Days" -> recentTickets.filter { DateUtils.isLastNDays(it.registrationTime, 5) }
             else -> recentTickets.filter { DateUtils.isToday(it.registrationTime) }
         }
+        list.sortedByDescending { it.registrationTime ?: "" }
     }
 
     Column(

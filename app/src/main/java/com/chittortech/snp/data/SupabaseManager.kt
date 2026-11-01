@@ -31,6 +31,7 @@ object SupabaseManager {
             client.postgrest["tickets"]
                 .select()
                 .decodeList<Ticket>()
+                .sortedByDescending { it.registrationTime ?: "" }
         } catch (e: Exception) {
             emptyList()
         }

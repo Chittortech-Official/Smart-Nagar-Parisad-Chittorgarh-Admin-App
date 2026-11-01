@@ -68,7 +68,7 @@ fun ComplaintsScreen(
                 else -> t.status.equals(selectedStatus, ignoreCase = true)
             }
             matchesDate && matchesSearch && matchesStatus
-        }
+        }.sortedByDescending { it.registrationTime ?: "" }
     }
 
     Column(
