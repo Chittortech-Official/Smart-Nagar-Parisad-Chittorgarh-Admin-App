@@ -34,7 +34,31 @@ class SnpBackgroundSyncWorker(
                     )
                 }
 
-                // 2. Check for unnotified SLA overdues
+                // 2. Check for resolved / closed complaints
+                val isClosed = ticket.status.equals("CLOSED", ignoreCase = true) || ticket.status.contains("RESOLVED", ignoreCase = true)
+                val resolvedKey = "${ticket.ticketNumber}_status_CLOSED"
+                if (isClosed && !SnpNotificationManager.isAlreadyNotified(appContext, resolvedKey)) {
+                    SnpNotificationManager.showResolvedAlert(
+                        context = appContext,
+                        ticketNumber = ticket.ticketNumber,
+                        wardNumber = ticket.wardNumber,
+                        categoryTitle = ticket.problemDescription
+                    )
+                }
+
+                // 3. Check for in-progress / assigned complaints
+                val inProgKey = "${ticket.ticketNumber}_status_IN_PROGRESS"
+                if (ticket.status.equals("IN_PROGRESS", ignoreCase = true) && !SnpNotificationManager.isAlreadyNotified(appContext, inProgKey)) {
+                    SnpNotificationManager.showStatusChangeAlert(
+                        context = appContext,
+                        ticketNumber = ticket.ticketNumber,
+                        wardNumber = ticket.wardNumber,
+                        categoryTitle = ticket.problemDescription,
+                        newStatus = ticket.status
+                    )
+                }
+
+                // 4. Check for unnotified SLA overdues
                 val overdueKey = "${ticket.ticketNumber}_overdue"
                 if ((ticket.isOverdue || ticket.status.equals("OVERDUE", ignoreCase = true)) &&
                     !SnpNotificationManager.isAlreadyNotified(appContext, overdueKey)

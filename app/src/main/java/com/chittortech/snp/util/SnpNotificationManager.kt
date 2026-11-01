@@ -21,6 +21,7 @@ object SnpNotificationManager {
     const val CHANNEL_EMERGENCY_ID = "snp_emergency_alerts"
     const val CHANNEL_SLA_OVERDUE_ID = "snp_sla_overdue_alerts"
     const val CHANNEL_NEW_COMPLAINTS_ID = "snp_new_complaints_alerts"
+    const val CHANNEL_STATUS_UPDATES_ID = "snp_status_updates_alerts"
 
     private const val PREFS_NAME = "snp_notification_dedup_prefs"
     private const val KEY_NOTIFIED_KEYS = "notified_keys"
@@ -79,7 +80,20 @@ object SnpNotificationManager {
                 lightColor = Color.BLUE
             }
 
-            notificationManager.createNotificationChannels(listOf(emergencyChannel, slaChannel, complaintsChannel))
+            // 4. Status & Resolution Channel (High Priority)
+            val statusChannel = NotificationChannel(
+                CHANNEL_STATUS_UPDATES_ID,
+                "शिकायत स्थिति एवं समाधान (Status & Resolution)",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "शिकायत प्रगति एवं सफल समाधान के लाइव नोटिफिकेशन"
+                enableLights(true)
+                lightColor = Color.GREEN
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 200, 100, 200)
+            }
+
+            notificationManager.createNotificationChannels(listOf(emergencyChannel, slaChannel, complaintsChannel, statusChannel))
         }
     }
 
@@ -165,6 +179,98 @@ object SnpNotificationManager {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .setColor(0xFFDC2626.toInt())
+            .build()
+
+        NotificationManagerCompat.from(context).notify(ticketNumber.hashCode(), notification)
+    }
+
+    fun showStatusChangeAlert(
+        context: Context,
+        ticketNumber: String,
+        wardNumber: Int,
+        categoryTitle: String,
+        newStatus: String
+    ) {
+        if (!hasNotificationPermission(context)) return
+        val dedupKey = "${ticketNumber}_status_${newStatus.uppercase()}"
+        if (isAlreadyNotified(context, dedupKey)) return
+        markAsNotified(context, dedupKey)
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            ticketNumber.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val readableStatus = when (newStatus.uppercase()) {
+            "IN_PROGRESS" -> "प्रक्रियाधीन (In Progress)"
+            "PENDING" -> "निरीक्षण हेतु लंबित"
+            "ASSIGNED" -> "वार्ड टीम को आवंटित"
+            else -> newStatus.replace("_", " ")
+        }
+
+        val title = "🔄 शिकायत स्थिति अपडेट: वार्ड $wardNumber"
+        val body = "$ticketNumber: शिकायत अब '$readableStatus' स्थिति में है।"
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$body\nविषय: $categoryTitle\nमाननीय सभापति/उपसभापति कमांड सेंटर द्वारा स्थिति ट्रैक की जा रही है।"))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setContentIntent(pendingIntent)
+            .setColor(0xFFD97706.toInt()) // Warm Amber
+            .build()
+
+        NotificationManagerCompat.from(context).notify(ticketNumber.hashCode(), notification)
+    }
+
+    fun showResolvedAlert(
+        context: Context,
+        ticketNumber: String,
+        wardNumber: Int,
+        categoryTitle: String
+    ) {
+        if (!hasNotificationPermission(context)) return
+        val dedupKey = "${ticketNumber}_status_CLOSED"
+        if (isAlreadyNotified(context, dedupKey)) return
+        markAsNotified(context, dedupKey)
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            ticketNumber.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val title = "✅ शिकायत समाधान पूर्ण (Resolved): वार्ड $wardNumber"
+        val body = "$ticketNumber: $categoryTitle का सफल निस्तारण कर दिया गया है।"
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$body\nसंबंधित फील्ड इंजीनियर द्वारा कार्य पूर्ण व नागरिक संतुष्टि सत्यापित।"))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setContentIntent(pendingIntent)
+            .setColor(0xFF16A34A.toInt()) // Fresh Green
             .build()
 
         NotificationManagerCompat.from(context).notify(ticketNumber.hashCode(), notification)

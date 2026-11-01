@@ -107,6 +107,27 @@ class MainActivity : ComponentActivity() {
                                         citizenName = citizen,
                                         isEmergency = isEmerg
                                     )
+                                } else if (action is PostgresAction.Update) {
+                                    val tNum = action.record["ticket_number"]?.toString()?.replace("\"", "") ?: "SNP-LIVE"
+                                    val wNum = action.record["ward_number"]?.toString()?.replace("\"", "")?.toIntOrNull() ?: 1
+                                    val desc = action.record["problem_description"]?.toString()?.replace("\"", "") ?: "शिकायत"
+                                    val status = action.record["status"]?.toString()?.replace("\"", "")?.trim()?.uppercase() ?: ""
+                                    if (status == "CLOSED" || status.contains("RESOLVED")) {
+                                        SnpNotificationManager.showResolvedAlert(
+                                            context = this@MainActivity,
+                                            ticketNumber = tNum,
+                                            wardNumber = wNum,
+                                            categoryTitle = desc
+                                        )
+                                    } else if (status.isNotBlank()) {
+                                        SnpNotificationManager.showStatusChangeAlert(
+                                            context = this@MainActivity,
+                                            ticketNumber = tNum,
+                                            wardNumber = wNum,
+                                            categoryTitle = desc,
+                                            newStatus = status
+                                        )
+                                    }
                                 }
                             }
                         } catch (_: Exception) {}
