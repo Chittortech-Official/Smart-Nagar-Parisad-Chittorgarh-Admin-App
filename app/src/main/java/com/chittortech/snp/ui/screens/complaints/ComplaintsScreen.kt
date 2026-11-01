@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.data.OfficialCategoriesDirectory
 import com.chittortech.snp.data.models.Ticket
 import com.chittortech.snp.ui.components.EmptyState
 import com.chittortech.snp.ui.components.SnpTopBar
@@ -140,8 +141,10 @@ fun ComplaintsScreen(
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
                     items(filteredTickets, key = { it.id.ifEmpty { it.ticketNumber } }) { ticket ->
+                        val catMeta = OfficialCategoriesDirectory.getCategoryMeta(ticket.categoryId, ticket.problemDescription)
+
                         Surface(
-                            shape = SnpSquareShape,
+                            shape = SnpCardShape,
                             color = SnpCardWhite,
                             shadowElevation = 1.dp,
                             border = BorderStroke(1.dp, SnpBorder),
@@ -159,7 +162,7 @@ fun ComplaintsScreen(
                                         Text(ticket.ticketNumber, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = SnpPrimary)
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Surface(
-                                            shape = SnpSquareShape,
+                                            shape = SnpBadgeShape,
                                             color = SnpPrimaryLight
                                         ) {
                                             Text(
@@ -167,6 +170,20 @@ fun ComplaintsScreen(
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = SnpPrimary,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Surface(
+                                            shape = SnpBadgeShape,
+                                            color = SnpSurfaceVariant
+                                        ) {
+                                            Text(
+                                                "${catMeta.emoji} ${catMeta.name}",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = TextSecondary,
+                                                maxLines = 1,
                                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                             )
                                         }

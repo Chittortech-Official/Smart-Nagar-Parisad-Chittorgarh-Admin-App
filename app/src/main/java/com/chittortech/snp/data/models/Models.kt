@@ -4,6 +4,51 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class ComplaintCategory(
+    val id: String = "",
+    @SerialName("department_id")
+    val departmentId: String = "",
+    val name: String = "",
+    @SerialName("default_sla_hours")
+    val defaultSlaHours: Int = 48,
+    val description: String? = null,
+    @SerialName("created_at")
+    val createdAt: String? = null
+)
+
+@Serializable
+data class AuthorityConfirmation(
+    val id: String = "",
+    @SerialName("ticket_id")
+    val ticketId: String = "",
+    @SerialName("officer_confirmed")
+    val officerConfirmed: Boolean = false,
+    @SerialName("verification_notes")
+    val verificationNotes: String? = null,
+    @SerialName("verified_by")
+    val verifiedBy: String? = null,
+    @SerialName("created_at")
+    val createdAt: String? = null
+)
+
+@Serializable
+data class CitizenConfirmation(
+    val id: String = "",
+    @SerialName("ticket_id")
+    val ticketId: String = "",
+    @SerialName("citizen_satisfied")
+    val citizenSatisfied: Boolean = false,
+    @SerialName("citizen_feedback")
+    val citizenFeedback: String? = null,
+    @SerialName("satisfaction_rating")
+    val satisfactionRating: Int = 5,
+    @SerialName("verified_by")
+    val verifiedBy: String? = null,
+    @SerialName("created_at")
+    val createdAt: String? = null
+)
+
+@Serializable
 data class Department(
     val id: String = "",
     val name: String = "",

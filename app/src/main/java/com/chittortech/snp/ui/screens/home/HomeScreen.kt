@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.data.OfficialCategoriesDirectory
 import com.chittortech.snp.data.models.DashboardStats
 import com.chittortech.snp.data.models.Ticket
 import com.chittortech.snp.ui.components.KpiCard
@@ -210,8 +211,10 @@ fun HomeScreen(
                     }
                 } else {
                     recentTickets.take(6).forEach { ticket ->
+                        val catMeta = OfficialCategoriesDirectory.getCategoryMeta(ticket.categoryId, ticket.problemDescription)
+
                         Surface(
-                            shape = SnpSquareShape,
+                            shape = SnpCardShape,
                             color = SnpCardWhite,
                             shadowElevation = 1.dp,
                             border = BorderStroke(1.dp, SnpBorder),
@@ -241,6 +244,14 @@ fun HomeScreen(
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Medium,
                                             color = TextSecondary
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "${catMeta.emoji} ${catMeta.name}",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = TextMuted,
+                                            maxLines = 1
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(4.dp))

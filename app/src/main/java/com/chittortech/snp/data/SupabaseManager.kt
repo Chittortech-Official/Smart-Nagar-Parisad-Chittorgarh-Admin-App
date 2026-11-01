@@ -93,6 +93,44 @@ object SupabaseManager {
         }
     }
 
+    suspend fun getCategories(): List<ComplaintCategory> {
+        return try {
+            client.postgrest["complaint_categories"]
+                .select()
+                .decodeList<ComplaintCategory>()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun getAuthorityConfirmation(ticketId: String): AuthorityConfirmation? {
+        return try {
+            client.postgrest["authority_confirmations"]
+                .select {
+                    filter {
+                        eq("ticket_id", ticketId)
+                    }
+                }
+                .decodeSingleOrNull<AuthorityConfirmation>()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getCitizenConfirmation(ticketId: String): CitizenConfirmation? {
+        return try {
+            client.postgrest["citizen_confirmations"]
+                .select {
+                    filter {
+                        eq("ticket_id", ticketId)
+                    }
+                }
+                .decodeSingleOrNull<CitizenConfirmation>()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun subscribeToTicketUpdates(): Flow<PostgresAction> = flow {
         try {
             val channel = client.realtime.channel("public:tickets")

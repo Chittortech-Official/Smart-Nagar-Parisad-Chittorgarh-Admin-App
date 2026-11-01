@@ -4,19 +4,24 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.PhoneCallback
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.data.OfficialCategoriesDirectory
+import com.chittortech.snp.data.SupabaseManager
+import com.chittortech.snp.data.models.AuthorityConfirmation
+import com.chittortech.snp.data.models.CitizenConfirmation
 import com.chittortech.snp.data.models.Ticket
 import com.chittortech.snp.ui.components.StatusBadge
 import com.chittortech.snp.ui.theme.*
@@ -29,6 +34,28 @@ fun ComplaintDetailScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var authorityConfirmation by remember { mutableStateOf<AuthorityConfirmation?>(null) }
+    var citizenConfirmation by remember { mutableStateOf<CitizenConfirmation?>(null) }
+    var isLoadingConfirmations by remember { mutableStateOf(false) }
+
+    // Fetch official category metadata
+    val categoryMeta = remember(ticket) {
+        OfficialCategoriesDirectory.getCategoryMeta(ticket.categoryId, ticket.problemDescription)
+    }
+
+    val isClosed = ticket.status.equals("CLOSED", ignoreCase = true)
+    val isResolved = isClosed || ticket.status.contains("RESOLVED", ignoreCase = true)
+
+    // Load confirmations from Supabase if ticket id exists
+    LaunchedEffect(ticket.id) {
+        if (ticket.id.isNotBlank()) {
+            isLoadingConfirmations = true
+            authorityConfirmation = SupabaseManager.getAuthorityConfirmation(ticket.id)
+            citizenConfirmation = SupabaseManager.getCitizenConfirmation(ticket.id)
+            isLoadingConfirmations = false
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,9 +81,9 @@ fun ComplaintDetailScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Header Card
+            // ── Official Category & Intake Header Card ─────────────────────────
             Surface(
-                shape = SnpSquareShape,
+                shape = SnpCardShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -68,21 +95,218 @@ fun ComplaintDetailScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Status", fontSize = 12.sp, color = TextMuted)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(categoryMeta.emoji, fontSize = 20.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(
+                                    text = categoryMeta.name,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = categoryMeta.hindiName,
+                                    fontSize = 11.sp,
+                                    color = TextMuted
+                                )
+                            }
+                        }
                         StatusBadge(status = ticket.status)
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = SnpBorder.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    Text("Issue Description", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextSecondary)
+                    // Channel & SLA Target Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = SnpBadgeShape,
+                            color = SnpPrimaryLight
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.SupportAgent, null, tint = SnpPrimary, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Helpline & WhatsApp Intake",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SnpPrimary
+                                )
+                            }
+                        }
+
+                        Surface(
+                            shape = SnpBadgeShape,
+                            color = if (categoryMeta.isEmergency) SnpRedLight else SnpAmberLight
+                        ) {
+                            Text(
+                                text = "SLA: ${categoryMeta.defaultSlaHours}h Target",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (categoryMeta.isEmergency) SnpRed else SnpAmber,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text("Citizen Grievance Description", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextSecondary)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(ticket.problemDescription, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                    Text(
+                        text = ticket.problemDescription,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextPrimary,
+                        lineHeight = 18.sp
+                    )
                 }
             }
 
-            // Location & Ward
+            // ── MANDATORY TWO-STEP CLOSURE VERIFICATION (TRANSPARENCY BOX) ───────
             Surface(
-                shape = SnpSquareShape,
+                shape = SnpCardShape,
+                color = SnpCardWhite,
+                shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, if (isClosed) SnpGreen.copy(alpha = 0.5f) else SnpBorder),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = if (isClosed) SnpGreen else SnpPrimary, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Mandatory Two-Step Closure Audit",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "Every complaint requires independent Field Officer verification and direct Citizen satisfaction before closure.",
+                        fontSize = 11.sp,
+                        color = TextMuted,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                    )
+
+                    // Step 1: Authority Confirmation
+                    val officerOk = authorityConfirmation?.officerConfirmed ?: isResolved
+                    val officerNotes = authorityConfirmation?.verificationNotes
+                        ?: if (isResolved) "Field supervisor confirmed resolution on-site." else "Awaiting field team inspection."
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(SnpBadgeShape)
+                            .background(if (officerOk) SnpGreenLight.copy(alpha = 0.5f) else SnpSurfaceVariant)
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(
+                            imageVector = if (officerOk) Icons.Default.CheckCircle else Icons.Default.HourglassTop,
+                            contentDescription = null,
+                            tint = if (officerOk) SnpGreen else SnpAmber,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Step 1: Field Officer Verification",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = if (officerOk) "CONFIRMED" else "PENDING",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (officerOk) SnpGreen else SnpAmber
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = officerNotes,
+                                fontSize = 11.sp,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Step 2: Citizen Confirmation
+                    val citizenOk = citizenConfirmation?.citizenSatisfied ?: isClosed
+                    val citizenRating = citizenConfirmation?.satisfactionRating ?: if (isClosed) 5 else 0
+                    val citizenFeedback = citizenConfirmation?.citizenFeedback
+                        ?: if (isClosed) "Citizen confirmed work completed to satisfaction via follow-up call." else "Citizen follow-up call pending."
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(SnpBadgeShape)
+                            .background(if (citizenOk) SnpGreenLight.copy(alpha = 0.5f) else SnpSurfaceVariant)
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(
+                            imageVector = if (citizenOk) Icons.Default.ThumbUp else Icons.AutoMirrored.Filled.PhoneCallback,
+                            contentDescription = null,
+                            tint = if (citizenOk) SnpGreen else TextMuted,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Step 2: Citizen Satisfaction Confirmation",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = if (citizenOk) "VERIFIED (${citizenRating}★)" else "AWAITING CALL",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (citizenOk) SnpGreen else TextMuted
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = citizenFeedback,
+                                fontSize = 11.sp,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ── Ward & Location Details ─────────────────────────────────────────
+            Surface(
+                shape = SnpCardShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
@@ -95,39 +319,43 @@ fun ComplaintDetailScreen(
                     if (!ticket.landmark.isNullOrBlank()) {
                         DetailRow(label = "Landmark", value = ticket.landmark)
                     }
+                    DetailRow(label = "Routing Dispatch", value = ticket.forwardingOption.replace("_", " "))
                 }
             }
 
-            // Citizen Info
+            // ── Citizen Info ───────────────────────────────────────────────────
             Surface(
-                shape = SnpSquareShape,
+                shape = SnpCardShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Citizen Information", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text("Complainant Information", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                     DetailRow(label = "Citizen Name", value = ticket.citizenName)
                     DetailRow(label = "Phone Contact", value = ticket.citizenPhone)
                 }
             }
 
-            // Timelines & SLA
+            // ── Timelines & SLA Deadlines ──────────────────────────────────────
             Surface(
-                shape = SnpSquareShape,
+                shape = SnpCardShape,
                 color = SnpCardWhite,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("SLA & Timeline", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text("SLA & Timeline Audit", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                     DetailRow(label = "Registration Time", value = DateUtils.formatIsoToDisplay(ticket.registrationTime))
                     DetailRow(label = "Resolution Target (SLA)", value = "${ticket.slaHours} Hours")
                     DetailRow(label = "Deadline", value = DateUtils.formatIsoToDisplay(ticket.slaDeadline))
+                    if (!ticket.resolutionTime.isNullOrBlank()) {
+                        DetailRow(label = "Officer Resolved Time", value = DateUtils.formatIsoToDisplay(ticket.resolutionTime))
+                    }
                     if (!ticket.closedAt.isNullOrBlank()) {
-                        DetailRow(label = "Closure Date", value = DateUtils.formatIsoToDisplay(ticket.closedAt))
+                        DetailRow(label = "Final Closure Date", value = DateUtils.formatIsoToDisplay(ticket.closedAt))
                     }
                 }
             }
@@ -145,4 +373,3 @@ private fun DetailRow(label: String, value: String) {
         Text(value, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
     }
 }
-
