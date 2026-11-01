@@ -5,8 +5,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.*
@@ -248,89 +250,108 @@ fun MainScreen(
                 }
             }
 
-            // ─── Executive Welcome Banner (Sliding from Top) ───────────────────
+            // ─── Executive Dynamic Island Welcome Pill (Expanding from Notch) ───
             AnimatedVisibility(
                 visible = showWelcomeNotification && selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen,
-                enter = slideInVertically(
-                    initialOffsetY = { -it },
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                enter = expandVertically(
+                    expandFrom = Alignment.Top,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 ) + fadeIn(),
-                exit = slideOutVertically(
-                    targetOffsetY = { -it },
-                    animationSpec = tween(400)
+                exit = shrinkVertically(
+                    shrinkTowards = Alignment.Top,
+                    animationSpec = tween(350)
                 ) + fadeOut(),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
                     .displayCutoutPadding()
-                    .padding(start = 14.dp, end = 14.dp, top = 6.dp)
+                    .padding(start = 12.dp, end = 12.dp, top = 6.dp)
                     .zIndex(100f)
             ) {
                 Surface(
-                    shape = SnpCardShape,
-                    color = Color.White,
-                    shadowElevation = 8.dp,
-                    border = BorderStroke(1.5.dp, SnpGold),
-                    modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(26.dp),
+                    color = Color(0xFF0A0F1D), // Obsidian pitch black Dynamic Island
+                    shadowElevation = 14.dp,
+                    border = BorderStroke(1.2.dp, SnpGold.copy(alpha = 0.75f)),
+                    modifier = Modifier.wrapContentSize()
                 ) {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                            .padding(start = 10.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = SnpPrimaryLight,
-                            border = BorderStroke(1.dp, SnpGold.copy(alpha = 0.5f)),
-                            modifier = Modifier.size(42.dp)
+                            color = Color.White,
+                            border = BorderStroke(1.dp, SnpGold),
+                            modifier = Modifier.size(38.dp)
                         ) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(4.dp),
+                                    .padding(3.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Image(
                                     painter = painterResource(R.drawable.rajasthan_logo),
-                                    contentDescription = "Rajasthan Government Logo",
+                                    contentDescription = "Rajasthan Government",
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = greetingTitle,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = SnpPrimary
-                            )
+                        Column(
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = greetingTitle,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(7.dp)
+                                        .background(Color(0xFF10B981), CircleShape)
+                                )
+                            }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = greetingSubtitle,
-                                fontSize = 11.5.sp,
+                                fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = TextSecondary,
-                                maxLines = 2,
-                                lineHeight = 16.sp
+                                color = Color(0xFFCBD5E1),
+                                lineHeight = 14.sp
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
 
-                        IconButton(
-                            onClick = { showWelcomeNotification = false },
-                            modifier = Modifier.size(28.dp)
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0x33FFFFFF),
+                            modifier = Modifier.size(24.dp)
                         ) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = TextMuted,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            IconButton(
+                                onClick = { showWelcomeNotification = false },
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Close",
+                                    tint = Color(0xFF94A3B8),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
                         }
                     }
                 }
