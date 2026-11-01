@@ -67,6 +67,7 @@ fun MainScreen(
     notifications: List<NotificationLog>,
     stats: DashboardStats,
     deptStats: List<DepartmentStats>,
+    isRefreshing: Boolean = false,
     hasShownWelcomeNotification: Boolean = false,
     onWelcomeDismissed: () -> Unit = {},
     onLogout: () -> Unit,
@@ -268,6 +269,7 @@ fun MainScreen(
                                 authorityName = authorityName,
                                 stats = stats,
                                 recentTickets = tickets,
+                                isRefreshing = isRefreshing,
                                 onViewAllComplaints = { navigateToTab(BottomTab.Complaints) },
                                 onTicketClick = { selectedTicket = it },
                                 onNotificationClick = { showNotifications = true },
@@ -281,6 +283,7 @@ fun MainScreen(
                         BottomTab.Complaints -> {
                             ComplaintsScreen(
                                 tickets = tickets,
+                                isRefreshing = isRefreshing,
                                 onTicketClick = { selectedTicket = it },
                                 onNotificationClick = { showNotifications = true },
                                 onRefreshClick = onRefresh
@@ -289,6 +292,7 @@ fun MainScreen(
                         BottomTab.Parshads -> {
                             ParshadsScreen(
                                 wards = wards,
+                                isRefreshing = isRefreshing,
                                 onNotificationClick = { showNotifications = true },
                                 onRefreshClick = onRefresh
                             )
@@ -296,6 +300,7 @@ fun MainScreen(
                         BottomTab.Departments -> {
                             DepartmentsScreen(
                                 departments = deptStats,
+                                isRefreshing = isRefreshing,
                                 onNotificationClick = { showNotifications = true },
                                 onRefreshClick = onRefresh
                             )

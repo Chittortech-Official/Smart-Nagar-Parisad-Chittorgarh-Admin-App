@@ -47,17 +47,23 @@ class MainActivity : ComponentActivity() {
                 var wards by remember { mutableStateOf<List<Ward>>(emptyList()) }
                 var departments by remember { mutableStateOf<List<Department>>(emptyList()) }
                 var notifications by remember { mutableStateOf<List<NotificationLog>>(emptyList()) }
-                var isLoadingData by remember { mutableStateOf(false) }
+                var isInitialLoading by remember { mutableStateOf(false) }
+                var isRefreshing by remember { mutableStateOf(false) }
                 var hasShownWelcomeNotification by remember { mutableStateOf(false) }
 
-                fun refreshData() {
+                fun refreshData(isManual: Boolean = false) {
                     scope.launch {
-                        isLoadingData = true
+                        if (isManual) {
+                            isRefreshing = true
+                        } else if (tickets.isEmpty()) {
+                            isInitialLoading = true
+                        }
                         tickets = SupabaseManager.getTickets()
                         wards = SupabaseManager.getWards()
                         departments = SupabaseManager.getDepartments()
                         notifications = SupabaseManager.getNotifications()
-                        isLoadingData = false
+                        isInitialLoading = false
+                        isRefreshing = false
                     }
                 }
 
@@ -201,7 +207,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-                    isLoadingData -> {
+                    isInitialLoading && tickets.isEmpty() -> {
                         SnpLoadingScreen(message = "सर्वर से डेटा लोड हो रहा है...")
                     }
                     else -> {
@@ -216,9 +222,10 @@ class MainActivity : ComponentActivity() {
                             notifications = notifications,
                             stats = dashboardStats,
                             deptStats = deptStats,
+                            isRefreshing = isRefreshing,
                             hasShownWelcomeNotification = hasShownWelcomeNotification,
                             onWelcomeDismissed = { hasShownWelcomeNotification = true },
-                            onRefresh = { refreshData() },
+                            onRefresh = { refreshData(isManual = true) },
                             onLogout = {
                                 SnpSessionManager.clearSession(this@MainActivity)
                                 currentUser = null

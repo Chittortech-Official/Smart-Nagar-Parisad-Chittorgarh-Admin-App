@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,9 +30,11 @@ import com.chittortech.snp.data.models.DepartmentStats
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DepartmentsScreen(
     departments: List<DepartmentStats>,
+    isRefreshing: Boolean = false,
     onNotificationClick: () -> Unit,
     onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -97,14 +100,19 @@ fun DepartmentsScreen(
             onRefreshClick = onRefreshClick
         )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(SnpBackground)
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 16.dp)
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { onRefreshClick?.invoke() },
+            modifier = Modifier.fillMaxSize()
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(SnpBackground)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
             items(
                 items = cleanDepartments,
                 key = { it.department.code },
@@ -267,6 +275,7 @@ fun DepartmentsScreen(
             }
         }
     }
+}
 }
 
 @Composable

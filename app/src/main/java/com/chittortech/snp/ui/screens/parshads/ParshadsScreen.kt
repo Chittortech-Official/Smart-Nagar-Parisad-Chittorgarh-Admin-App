@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +35,11 @@ import com.chittortech.snp.ui.components.EmptyState
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParshadsScreen(
     wards: List<Ward>,
+    isRefreshing: Boolean = false,
     onNotificationClick: () -> Unit,
     onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -128,12 +131,17 @@ fun ParshadsScreen(
             onRefreshClick = onRefreshClick
         )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(SnpBackground),
-            contentPadding = PaddingValues(bottom = 16.dp)
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { onRefreshClick?.invoke() },
+            modifier = Modifier.fillMaxSize()
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(SnpBackground),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
             // Party Filter Strip with Official Symbols (Scrolls naturally, NOT sticky)
             item(key = "party_filters") {
                 Row(
@@ -269,6 +277,7 @@ fun ParshadsScreen(
             }
         }
     }
+}
 }
 
 // ─── 120Hz Ultra Smooth Dedicated Card ───────────────────────────────────────

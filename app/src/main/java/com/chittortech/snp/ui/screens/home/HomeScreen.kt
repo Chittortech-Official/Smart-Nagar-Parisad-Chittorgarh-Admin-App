@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,12 +32,14 @@ import com.chittortech.snp.ui.components.StatusBadge
 import com.chittortech.snp.ui.theme.*
 import com.chittortech.snp.util.DateUtils
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     authorityRole: String,
     authorityName: String,
     stats: DashboardStats,
     recentTickets: List<Ticket>,
+    isRefreshing: Boolean = false,
     onViewAllComplaints: () -> Unit,
     onTicketClick: (Ticket) -> Unit,
     onNotificationClick: () -> Unit,
@@ -69,11 +72,16 @@ fun HomeScreen(
             onTitleClick = onHeaderClick
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { onRefreshClick?.invoke() },
+            modifier = Modifier.fillMaxSize()
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // ── Date Filters Strip ─────────────────────────────────────────────
@@ -543,5 +551,6 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(30.dp))
         }
     }
+}
 }
 

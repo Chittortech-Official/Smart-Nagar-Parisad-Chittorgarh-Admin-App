@@ -9,9 +9,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +30,11 @@ import com.chittortech.snp.ui.components.StatusBadge
 import com.chittortech.snp.ui.theme.*
 import com.chittortech.snp.util.DateUtils
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComplaintsScreen(
     tickets: List<Ticket>,
+    isRefreshing: Boolean = false,
     onTicketClick: (Ticket) -> Unit,
     onNotificationClick: () -> Unit,
     onRefreshClick: (() -> Unit)? = null,
@@ -168,21 +172,33 @@ fun ComplaintsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (filteredTickets.isEmpty()) {
-                EmptyState(message = "No complaints found matching criteria.")
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    items(
-                        items = filteredTickets,
-                        key = { it.id.ifEmpty { it.ticketNumber } },
-                        contentType = { "complaint_ticket" }
-                    ) { ticket ->
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { onRefreshClick?.invoke() },
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (filteredTickets.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        EmptyState(message = "No complaints found matching criteria.")
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        items(
+                            items = filteredTickets,
+                            key = { it.id.ifEmpty { it.ticketNumber } },
+                            contentType = { "complaint_ticket" }
+                        ) { ticket ->
                         val catMeta = OfficialCategoriesDirectory.getCategoryMeta(ticket.categoryId, ticket.problemDescription)
 
                         Surface(
@@ -372,5 +388,6 @@ fun ComplaintsScreen(
             }
         }
     }
+}
 }
 
