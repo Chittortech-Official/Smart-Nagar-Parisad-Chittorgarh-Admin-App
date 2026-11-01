@@ -179,8 +179,8 @@ fun HomeScreen(
 
             // ── Critical Alerts (Overdue & Escalations) ─────────────────────────
             Surface(
-                shape = SnpSquareShape,
-                color = SnpCardWhite,
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
                 shadowElevation = 2.dp,
                 border = BorderStroke(1.dp, SnpBorder),
                 modifier = Modifier
@@ -188,26 +188,111 @@ fun HomeScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("SLA & Escalation Overview", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                    Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("${stats.overdueComplaints}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = SnpRed)
-                            Text("SLA Overdue", fontSize = 11.sp, color = TextSecondary)
+                        Text("SLA & Escalation Health", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = SnpPrimaryLight
+                        ) {
+                            Text(
+                                "Live Status",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = SnpPrimary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
                         }
-                        Box(modifier = Modifier.height(36.dp).width(1.dp).background(SnpBorder))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("${stats.escalatedComplaints}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = SnpAmber)
-                            Text("Escalated", fontSize = 11.sp, color = TextSecondary)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // SLA Overdue Soft Red Card
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFFEF2F2),
+                            border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "${stats.overdueComplaints}",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFDC2626)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "SLA Overdue",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFFB91C1C)
+                                )
+                            }
                         }
-                        Box(modifier = Modifier.height(36.dp).width(1.dp).background(SnpBorder))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("${stats.monthClosed}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = SnpGreen)
-                            Text("Month Closed", fontSize = 11.sp, color = TextSecondary)
+
+                        // Escalated Soft Amber Card
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFFFFBEB),
+                            border = BorderStroke(1.dp, Color(0xFFFDE68A)),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "${stats.escalatedComplaints}",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFD97706)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Escalated",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFFB45309)
+                                )
+                            }
+                        }
+
+                        // Month Closed Soft Green Card
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFF0FDF4),
+                            border = BorderStroke(1.dp, Color(0xFFBBF7D0)),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "${stats.monthClosed}",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF16A34A)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Month Closed",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF15803D)
+                                )
+                            }
                         }
                     }
                 }

@@ -33,6 +33,7 @@ import com.chittortech.snp.ui.screens.about.AboutAppScreen
 import com.chittortech.snp.ui.screens.complaints.ComplaintDetailScreen
 import com.chittortech.snp.ui.screens.complaints.ComplaintsScreen
 import com.chittortech.snp.ui.screens.contact.ContactDeveloperScreen
+import com.chittortech.snp.ui.screens.controlroom.ControlRoomScreen
 import com.chittortech.snp.ui.screens.departments.DepartmentsScreen
 import com.chittortech.snp.ui.screens.home.HomeScreen
 import com.chittortech.snp.ui.screens.more.MoreScreen
@@ -80,6 +81,7 @@ fun MainScreen(
     var showSlaScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
     var showContactScreen by remember { mutableStateOf(false) }
+    var showControlRoomScreen by remember { mutableStateOf(false) }
 
     var showWelcomeNotification by remember { mutableStateOf(false) }
     var isIslandExpanded by remember { mutableStateOf(false) }
@@ -123,6 +125,7 @@ fun MainScreen(
     }
 
     val canHandleBack = selectedTicket != null ||
+            showControlRoomScreen ||
             showContactScreen ||
             showAboutScreen ||
             showSlaScreen ||
@@ -134,6 +137,9 @@ fun MainScreen(
         when {
             selectedTicket != null -> {
                 selectedTicket = null
+            }
+            showControlRoomScreen -> {
+                showControlRoomScreen = false
             }
             showContactScreen -> {
                 showContactScreen = false
@@ -163,7 +169,7 @@ fun MainScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            if (selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen && !showContactScreen) {
+            if (selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen && !showContactScreen && !showControlRoomScreen) {
                 NavigationBar(
                     containerColor = Color.White,
                     tonalElevation = 6.dp,
@@ -249,6 +255,11 @@ fun MainScreen(
                         onBack = { showContactScreen = false }
                     )
                 }
+                showControlRoomScreen -> {
+                    ControlRoomScreen(
+                        onBack = { showControlRoomScreen = false }
+                    )
+                }
                 else -> {
                     when (currentTab) {
                         BottomTab.Home -> {
@@ -298,6 +309,7 @@ fun MainScreen(
                                 onNavigateToNotifications = { showNotifications = true },
                                 onNavigateToAbout = { showAboutScreen = true },
                                 onNavigateToContact = { showContactScreen = true },
+                                onNavigateToControlRoom = { showControlRoomScreen = true },
                                 onLogout = onLogout,
                                 onNotificationClick = { showNotifications = true }
                             )
@@ -308,7 +320,7 @@ fun MainScreen(
 
             // ─── Executive Dynamic Island Welcome Pill (Apple Responsive Morph) ───
             AnimatedVisibility(
-                visible = showWelcomeNotification && selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen && !showContactScreen,
+                visible = showWelcomeNotification && selectedTicket == null && !showNotifications && !showSlaScreen && !showAboutScreen && !showContactScreen && !showControlRoomScreen,
                 enter = expandVertically(
                     expandFrom = Alignment.Top,
                     animationSpec = spring(

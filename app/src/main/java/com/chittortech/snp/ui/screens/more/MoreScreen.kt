@@ -33,6 +33,7 @@ fun MoreScreen(
     onNavigateToNotifications: () -> Unit = {},
     onNavigateToAbout: () -> Unit,
     onNavigateToContact: () -> Unit,
+    onNavigateToControlRoom: () -> Unit,
     onLogout: () -> Unit,
     onNotificationClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -119,6 +120,14 @@ fun MoreScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
+                    SettingsMenuItem(
+                        icon = Icons.Default.ContactPhone,
+                        iconTint = Color(0xFF2563EB),
+                        title = "City Control Room Directory",
+                        subtitle = "Landline, Fire Brigade & AEN/JEN Hotlines",
+                        onClick = onNavigateToControlRoom
+                    )
+                    HorizontalDivider(color = SnpBorder.copy(alpha = 0.6f))
                     SettingsMenuItem(
                         icon = Icons.Default.WarningAmber,
                         iconTint = Color(0xFFDC2626),

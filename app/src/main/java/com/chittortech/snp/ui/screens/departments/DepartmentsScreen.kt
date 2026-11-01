@@ -1,5 +1,7 @@
 package com.chittortech.snp.ui.screens.departments
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +35,7 @@ fun DepartmentsScreen(
     onRefreshClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     // Official 6 Municipal Departments fallback list
     val officialFallback = remember {
         listOf(
@@ -166,7 +170,15 @@ fun DepartmentsScreen(
                             }
 
                             dept.headOfficerPhone?.let { phone ->
-                                IconButton(onClick = {}, modifier = Modifier.size(34.dp)) {
+                                IconButton(
+                                    onClick = {
+                                        try {
+                                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {}
+                                    },
+                                    modifier = Modifier.size(34.dp)
+                                ) {
                                     Icon(
                                         Icons.Default.Phone,
                                         contentDescription = "Call Head Officer",
@@ -211,15 +223,43 @@ fun DepartmentsScreen(
                         HorizontalDivider(color = SnpBorder.copy(alpha = 0.5f))
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        // Real-time KPI Stats Grid
+                        // Real-time KPI Stats Grid with Sober Decent Colors
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            DeptStatItem(label = "कुल दर्ज", value = "${ds.total}", color = SnpPrimary)
-                            DeptStatItem(label = "प्रक्रियाधीन", value = "${ds.pending + ds.inProgress}", color = SnpAmber)
-                            DeptStatItem(label = "निस्तारित", value = "${ds.closed}", color = SnpGreen)
-                            DeptStatItem(label = "समय सीमा पार", value = "${ds.overdue}", color = SnpRed)
+                            DeptStatItem(
+                                label = "कुल दर्ज",
+                                value = "${ds.total}",
+                                textColor = Color(0xFF1E40AF),
+                                bgColor = Color(0xFFEFF6FF),
+                                borderColor = Color(0xFFBFDBFE),
+                                modifier = Modifier.weight(1f)
+                            )
+                            DeptStatItem(
+                                label = "प्रक्रियाधीन",
+                                value = "${ds.pending + ds.inProgress}",
+                                textColor = Color(0xFFB45309),
+                                bgColor = Color(0xFFFFFBEB),
+                                borderColor = Color(0xFFFDE68A),
+                                modifier = Modifier.weight(1f)
+                            )
+                            DeptStatItem(
+                                label = "निस्तारित",
+                                value = "${ds.closed}",
+                                textColor = Color(0xFF15803D),
+                                bgColor = Color(0xFFF0FDF4),
+                                borderColor = Color(0xFFBBF7D0),
+                                modifier = Modifier.weight(1f)
+                            )
+                            DeptStatItem(
+                                label = "समय सीमा पार",
+                                value = "${ds.overdue}",
+                                textColor = Color(0xFFDC2626),
+                                bgColor = Color(0xFFFEF2F2),
+                                borderColor = Color(0xFFFECACA),
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
@@ -229,10 +269,34 @@ fun DepartmentsScreen(
 }
 
 @Composable
-private fun DeptStatItem(label: String, value: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = color)
-        Text(label, fontSize = 10.sp, color = TextMuted)
+private fun DeptStatItem(
+    label: String,
+    value: String,
+    textColor: Color,
+    bgColor: Color,
+    borderColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(value, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = textColor)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = label,
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = textColor.copy(alpha = 0.85f),
+                maxLines = 1
+            )
+        }
     }
 }
 
