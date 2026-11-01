@@ -1,15 +1,21 @@
 package com.chittortech.snp
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import com.chittortech.snp.data.SnpSessionManager
 import com.chittortech.snp.data.SnpSessionResult
 import com.chittortech.snp.data.SupabaseManager
@@ -21,6 +27,8 @@ import com.chittortech.snp.ui.screens.splash.SnpSplashScreen
 import com.chittortech.snp.ui.theme.SmartNagarParishadTheme
 import com.chittortech.snp.ui.theme.SnpPrimary
 import com.chittortech.snp.util.DateUtils
+import com.chittortech.snp.util.SnpNotificationManager
+import io.github.jan.supabase.realtime.PostgresAction
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -59,6 +67,49 @@ class MainActivity : ComponentActivity() {
                     if (sessionResult is SnpSessionResult.Valid) {
                         currentUser = Triple(sessionResult.email, sessionResult.role, sessionResult.fullName)
                         refreshData()
+                    }
+                }
+
+                // Notification Permission for Android 13+ (TIRAMISU)
+                val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission()
+                ) { /* Result handled */ }
+
+                LaunchedEffect(Unit) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (ContextCompat.checkSelfPermission(
+                                this@MainActivity,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                }
+
+                // Subscribe to Supabase Realtime ticket notifications
+                LaunchedEffect(currentUser) {
+                    if (currentUser != null) {
+                        try {
+                            SupabaseManager.subscribeToTicketUpdates().collect { action ->
+                                refreshData()
+                                if (action is PostgresAction.Insert) {
+                                    val tNum = action.record["ticket_number"]?.toString()?.replace("\"", "") ?: "SNP-LIVE"
+                                    val wNum = action.record["ward_number"]?.toString()?.replace("\"", "")?.toIntOrNull() ?: 1
+                                    val desc = action.record["problem_description"]?.toString()?.replace("\"", "") ?: "नई नागरिक शिकायत दर्ज"
+                                    val citizen = action.record["citizen_name"]?.toString()?.replace("\"", "") ?: "नागरिक"
+                                    val isEmerg = desc.contains("आग") || desc.contains("मृत") || desc.contains("दमकल") || desc.contains("दुर्घटना")
+                                    SnpNotificationManager.showNewComplaintAlert(
+                                        context = this@MainActivity,
+                                        ticketNumber = tNum,
+                                        wardNumber = wNum,
+                                        categoryTitle = desc,
+                                        citizenName = citizen,
+                                        isEmergency = isEmerg
+                                    )
+                                }
+                            }
+                        } catch (_: Exception) {}
                     }
                 }
 
