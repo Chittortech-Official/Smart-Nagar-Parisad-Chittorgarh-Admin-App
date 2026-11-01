@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -174,17 +175,23 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = { navigateToTab(tab) },
+                            alwaysShowLabel = true,
                             icon = {
                                 Icon(
                                     tab.icon,
                                     contentDescription = tab.title,
-                                    modifier = Modifier.size(23.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             },
                             label = {
                                 Text(
                                     tab.title,
-                                    fontSize = 11.sp,
+                                    fontSize = 10.sp,
+                                    letterSpacing = (-0.2).sp,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Center,
                                     fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
                                 )
                             },
