@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -90,41 +91,64 @@ fun ComplaintDetailScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
+                    // Top Row: Department Code & Ward on left, Status on right
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             Surface(
-                                shape = SnpBadgeShape,
+                                shape = RoundedCornerShape(6.dp),
                                 color = SnpPrimaryLight,
                                 border = BorderStroke(1.dp, SnpPrimary.copy(alpha = 0.3f))
                             ) {
                                 Text(
                                     text = categoryMeta.departmentCode,
                                     fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.ExtraBold,
                                     color = SnpPrimary,
-                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = SnpSurfaceVariant,
+                                border = BorderStroke(1.dp, SnpBorder)
+                            ) {
                                 Text(
-                                    text = categoryMeta.name,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
-                                )
-                                Text(
-                                    text = categoryMeta.hindiName,
+                                    text = "वार्ड ${ticket.wardNumber}",
                                     fontSize = 11.sp,
-                                    color = TextMuted
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextSecondary,
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
                                 )
                             }
                         }
-                        StatusBadge(status = ticket.status)
+                        StatusBadge(status = if (ticket.isOverdue) "OVERDUE" else ticket.status)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Category Name & Hindi translation
+                    Text(
+                        text = categoryMeta.name,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        lineHeight = 21.sp
+                    )
+                    if (categoryMeta.hindiName.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = categoryMeta.hindiName,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextMuted
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -240,20 +264,30 @@ fun ComplaintDetailScreen(
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Step 1: Field Officer Verification",
+                                    text = "Step 1: Field Verification",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
+                                    color = TextPrimary,
+                                    modifier = Modifier.weight(1f)
                                 )
-                                Text(
-                                    text = if (officerOk) "CONFIRMED" else "PENDING",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (officerOk) SnpGreen else SnpAmber
-                                )
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = if (officerOk) SnpGreenLight else SnpAmberLight
+                                ) {
+                                    Text(
+                                        text = if (officerOk) "CONFIRMED" else "PENDING",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (officerOk) SnpGreen else SnpAmber,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
@@ -290,20 +324,30 @@ fun ComplaintDetailScreen(
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Step 2: Citizen Satisfaction Confirmation",
+                                    text = "Step 2: Citizen Confirmation",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
+                                    color = TextPrimary,
+                                    modifier = Modifier.weight(1f)
                                 )
-                                Text(
-                                    text = if (citizenOk) "VERIFIED (${citizenRating}★)" else "AWAITING CALL",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (citizenOk) SnpGreen else TextMuted
-                                )
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = if (citizenOk) SnpGreenLight else SnpSurfaceVariant
+                                ) {
+                                    Text(
+                                        text = if (citizenOk) "VERIFIED (${citizenRating}★)" else "AWAITING CALL",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (citizenOk) SnpGreen else TextMuted,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(

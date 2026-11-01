@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.OfficialCategoriesDirectory
@@ -43,8 +44,18 @@ fun HomeScreen(
     onHeaderClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    var selectedFilter by remember { mutableStateOf("All Time") }
+    var selectedFilter by remember { mutableStateOf("Today") }
     val filterOptions = listOf("Today", "Yesterday", "Last 7 Days", "This Month", "All Time")
+
+    val filteredTickets = remember(recentTickets, selectedFilter) {
+        when (selectedFilter) {
+            "Today" -> recentTickets.filter { DateUtils.isToday(it.registrationTime) }
+            "Yesterday" -> recentTickets.filter { DateUtils.isYesterday(it.registrationTime) }
+            "Last 7 Days" -> recentTickets.filter { DateUtils.isLastNDays(it.registrationTime, 7) }
+            "This Month" -> recentTickets.filter { DateUtils.isThisMonth(it.registrationTime) }
+            else -> recentTickets
+        }
+    }
 
     Column(
         modifier = modifier
@@ -195,85 +206,198 @@ fun HomeScreen(
             // ── Recent Complaints Stream ───────────────────────────────────────
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 SectionHeader(
-                    title = "Live Citizen Complaints",
+                    title = if (selectedFilter == "Today") "Today's Citizen Complaints (${filteredTickets.size})" else "Complaints • $selectedFilter (${filteredTickets.size})",
                     actionLabel = "View All",
                     onAction = onViewAllComplaints
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                if (recentTickets.isEmpty()) {
+                if (filteredTickets.isEmpty()) {
                     Surface(
-                        shape = SnpSquareShape,
+                        shape = RoundedCornerShape(12.dp),
                         color = Color.White,
                         border = BorderStroke(1.dp, SnpBorder),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Box(modifier = Modifier.padding(24.dp), contentAlignment = Alignment.Center) {
-                            Text("No complaints registered yet.", fontSize = 13.sp, color = TextMuted)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.Inbox,
+                                contentDescription = null,
+                                tint = TextMuted,
+                                modifier = Modifier.size(36.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "No complaints found for $selectedFilter",
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "Switch filter to 'Yesterday', 'Last 7 Days', or 'All Time' to view other records.",
+                                fontSize = 11.5.sp,
+                                color = TextMuted,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
                         }
                     }
                 } else {
-                    recentTickets.take(6).forEach { ticket ->
+                    filteredTickets.take(10).forEach { ticket ->
                         val catMeta = OfficialCategoriesDirectory.getCategoryMeta(ticket.categoryId, ticket.problemDescription)
 
                         Surface(
-                            shape = SnpCardShape,
+                            shape = RoundedCornerShape(12.dp),
                             color = SnpCardWhite,
                             shadowElevation = 1.dp,
                             border = BorderStroke(1.dp, SnpBorder),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp)
+                                .padding(vertical = 5.dp)
                                 .clickable { onTicketClick(ticket) }
                         ) {
-                            Row(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(14.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                    .padding(14.dp)
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Line 1: Ticket Number & Ward on Left, Status Badge on Right
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
                                         Text(
                                             text = ticket.ticketNumber,
-                                            fontSize = 12.sp,
+                                            fontSize = 12.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = SnpPrimary
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(4.dp),
+                                            color = SnpSurfaceVariant,
+                                            border = BorderStroke(0.5.dp, SnpBorder)
+                                        ) {
+                                            Text(
+                                                text = "Ward ${ticket.wardNumber}",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = TextSecondary,
+                                                maxLines = 1,
+                                                softWrap = false,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+
+                                    StatusBadge(status = if (ticket.isOverdue) "OVERDUE" else ticket.status)
+                                }
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                // Line 2: Department Badge + Category Name
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = SnpPrimaryLight
+                                    ) {
                                         Text(
-                                            text = "Ward ${ticket.wardNumber}",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = TextSecondary
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text(
-                                            text = "${catMeta.departmentCode} • ${catMeta.name}",
+                                            text = catMeta.departmentCode,
                                             fontSize = 10.sp,
-                                            fontWeight = FontWeight.SemiBold,
+                                            fontWeight = FontWeight.ExtraBold,
                                             color = SnpPrimary,
-                                            maxLines = 1
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = ticket.problemDescription,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = TextPrimary,
-                                        maxLines = 1
-                                    )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = DateUtils.formatIsoToDisplay(ticket.registrationTime),
-                                        fontSize = 11.sp,
-                                        color = TextMuted
+                                        text = catMeta.name,
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = TextSecondary,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false)
                                     )
                                 }
-                                StatusBadge(status = ticket.status)
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                // Line 3: Problem Description
+                                Text(
+                                    text = ticket.problemDescription,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    lineHeight = 18.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                // Line 4: Citizen Name and Time
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Person,
+                                            contentDescription = null,
+                                            tint = TextMuted,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Text(
+                                            text = ticket.citizenName,
+                                            fontSize = 11.sp,
+                                            color = TextSecondary,
+                                            fontWeight = FontWeight.Medium,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.AccessTime,
+                                            contentDescription = null,
+                                            tint = TextMuted,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Text(
+                                            text = DateUtils.formatIsoToDisplay(ticket.registrationTime),
+                                            fontSize = 10.5.sp,
+                                            color = TextMuted,
+                                            maxLines = 1,
+                                            softWrap = false
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

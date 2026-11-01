@@ -34,14 +34,21 @@ fun StatusBadge(status: String, modifier: Modifier = Modifier) {
         "REOPENED" -> Triple(SnpGoldLight, SnpGold, "REOPENED")
         else -> Triple(SnpSurfaceVariant, TextSecondary, status)
     }
-    Box(
+    Surface(
+        shape = RoundedCornerShape(6.dp),
+        color = bg,
+        border = BorderStroke(1.dp, fg.copy(alpha = 0.25f)),
         modifier = modifier
-            .clip(SnpBadgeShape)
-            .background(bg)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        contentAlignment = Alignment.Center
     ) {
-        Text(label.uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = fg)
+        Text(
+            text = label.uppercase(),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = fg,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.5.dp)
+        )
     }
 }
 

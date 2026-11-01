@@ -95,19 +95,54 @@ object OfficialCategoriesDirectory {
     )
 
     fun getCategoryMeta(categoryId: String, problemDesc: String): CategoryMeta {
-        // Try matching by problem description keywords if categoryId is arbitrary
         val descLower = problemDesc.lowercase()
         return when {
-            descLower.contains("animal") || descLower.contains("carcass") || descLower.contains("मृत") -> OFFICIAL_CATEGORIES[2]
-            descLower.contains("door") || descLower.contains("vehicle") || descLower.contains("tipper") || descLower.contains("टिपर") -> OFFICIAL_CATEGORIES[1]
-            descLower.contains("light") || descLower.contains("led") || descLower.contains("pole") || descLower.contains("रोशनी") -> OFFICIAL_CATEGORIES[3]
-            descLower.contains("high-mast") || descLower.contains("tower") -> OFFICIAL_CATEGORIES[4]
-            descLower.contains("road") || descLower.contains("pothole") || descLower.contains("गड्ढा") || descLower.contains("सड़क") -> OFFICIAL_CATEGORIES[5]
-            descLower.contains("divider") || descLower.contains("pavement") || descLower.contains("फुटपाथ") -> OFFICIAL_CATEGORIES[6]
-            descLower.contains("drain") || descLower.contains("nullah") || descLower.contains("choked") || descLower.contains("नाली") -> OFFICIAL_CATEGORIES[7]
-            descLower.contains("slab") || descLower.contains("gutter") || descLower.contains("manhole") || descLower.contains("गटर") -> OFFICIAL_CATEGORIES[8]
-            descLower.contains("water") || descLower.contains("log") || descLower.contains("जलभराव") -> OFFICIAL_CATEGORIES[9]
-            descLower.contains("encroach") || descLower.contains("shed") || descLower.contains("अतिक्रमण") -> OFFICIAL_CATEGORIES[10]
+            // Sanitation & Waste Collection (highest priority for cleanliness & garbage)
+            descLower.contains("कचरा") || descLower.contains("कूड़ा") || descLower.contains("गंदगी") ||
+                    descLower.contains("dustbin") || descLower.contains("garbage") || descLower.contains("waste") ||
+                    descLower.contains("सफाई") || descLower.contains("दुर्गंध") -> OFFICIAL_CATEGORIES[0]
+
+            // Dead Animal Disposal (Emergency Sanitation)
+            descLower.contains("animal") || descLower.contains("carcass") || descLower.contains("मृत") ||
+                    descLower.contains("पशु") || descLower.contains("कुत्ता") -> OFFICIAL_CATEGORIES[2]
+
+            // Door to Door Tipper
+            descLower.contains("door") || descLower.contains("vehicle") || descLower.contains("tipper") ||
+                    descLower.contains("टिपर") -> OFFICIAL_CATEGORIES[1]
+
+            // Electrical & Streetlight
+            descLower.contains("light") || descLower.contains("led") || descLower.contains("pole") ||
+                    descLower.contains("रोशनी") || descLower.contains("स्ट्रीट") || descLower.contains("लाइट") ||
+                    descLower.contains("अंधेरा") -> OFFICIAL_CATEGORIES[3]
+
+            // High Mast Tower
+            descLower.contains("high-mast") || descLower.contains("tower") || descLower.contains("हाई-मास्ट") -> OFFICIAL_CATEGORIES[4]
+
+            // Roads & Infrastructure Maintenance
+            descLower.contains("pothole") || descLower.contains("गड्ढा") || descLower.contains("पेच") ||
+                    descLower.contains("डामर") || descLower.contains("पैच") ||
+                    (descLower.contains("सड़क") && !descLower.contains("कचरा")) ||
+                    descLower.contains("road") -> OFFICIAL_CATEGORIES[5]
+
+            // Divider & Footpath
+            descLower.contains("divider") || descLower.contains("pavement") || descLower.contains("डिवाइडर") ||
+                    descLower.contains("फुटपाथ") -> OFFICIAL_CATEGORIES[6]
+
+            // Drains & Sewerage
+            descLower.contains("drain") || descLower.contains("nullah") || descLower.contains("choked") ||
+                    descLower.contains("नाली") || descLower.contains("नाला") || descLower.contains("सीवरेज") -> OFFICIAL_CATEGORIES[7]
+
+            // Gutter Slabs
+            descLower.contains("slab") || descLower.contains("gutter") || descLower.contains("manhole") ||
+                    descLower.contains("गटर") || descLower.contains("पट्टियां") -> OFFICIAL_CATEGORIES[8]
+
+            // Waterlogging
+            descLower.contains("waterlog") || descLower.contains("जलभराव") || descLower.contains("पानी भरा") -> OFFICIAL_CATEGORIES[9]
+
+            // Encroachment
+            descLower.contains("encroach") || descLower.contains("shed") || descLower.contains("अतिक्रमण") ||
+                    descLower.contains("कब्जा") -> OFFICIAL_CATEGORIES[10]
+
             else -> OFFICIAL_CATEGORIES[0] // Default Kachra Patra Emptying
         }
     }
