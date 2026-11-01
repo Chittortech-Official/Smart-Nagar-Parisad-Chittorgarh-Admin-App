@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     isLoadingData -> {
-                        SnpLoadingScreen(message = "Synchronizing Live Municipal Records...")
+                        SnpLoadingScreen(message = "Synchronizing data from the backend...")
                     }
                     else -> {
                         val (email, role, name) = currentUser!!

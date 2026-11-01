@@ -68,7 +68,7 @@ fun MainScreen(
 
     var showWelcomeNotification by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(6500)
+        kotlinx.coroutines.delay(8000)
         showWelcomeNotification = false
     }
 
@@ -261,7 +261,9 @@ fun MainScreen(
                 ) + fadeOut(),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(start = 14.dp, end = 14.dp, top = 8.dp)
+                    .statusBarsPadding()
+                    .displayCutoutPadding()
+                    .padding(start = 14.dp, end = 14.dp, top = 6.dp)
                     .zIndex(100f)
             ) {
                 Surface(
@@ -274,14 +276,14 @@ fun MainScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
                             shape = CircleShape,
                             color = SnpPrimaryLight,
                             border = BorderStroke(1.dp, SnpGold.copy(alpha = 0.5f)),
-                            modifier = Modifier.size(38.dp)
+                            modifier = Modifier.size(42.dp)
                         ) {
                             Box(
                                 modifier = Modifier
@@ -302,20 +304,22 @@ fun MainScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = greetingTitle,
-                                fontSize = 14.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = SnpPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = greetingSubtitle,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = TextSecondary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                maxLines = 2,
+                                lineHeight = 16.sp
                             )
                         }
+
+                        Spacer(modifier = Modifier.width(4.dp))
 
                         IconButton(
                             onClick = { showWelcomeNotification = false },
