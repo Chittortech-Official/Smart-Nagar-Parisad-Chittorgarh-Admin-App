@@ -66,3 +66,4 @@ EXECUTE FUNCTION public.handle_ticket_push_notification();
 -- 4. Enable Realtime on tickets and notification_logs tables
 ALTER PUBLICATION supabase_realtime ADD TABLE public.tickets;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notification_logs;
+

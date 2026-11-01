@@ -10,10 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,11 +38,20 @@ fun ComplaintsScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedStatus by remember { mutableStateOf("ALL") }
+    var selectedDateFilter by remember { mutableStateOf("Today") }
 
+    val dateFilterOptions = listOf("Today", "Yesterday", "Last 5 Days")
     val statusTabs = listOf("ALL", "REGISTERED", "IN_PROGRESS", "CLOSED", "OVERDUE")
 
-    val filteredTickets = remember(tickets, searchQuery, selectedStatus) {
+    val filteredTickets = remember(tickets, searchQuery, selectedStatus, selectedDateFilter) {
         tickets.filter { t ->
+            val matchesDate = when (selectedDateFilter) {
+                "Today" -> DateUtils.isToday(t.registrationTime)
+                "Yesterday" -> DateUtils.isYesterday(t.registrationTime)
+                "Last 5 Days" -> DateUtils.isLastNDays(t.registrationTime, 5)
+                else -> DateUtils.isToday(t.registrationTime)
+            }
+
             val matchesSearch = searchQuery.isBlank() ||
                     t.ticketNumber.contains(searchQuery, ignoreCase = true) ||
                     t.citizenName.contains(searchQuery, ignoreCase = true) ||
@@ -57,7 +63,7 @@ fun ComplaintsScreen(
                 "OVERDUE" -> t.isOverdue
                 else -> t.status.equals(selectedStatus, ignoreCase = true)
             }
-            matchesSearch && matchesStatus
+            matchesDate && matchesSearch && matchesStatus
         }
     }
 
@@ -97,6 +103,38 @@ fun ComplaintsScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             )
+
+            // Date Filter Strip (Today, Yesterday, Last 5 Days)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                dateFilterOptions.forEach { dateFilter ->
+                    val isSelected = selectedDateFilter == dateFilter
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { selectedDateFilter = dateFilter },
+                        shape = SnpSquareShape,
+                        label = { Text(dateFilter, fontSize = 11.5.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = SnpPrimary,
+                            selectedLabelColor = Color.White,
+                            containerColor = Color.White,
+                            labelColor = TextSecondary
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = if (isSelected) SnpPrimary else SnpBorder,
+                            enabled = true,
+                            selected = isSelected
+                        )
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Status Filter Tabs
             Row(
@@ -291,8 +329,48 @@ fun ComplaintsScreen(
                             }
                         }
                     }
+
+                // Official Portal Archive Notice
+                item(key = "portal_archive_notice") {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFF8FAFC),
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Print,
+                                contentDescription = null,
+                                tint = SnpPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "विभागीय रिकॉर्ड अभिलेखागार (Portal Archive)",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "ऐप में केवल आज, कल एवं पिछले 5 दिनों की सक्रिय शिकायतें उपलब्ध हैं। 5 दिन से पुराना संपूर्ण रिकॉर्ड नगर परिषद वेब पोर्टल / कंट्रोल रूम रिकॉर्ड शाखा से प्रिंट व विभागीय ऑडिट हेतु उपलब्ध है।",
+                                    fontSize = 11.sp,
+                                    color = TextSecondary,
+                                    lineHeight = 15.sp
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
 }
 

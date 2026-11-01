@@ -45,15 +45,14 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedFilter by remember { mutableStateOf("Today") }
-    val filterOptions = listOf("Today", "Yesterday", "Last 7 Days", "This Month", "All Time")
+    val filterOptions = listOf("Today", "Yesterday", "Last 5 Days")
 
     val filteredTickets = remember(recentTickets, selectedFilter) {
         when (selectedFilter) {
             "Today" -> recentTickets.filter { DateUtils.isToday(it.registrationTime) }
             "Yesterday" -> recentTickets.filter { DateUtils.isYesterday(it.registrationTime) }
-            "Last 7 Days" -> recentTickets.filter { DateUtils.isLastNDays(it.registrationTime, 7) }
-            "This Month" -> recentTickets.filter { DateUtils.isThisMonth(it.registrationTime) }
-            else -> recentTickets
+            "Last 5 Days" -> recentTickets.filter { DateUtils.isLastNDays(it.registrationTime, 5) }
+            else -> recentTickets.filter { DateUtils.isToday(it.registrationTime) }
         }
     }
 
@@ -497,6 +496,46 @@ fun HomeScreen(
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Official Portal Archive Notice
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = Color(0xFFF8FAFC),
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Print,
+                        contentDescription = null,
+                        tint = SnpPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "विभागीय रिकॉर्ड अभिलेखागार (Portal Archive)",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "ऐप में केवल आज, कल एवं पिछले 5 दिनों की सक्रिय शिकायतें उपलब्ध हैं। 5 दिन से पुराना संपूर्ण रिकॉर्ड नगर परिषद वेब पोर्टल / कंट्रोल रूम रिकॉर्ड शाखा से प्रिंट व विभागीय ऑडिट हेतु उपलब्ध है।",
+                            fontSize = 11.sp,
+                            color = TextSecondary,
+                            lineHeight = 15.sp
+                        )
                     }
                 }
             }
