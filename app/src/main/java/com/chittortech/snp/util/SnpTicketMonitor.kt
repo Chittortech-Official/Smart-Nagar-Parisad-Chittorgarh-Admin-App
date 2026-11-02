@@ -85,6 +85,7 @@ object SnpTicketMonitor {
                         wardNumber = ticket.wardNumber,
                         categoryTitle = desc,
                         citizenName = ticket.citizenName,
+                        citizenPhone = ticket.citizenPhone,
                         isEmergency = isEmerg
                     )
                 }
@@ -115,6 +116,7 @@ object SnpTicketMonitor {
                     wardNumber = ticket.wardNumber,
                     categoryTitle = desc,
                     citizenName = ticket.citizenName,
+                    citizenPhone = ticket.citizenPhone,
                     isEmergency = isEmerg
                 )
                 editor.putString(statusKey, ticket.status)
@@ -128,7 +130,9 @@ object SnpTicketMonitor {
                         ticketId = ticket.id,
                         ticketNumber = ticket.ticketNumber,
                         wardNumber = ticket.wardNumber,
-                        categoryTitle = ticket.problemDescription
+                        categoryTitle = ticket.problemDescription,
+                        citizenName = ticket.citizenName,
+                        citizenPhone = ticket.citizenPhone
                     )
                 } else {
                     SnpNotificationManager.showStatusChangeAlert(
@@ -137,7 +141,9 @@ object SnpTicketMonitor {
                         ticketNumber = ticket.ticketNumber,
                         wardNumber = ticket.wardNumber,
                         categoryTitle = ticket.problemDescription,
-                        newStatus = ticket.status
+                        newStatus = ticket.status,
+                        citizenName = ticket.citizenName,
+                        citizenPhone = ticket.citizenPhone
                     )
                 }
                 editor.putString(statusKey, ticket.status)
@@ -153,7 +159,9 @@ object SnpTicketMonitor {
                     ticketId = ticket.id,
                     ticketNumber = ticket.ticketNumber,
                     wardNumber = ticket.wardNumber,
-                    categoryTitle = ticket.problemDescription
+                    categoryTitle = ticket.problemDescription,
+                    citizenName = ticket.citizenName,
+                    citizenPhone = ticket.citizenPhone
                 )
                 editor.putBoolean(overdueKey, true)
             }
