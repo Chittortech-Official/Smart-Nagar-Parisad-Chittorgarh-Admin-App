@@ -106,8 +106,6 @@ object SnpNotificationManager {
         isEmergency: Boolean = false
     ) {
         if (!hasNotificationPermission(context)) return
-        if (isAlreadyNotified(context, ticketNumber)) return
-        markAsNotified(context, ticketNumber)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -115,7 +113,7 @@ object SnpNotificationManager {
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
-            ticketNumber.hashCode(),
+            (ticketNumber + "_new").hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -142,7 +140,7 @@ object SnpNotificationManager {
             .setColor(if (isEmergency) Color.RED else 0xFF0D47A1.toInt())
             .build()
 
-        NotificationManagerCompat.from(context).notify(ticketNumber.hashCode(), notification)
+        NotificationManagerCompat.from(context).notify((ticketNumber + "_new").hashCode(), notification)
     }
 
     fun showOverdueAlert(
@@ -152,9 +150,6 @@ object SnpNotificationManager {
         categoryTitle: String
     ) {
         if (!hasNotificationPermission(context)) return
-        val dedupKey = "${ticketNumber}_overdue"
-        if (isAlreadyNotified(context, dedupKey)) return
-        markAsNotified(context, dedupKey)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -162,13 +157,15 @@ object SnpNotificationManager {
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
-            ticketNumber.hashCode(),
+            (ticketNumber + "_overdue").hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val title = "⚠️ समय सीमा पार (SLA Overdue): वार्ड $wardNumber"
         val body = "$ticketNumber: $categoryTitle की निर्धारित समाधान समय सीमा समाप्त हो चुकी है।"
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_SLA_OVERDUE_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -177,11 +174,12 @@ object SnpNotificationManager {
             .setStyle(NotificationCompat.BigTextStyle().bigText("$body\nसंबंधित कनिष्ठ अभियंता (JEN) एवं वार्ड प्रभारी को तत्काल फॉलो-अप आवश्यक है।"))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
             .setColor(0xFFDC2626.toInt())
             .build()
 
-        NotificationManagerCompat.from(context).notify(ticketNumber.hashCode(), notification)
+        NotificationManagerCompat.from(context).notify((ticketNumber + "_overdue").hashCode(), notification)
     }
 
     fun showStatusChangeAlert(
@@ -192,9 +190,6 @@ object SnpNotificationManager {
         newStatus: String
     ) {
         if (!hasNotificationPermission(context)) return
-        val dedupKey = "${ticketNumber}_status_${newStatus.uppercase()}"
-        if (isAlreadyNotified(context, dedupKey)) return
-        markAsNotified(context, dedupKey)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -202,7 +197,7 @@ object SnpNotificationManager {
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
-            ticketNumber.hashCode(),
+            (ticketNumber + "_status").hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -211,6 +206,8 @@ object SnpNotificationManager {
             "IN_PROGRESS" -> "प्रक्रियाधीन (In Progress)"
             "PENDING" -> "निरीक्षण हेतु लंबित"
             "ASSIGNED" -> "वार्ड टीम को आवंटित"
+            "REJECTED" -> "अस्वीकृत (Rejected)"
+            "RESOLVED_AWAITING_CITIZEN" -> "समाधान सत्यापन प्रतीक्षित"
             else -> newStatus.replace("_", " ")
         }
 
@@ -231,7 +228,7 @@ object SnpNotificationManager {
             .setColor(0xFFD97706.toInt()) // Warm Amber
             .build()
 
-        NotificationManagerCompat.from(context).notify(ticketNumber.hashCode(), notification)
+        NotificationManagerCompat.from(context).notify((ticketNumber + "_status").hashCode(), notification)
     }
 
     fun showResolvedAlert(
@@ -241,9 +238,6 @@ object SnpNotificationManager {
         categoryTitle: String
     ) {
         if (!hasNotificationPermission(context)) return
-        val dedupKey = "${ticketNumber}_status_CLOSED"
-        if (isAlreadyNotified(context, dedupKey)) return
-        markAsNotified(context, dedupKey)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -251,7 +245,7 @@ object SnpNotificationManager {
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
-            ticketNumber.hashCode(),
+            (ticketNumber + "_resolved").hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -273,7 +267,7 @@ object SnpNotificationManager {
             .setColor(0xFF16A34A.toInt()) // Fresh Green
             .build()
 
-        NotificationManagerCompat.from(context).notify(ticketNumber.hashCode(), notification)
+        NotificationManagerCompat.from(context).notify((ticketNumber + "_resolved").hashCode(), notification)
     }
 
     private fun hasNotificationPermission(context: Context): Boolean {
@@ -287,4 +281,3 @@ object SnpNotificationManager {
         }
     }
 }
-

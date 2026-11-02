@@ -134,6 +134,7 @@ object SupabaseManager {
 
     fun subscribeToTicketUpdates(): Flow<PostgresAction> = flow {
         try {
+            client.realtime.connect()
             val channel = client.realtime.channel("public:tickets")
             val changeFlow = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
                 table = "tickets"

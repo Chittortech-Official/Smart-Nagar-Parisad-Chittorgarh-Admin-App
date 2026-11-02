@@ -28,6 +28,7 @@ import com.chittortech.snp.ui.theme.SmartNagarParishadTheme
 import com.chittortech.snp.ui.theme.SnpPrimary
 import com.chittortech.snp.util.DateUtils
 import com.chittortech.snp.util.SnpNotificationManager
+import com.chittortech.snp.util.SnpTicketMonitor
 import io.github.jan.supabase.realtime.PostgresAction
 import kotlinx.coroutines.launch
 
@@ -64,6 +65,7 @@ class MainActivity : ComponentActivity() {
                         notifications = SupabaseManager.getNotifications()
                         isInitialLoading = false
                         isRefreshing = false
+                        SnpTicketMonitor.syncTickets(this@MainActivity)
                     }
                 }
 
@@ -93,48 +95,12 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                // Subscribe to Supabase Realtime ticket notifications
+                // Subscribe to Supabase Realtime ticket notifications to refresh UI
                 LaunchedEffect(currentUser) {
                     if (currentUser != null) {
                         try {
-                            SupabaseManager.subscribeToTicketUpdates().collect { action ->
+                            SupabaseManager.subscribeToTicketUpdates().collect { _ ->
                                 refreshData()
-                                if (action is PostgresAction.Insert) {
-                                    val tNum = action.record["ticket_number"]?.toString()?.replace("\"", "") ?: "SNP-LIVE"
-                                    val wNum = action.record["ward_number"]?.toString()?.replace("\"", "")?.toIntOrNull() ?: 1
-                                    val desc = action.record["problem_description"]?.toString()?.replace("\"", "") ?: "नई नागरिक शिकायत दर्ज"
-                                    val citizen = action.record["citizen_name"]?.toString()?.replace("\"", "") ?: "नागरिक"
-                                    val isEmerg = desc.contains("आग") || desc.contains("मृत") || desc.contains("दमकल") || desc.contains("दुर्घटना")
-                                    SnpNotificationManager.showNewComplaintAlert(
-                                        context = this@MainActivity,
-                                        ticketNumber = tNum,
-                                        wardNumber = wNum,
-                                        categoryTitle = desc,
-                                        citizenName = citizen,
-                                        isEmergency = isEmerg
-                                    )
-                                } else if (action is PostgresAction.Update) {
-                                    val tNum = action.record["ticket_number"]?.toString()?.replace("\"", "") ?: "SNP-LIVE"
-                                    val wNum = action.record["ward_number"]?.toString()?.replace("\"", "")?.toIntOrNull() ?: 1
-                                    val desc = action.record["problem_description"]?.toString()?.replace("\"", "") ?: "शिकायत"
-                                    val status = action.record["status"]?.toString()?.replace("\"", "")?.trim()?.uppercase() ?: ""
-                                    if (status == "CLOSED" || status.contains("RESOLVED")) {
-                                        SnpNotificationManager.showResolvedAlert(
-                                            context = this@MainActivity,
-                                            ticketNumber = tNum,
-                                            wardNumber = wNum,
-                                            categoryTitle = desc
-                                        )
-                                    } else if (status.isNotBlank()) {
-                                        SnpNotificationManager.showStatusChangeAlert(
-                                            context = this@MainActivity,
-                                            ticketNumber = tNum,
-                                            wardNumber = wNum,
-                                            categoryTitle = desc,
-                                            newStatus = status
-                                        )
-                                    }
-                                }
                             }
                         } catch (_: Exception) {}
                     }

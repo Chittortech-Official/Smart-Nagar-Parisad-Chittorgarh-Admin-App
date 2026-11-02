@@ -2,7 +2,6 @@ package com.chittortech.snp.util
 
 import android.content.Context
 import androidx.work.*
-import com.chittortech.snp.data.SupabaseManager
 import java.util.concurrent.TimeUnit
 
 class SnpBackgroundSyncWorker(
@@ -12,65 +11,11 @@ class SnpBackgroundSyncWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            val tickets = SupabaseManager.getTickets()
+            // Trigger comprehensive status diff & notification check
+            SnpTicketMonitor.syncTickets(appContext)
 
-            // Filter tickets within active 5-day window
-            val activeTickets = tickets.filter { ticket ->
-                DateUtils.isLastNDays(ticket.registrationTime, 5)
-            }
-
-            for (ticket in activeTickets) {
-                // 1. Check for unnotified new complaints
-                if (!SnpNotificationManager.isAlreadyNotified(appContext, ticket.ticketNumber)) {
-                    val desc = ticket.problemDescription
-                    val isEmerg = desc.contains("आग") || desc.contains("मृत") || desc.contains("दमकल") || desc.contains("दुर्घटना") || desc.contains("धंस")
-                    SnpNotificationManager.showNewComplaintAlert(
-                        context = appContext,
-                        ticketNumber = ticket.ticketNumber,
-                        wardNumber = ticket.wardNumber,
-                        categoryTitle = desc,
-                        citizenName = ticket.citizenName,
-                        isEmergency = isEmerg
-                    )
-                }
-
-                // 2. Check for resolved / closed complaints
-                val isClosed = ticket.status.equals("CLOSED", ignoreCase = true) || ticket.status.contains("RESOLVED", ignoreCase = true)
-                val resolvedKey = "${ticket.ticketNumber}_status_CLOSED"
-                if (isClosed && !SnpNotificationManager.isAlreadyNotified(appContext, resolvedKey)) {
-                    SnpNotificationManager.showResolvedAlert(
-                        context = appContext,
-                        ticketNumber = ticket.ticketNumber,
-                        wardNumber = ticket.wardNumber,
-                        categoryTitle = ticket.problemDescription
-                    )
-                }
-
-                // 3. Check for in-progress / assigned complaints
-                val inProgKey = "${ticket.ticketNumber}_status_IN_PROGRESS"
-                if (ticket.status.equals("IN_PROGRESS", ignoreCase = true) && !SnpNotificationManager.isAlreadyNotified(appContext, inProgKey)) {
-                    SnpNotificationManager.showStatusChangeAlert(
-                        context = appContext,
-                        ticketNumber = ticket.ticketNumber,
-                        wardNumber = ticket.wardNumber,
-                        categoryTitle = ticket.problemDescription,
-                        newStatus = ticket.status
-                    )
-                }
-
-                // 4. Check for unnotified SLA overdues
-                val overdueKey = "${ticket.ticketNumber}_overdue"
-                if ((ticket.isOverdue || ticket.status.equals("OVERDUE", ignoreCase = true)) &&
-                    !SnpNotificationManager.isAlreadyNotified(appContext, overdueKey)
-                ) {
-                    SnpNotificationManager.showOverdueAlert(
-                        context = appContext,
-                        ticketNumber = ticket.ticketNumber,
-                        wardNumber = ticket.wardNumber,
-                        categoryTitle = ticket.problemDescription
-                    )
-                }
-            }
+            // Self-schedule next one-time check to ensure frequent background checks
+            scheduleNextOneTimeSync(appContext)
 
             Result.success()
         } catch (e: Exception) {
@@ -79,7 +24,8 @@ class SnpBackgroundSyncWorker(
     }
 
     companion object {
-        private const val UNIQUE_WORK_NAME = "snp_background_notification_sync"
+        private const val UNIQUE_PERIODIC_WORK = "snp_background_notification_sync"
+        private const val UNIQUE_ONETIME_WORK = "snp_background_sync_onetimer"
 
         fun schedulePeriodicSync(context: Context) {
             val constraints = Constraints.Builder()
@@ -88,18 +34,41 @@ class SnpBackgroundSyncWorker(
 
             val periodicRequest = PeriodicWorkRequestBuilder<SnpBackgroundSyncWorker>(
                 15, TimeUnit.MINUTES,
-                5, TimeUnit.MINUTES // 5 min flex interval
+                5, TimeUnit.MINUTES // 5 min flex window
             )
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
                 .build()
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                UNIQUE_WORK_NAME,
-                ExistingPeriodicWorkPolicy.KEEP,
+                UNIQUE_PERIODIC_WORK,
+                ExistingPeriodicWorkPolicy.UPDATE,
                 periodicRequest
+            )
+
+            // Also trigger an initial sync immediately
+            val immediateRequest = OneTimeWorkRequestBuilder<SnpBackgroundSyncWorker>()
+                .setConstraints(constraints)
+                .build()
+
+            WorkManager.getInstance(context).enqueue(immediateRequest)
+        }
+
+        fun scheduleNextOneTimeSync(context: Context) {
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+
+            val oneTimeRequest = OneTimeWorkRequestBuilder<SnpBackgroundSyncWorker>()
+                .setConstraints(constraints)
+                .setInitialDelay(10, TimeUnit.MINUTES)
+                .build()
+
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                UNIQUE_ONETIME_WORK,
+                ExistingWorkPolicy.REPLACE,
+                oneTimeRequest
             )
         }
     }
 }
-
