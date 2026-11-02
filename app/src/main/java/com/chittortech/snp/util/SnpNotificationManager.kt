@@ -118,7 +118,7 @@ object SnpNotificationManager {
 
     private fun buildViewAction(context: Context, ticketId: String, ticketNumber: String, label: String = "👁️ विवरण देखें"): NotificationCompat.Action {
         val viewIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }
@@ -149,7 +149,7 @@ object SnpNotificationManager {
 
         val notifId = (ticketId + "_new").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }
@@ -219,7 +219,7 @@ object SnpNotificationManager {
 
         val notifId = (ticketId + "_status").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }
@@ -283,7 +283,7 @@ object SnpNotificationManager {
 
         val notifId = (ticketId + "_resolved").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }
@@ -346,7 +346,7 @@ object SnpNotificationManager {
 
         val notifId = (ticketId + "_overdue").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }

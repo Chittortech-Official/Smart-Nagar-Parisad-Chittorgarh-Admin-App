@@ -34,13 +34,17 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    private val targetTicketState = mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        extractTicketIntent(intent)
         enableEdgeToEdge()
 
         setContent {
             SmartNagarParishadTheme {
                 val scope = rememberCoroutineScope()
+                val targetTicket = targetTicketState.value
                 var isSplashShowing by remember { mutableStateOf(true) }
                 var currentUser by remember { mutableStateOf<Triple<String, String, String>?>(null) } // email, role, name
 
@@ -75,6 +79,13 @@ class MainActivity : ComponentActivity() {
                     if (sessionResult is SnpSessionResult.Valid) {
                         currentUser = Triple(sessionResult.email, sessionResult.role, sessionResult.fullName)
                         refreshData()
+                    }
+                }
+
+                // If intent targeted a specific ticket, ensure data is refreshed to locate it immediately
+                LaunchedEffect(targetTicket) {
+                    if (!targetTicket.isNullOrBlank()) {
+                        refreshData(isManual = false)
                     }
                 }
 
@@ -189,6 +200,8 @@ class MainActivity : ComponentActivity() {
                             stats = dashboardStats,
                             deptStats = deptStats,
                             isRefreshing = isRefreshing,
+                            targetTicketNumber = targetTicket,
+                            onTargetTicketHandled = { targetTicketState.value = null },
                             hasShownWelcomeNotification = hasShownWelcomeNotification,
                             onWelcomeDismissed = { hasShownWelcomeNotification = true },
                             onRefresh = { refreshData(isManual = true) },
@@ -201,6 +214,21 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        extractTicketIntent(intent)
+    }
+
+    private fun extractTicketIntent(incomingIntent: android.content.Intent?) {
+        val tNumber = incomingIntent?.getStringExtra("EXTRA_TICKET_NUMBER")
+        val tId = incomingIntent?.getStringExtra("EXTRA_TICKET_ID")
+        val target = tNumber?.takeIf { it.isNotBlank() } ?: tId?.takeIf { it.isNotBlank() }
+        if (!target.isNullOrBlank()) {
+            targetTicketState.value = target
         }
     }
 }

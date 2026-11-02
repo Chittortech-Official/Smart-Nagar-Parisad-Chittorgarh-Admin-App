@@ -68,6 +68,8 @@ fun MainScreen(
     stats: DashboardStats,
     deptStats: List<DepartmentStats>,
     isRefreshing: Boolean = false,
+    targetTicketNumber: String? = null,
+    onTargetTicketHandled: () -> Unit = {},
     hasShownWelcomeNotification: Boolean = false,
     onWelcomeDismissed: () -> Unit = {},
     onLogout: () -> Unit,
@@ -86,6 +88,27 @@ fun MainScreen(
 
     var showWelcomeNotification by remember { mutableStateOf(false) }
     var isIslandExpanded by remember { mutableStateOf(false) }
+
+    // Direct deep link navigation from notification taps
+    LaunchedEffect(targetTicketNumber, tickets) {
+        val target = targetTicketNumber
+        if (!target.isNullOrBlank() && tickets.isNotEmpty()) {
+            val found = tickets.find {
+                it.ticketNumber.equals(target, ignoreCase = true) ||
+                it.id.equals(target, ignoreCase = true)
+            }
+            if (found != null) {
+                showNotifications = false
+                showSlaScreen = false
+                showAboutScreen = false
+                showContactScreen = false
+                showControlRoomScreen = false
+                currentTab = BottomTab.Complaints
+                selectedTicket = found
+                onTargetTicketHandled()
+            }
+        }
+    }
 
     LaunchedEffect(hasShownWelcomeNotification) {
         if (!hasShownWelcomeNotification) {
