@@ -51,3 +51,10 @@ captures/
 # External native build folder
 .cxx/
 
+# Web dependencies and build outputs
+node_modules/
+web/node_modules/
+dist/
+web/dist/
+
+
