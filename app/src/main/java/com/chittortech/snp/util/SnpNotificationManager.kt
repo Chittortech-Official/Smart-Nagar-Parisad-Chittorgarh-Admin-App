@@ -31,7 +31,7 @@ object SnpNotificationManager {
             // 1. Emergency Channel (Highest Priority, Red LED, Long Vibration)
             val emergencyChannel = NotificationChannel(
                 CHANNEL_EMERGENCY_ID,
-                "आपातकालीन एवं दमकल अलर्ट (Emergency & Fire)",
+                "🚨 आपातकालीन अलर्ट (Emergency & Fire)",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "दैनिक आपातकालीन शिकायतें जैसे मृत पशु, आग, खुला नाला एवं तत्काल सहायता"
@@ -44,7 +44,7 @@ object SnpNotificationManager {
             // 2. SLA Overdue Channel (High Priority, Amber LED)
             val slaChannel = NotificationChannel(
                 CHANNEL_SLA_OVERDUE_ID,
-                "समय सीमा उल्लंघन (SLA Overdue Escalations)",
+                "⚠️ समय सीमा उल्लंघन (SLA Escalations)",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "वार्ड शिकायतों की 24h/48h समाधान समय सीमा समाप्त होने पर अलर्ट"
@@ -54,10 +54,10 @@ object SnpNotificationManager {
                 vibrationPattern = longArrayOf(0, 250, 150, 250)
             }
 
-            // 3. New Citizen Complaints Channel (High Priority for instant attention)
+            // 3. New Citizen Complaints Channel (High Priority)
             val complaintsChannel = NotificationChannel(
                 CHANNEL_NEW_COMPLAINTS_ID,
-                "नई नागरिक शिकायतें (New Citizen Grievances)",
+                "📝 नई नागरिक शिकायतें (New Grievances)",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "नागरिक द्वारा हेल्पलाइन अथवा ऐप से दर्ज नई शिकायतों का लाइव नोटिफिकेशन"
@@ -70,7 +70,7 @@ object SnpNotificationManager {
             // 4. Status & Resolution Channel (High Priority)
             val statusChannel = NotificationChannel(
                 CHANNEL_STATUS_UPDATES_ID,
-                "शिकायत स्थिति एवं समाधान (Status & Resolution)",
+                "🔄 शिकायत स्थिति व समाधान (Status & Resolution)",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "शिकायत प्रगति एवं सफल समाधान के लाइव नोटिफिकेशन"
@@ -81,6 +81,19 @@ object SnpNotificationManager {
             }
 
             notificationManager.createNotificationChannels(listOf(emergencyChannel, slaChannel, complaintsChannel, statusChannel))
+        }
+    }
+
+    private fun getStatusBadge(status: String): Pair<String, Int> {
+        return when (status.uppercase().trim()) {
+            "IN_PROGRESS" -> Pair("🟡 प्रक्रियाधीन (In Progress)", 0xFFD97706.toInt())
+            "PENDING", "REGISTERED" -> Pair("🔵 दर्ज / लंबित (Registered)", 0xFF0D47A1.toInt())
+            "ASSIGNED" -> Pair("🟣 वार्ड टीम को आवंटित (Assigned)", 0xFF7C3AED.toInt())
+            "RESOLVED", "RESOLVED_AWAITING_CITIZEN" -> Pair("🟢 समाधान सत्यापित (Resolved)", 0xFF16A34A.toInt())
+            "CLOSED" -> Pair("✅ सफल निस्तारण पूर्ण (Closed)", 0xFF16A34A.toInt())
+            "REJECTED" -> Pair("🔴 निरस्त (Rejected)", 0xFFDC2626.toInt())
+            "OVERDUE" -> Pair("⚠️ समय सीमा पार (Overdue)", 0xFFDC2626.toInt())
+            else -> Pair("⚪ ${status.replace("_", " ")}", 0xFF475569.toInt())
         }
     }
 
@@ -103,6 +116,25 @@ object SnpNotificationManager {
         ).build()
     }
 
+    private fun buildViewAction(context: Context, ticketId: String, ticketNumber: String, label: String = "👁️ विवरण देखें"): NotificationCompat.Action {
+        val viewIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
+        }
+        val viewPendingIntent = PendingIntent.getActivity(
+            context,
+            (ticketId + "_view").hashCode(),
+            viewIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        return NotificationCompat.Action.Builder(
+            android.R.drawable.ic_menu_info_details,
+            label,
+            viewPendingIntent
+        ).build()
+    }
+
     fun showNewComplaintAlert(
         context: Context,
         ticketId: String,
@@ -115,12 +147,12 @@ object SnpNotificationManager {
     ) {
         if (!hasNotificationPermission(context)) return
 
+        val notifId = (ticketId + "_new").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }
-        val notifId = (ticketId + "_new").hashCode()
         val pendingIntent = PendingIntent.getActivity(
             context,
             notifId,
@@ -130,29 +162,36 @@ object SnpNotificationManager {
 
         val channelId = if (isEmergency) CHANNEL_EMERGENCY_ID else CHANNEL_NEW_COMPLAINTS_ID
         val title = if (isEmergency) {
-            "🚨 आपातकालीन शिकायत दर्ज: वार्ड $wardNumber"
+            "🚨 [वार्ड $wardNumber] आपातकालीन शिकायत दर्ज!"
         } else {
-            "📝 नई नागरिक शिकायत: वार्ड $wardNumber"
+            "📝 [वार्ड $wardNumber] नई नागरिक शिकायत दर्ज"
         }
 
-        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName else "नागरिक"
-        val citizenContactText = if (citizenPhone.isNotBlank()) " | $citizenDisplayName ($citizenPhone)" else " | $citizenDisplayName"
-        val body = "$ticketNumber: $categoryTitle$citizenContactText"
+        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
+        val cleanPhone = citizenPhone.trim()
+
+        val collapsedText = if (cleanPhone.isNotBlank()) {
+            "👤 $citizenDisplayName  •  📞 $cleanPhone"
+        } else {
+            "👤 $citizenDisplayName  •  वार्ड $wardNumber"
+        }
+
+        val expandedCardText = buildString {
+            append("📋 विषय: ").append(categoryTitle).append("\n")
+            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
+            append("📞 संपर्क: ").append(if (cleanPhone.isNotBlank()) cleanPhone else "उपलब्ध नहीं").append("\n")
+            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • नगर परिषद चित्तौड़गढ़\n")
+            append("⚡ स्थिति: 🔵 दर्ज (REGISTERED) | त्वरित संज्ञान हेतु प्रेषित")
+        }
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val expandedText = buildString {
-            append(ticketNumber).append(": ").append(categoryTitle).append("\n")
-            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
-            append("📞 संपर्क: ").append(if (citizenPhone.isNotBlank()) citizenPhone else "उपलब्ध नहीं").append("\n")
-            append("माननीय सभापति/उपसभापति कमांड सेंटर द्वारा त्वरित संज्ञान हेतु प्रेषित।")
-        }
-
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedText))
+            .setContentText(collapsedText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedCardText))
             .setPriority(if (isEmergency) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
@@ -160,62 +199,8 @@ object SnpNotificationManager {
             .setContentIntent(pendingIntent)
             .setColor(if (isEmergency) Color.RED else 0xFF0D47A1.toInt())
 
-        buildCallAction(context, ticketId, citizenPhone)?.let { builder.addAction(it) }
-
-        NotificationManagerCompat.from(context).notify(notifId, builder.build())
-    }
-
-    fun showOverdueAlert(
-        context: Context,
-        ticketId: String,
-        ticketNumber: String,
-        wardNumber: Int,
-        categoryTitle: String,
-        citizenName: String = "",
-        citizenPhone: String = ""
-    ) {
-        if (!hasNotificationPermission(context)) return
-
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
-            putExtra("EXTRA_TICKET_ID", ticketId)
-        }
-        val notifId = (ticketId + "_overdue").hashCode()
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            notifId,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val title = "⚠️ समय सीमा पार (SLA Overdue): वार्ड $wardNumber"
-        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName else "नागरिक"
-        val citizenContactText = if (citizenPhone.isNotBlank()) " | $citizenDisplayName ($citizenPhone)" else " | $citizenDisplayName"
-        val body = "$ticketNumber: SLA सीमा समाप्त$citizenContactText"
-
-        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
-        val expandedText = buildString {
-            append(ticketNumber).append(": ").append(categoryTitle).append(" की समाधान सीमा समाप्त हो चुकी है।\n")
-            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
-            append("📞 संपर्क: ").append(if (citizenPhone.isNotBlank()) citizenPhone else "उपलब्ध नहीं").append("\n")
-            append("संबंधित JEN एवं वार्ड प्रभारी को त्वरित फॉलो-अप आवश्यक है।")
-        }
-
-        val builder = NotificationCompat.Builder(context, CHANNEL_SLA_OVERDUE_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedText))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .setSound(defaultSoundUri)
-            .setVibrate(longArrayOf(0, 250, 150, 250))
-            .setContentIntent(pendingIntent)
-            .setColor(0xFFDC2626.toInt())
-
-        buildCallAction(context, ticketId, citizenPhone)?.let { builder.addAction(it) }
+        buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
+        builder.addAction(buildViewAction(context, ticketId, ticketNumber, "👁️ शिकायत देखें"))
 
         NotificationManagerCompat.from(context).notify(notifId, builder.build())
     }
@@ -232,12 +217,12 @@ object SnpNotificationManager {
     ) {
         if (!hasNotificationPermission(context)) return
 
+        val notifId = (ticketId + "_status").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }
-        val notifId = (ticketId + "_status").hashCode()
         val pendingIntent = PendingIntent.getActivity(
             context,
             notifId,
@@ -245,43 +230,42 @@ object SnpNotificationManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val readableStatus = when (newStatus.uppercase()) {
-            "IN_PROGRESS" -> "प्रक्रियाधीन (In Progress)"
-            "PENDING" -> "निरीक्षण हेतु लंबित"
-            "ASSIGNED" -> "वार्ड टीम को आवंटित"
-            "REJECTED" -> "अस्वीकृत (Rejected)"
-            "RESOLVED_AWAITING_CITIZEN" -> "समाधान सत्यापन प्रतीक्षित"
-            else -> newStatus.replace("_", " ")
+        val (badgeLabel, badgeColor) = getStatusBadge(newStatus)
+        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
+        val cleanPhone = citizenPhone.trim()
+
+        val title = "🔄 [वार्ड $wardNumber] शिकायत स्थिति अपडेट"
+        val collapsedText = if (cleanPhone.isNotBlank()) {
+            "$badgeLabel • 👤 $citizenDisplayName"
+        } else {
+            badgeLabel
         }
 
-        val title = "🔄 शिकायत स्थिति अपडेट: वार्ड $wardNumber"
-        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName else "नागरिक"
-        val citizenContactText = if (citizenPhone.isNotBlank()) " | $citizenDisplayName ($citizenPhone)" else " | $citizenDisplayName"
-        val body = "$ticketNumber: $readableStatus$citizenContactText"
+        val expandedCardText = buildString {
+            append("⚡ अद्यतन स्थिति: ").append(badgeLabel).append("\n")
+            append("📋 विषय: ").append(categoryTitle).append("\n")
+            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
+            append("📞 संपर्क: ").append(if (cleanPhone.isNotBlank()) cleanPhone else "उपलब्ध नहीं").append("\n")
+            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • कमांड सेंटर द्वारा लाइव ट्रैक")
+        }
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val expandedText = buildString {
-            append(ticketNumber).append(": स्थिति अब '").append(readableStatus).append("'\n")
-            append("📋 विषय: ").append(categoryTitle).append("\n")
-            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
-            append("📞 संपर्क: ").append(if (citizenPhone.isNotBlank()) citizenPhone else "उपलब्ध नहीं").append("\n")
-            append("माननीय सभापति/उपसभापति कमांड सेंटर द्वारा स्थिति ट्रैक की जा रही है।")
-        }
-
         val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedText))
+            .setContentText(collapsedText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedCardText))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setVibrate(longArrayOf(0, 200, 100, 200))
             .setContentIntent(pendingIntent)
-            .setColor(0xFFD97706.toInt()) // Warm Amber
+            .setColor(badgeColor)
 
-        buildCallAction(context, ticketId, citizenPhone)?.let { builder.addAction(it) }
+        buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
+        builder.addAction(buildViewAction(context, ticketId, ticketNumber, "👁️ प्रगति देखें"))
 
         NotificationManagerCompat.from(context).notify(notifId, builder.build())
     }
@@ -297,12 +281,12 @@ object SnpNotificationManager {
     ) {
         if (!hasNotificationPermission(context)) return
 
+        val notifId = (ticketId + "_resolved").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
             putExtra("EXTRA_TICKET_ID", ticketId)
         }
-        val notifId = (ticketId + "_resolved").hashCode()
         val pendingIntent = PendingIntent.getActivity(
             context,
             notifId,
@@ -310,33 +294,104 @@ object SnpNotificationManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val title = "✅ शिकायत समाधान पूर्ण (Resolved): वार्ड $wardNumber"
-        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName else "नागरिक"
-        val citizenContactText = if (citizenPhone.isNotBlank()) " | $citizenDisplayName ($citizenPhone)" else " | $citizenDisplayName"
-        val body = "$ticketNumber: समाधान पूर्ण$citizenContactText"
+        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
+        val cleanPhone = citizenPhone.trim()
+
+        val title = "✅ [वार्ड $wardNumber] शिकायत समाधान पूर्ण!"
+        val collapsedText = if (cleanPhone.isNotBlank()) {
+            "🎉 समाधान पूर्ण • 👤 $citizenDisplayName ($cleanPhone)"
+        } else {
+            "🎉 समाधान पूर्ण • 👤 $citizenDisplayName"
+        }
+
+        val expandedCardText = buildString {
+            append("🎉 समाधान सत्यापित: कार्य गुणवत्तापूर्वक निस्तारित\n")
+            append("📋 विषय: ").append(categoryTitle).append("\n")
+            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
+            append("📞 संपर्क: ").append(if (cleanPhone.isNotBlank()) cleanPhone else "उपलब्ध नहीं").append("\n")
+            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • नागरिक संतुष्टि सत्यापित")
+        }
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val expandedText = buildString {
-            append(ticketNumber).append(": ").append(categoryTitle).append(" का सफल निस्तारण पूर्ण।\n")
-            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
-            append("📞 संपर्क: ").append(if (citizenPhone.isNotBlank()) citizenPhone else "उपलब्ध नहीं").append("\n")
-            append("संबंधित फील्ड इंजीनियर द्वारा कार्य पूर्ण व नागरिक संतुष्टि सत्यापित।")
-        }
-
         val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedText))
+            .setContentText(collapsedText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedCardText))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setVibrate(longArrayOf(0, 200, 100, 200))
             .setContentIntent(pendingIntent)
-            .setColor(0xFF16A34A.toInt()) // Fresh Green
+            .setColor(0xFF16A34A.toInt()) // Vibrant Green
 
-        buildCallAction(context, ticketId, citizenPhone)?.let { builder.addAction(it) }
+        buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
+        builder.addAction(buildViewAction(context, ticketId, ticketNumber, "👁️ निस्तारण देखें"))
+
+        NotificationManagerCompat.from(context).notify(notifId, builder.build())
+    }
+
+    fun showOverdueAlert(
+        context: Context,
+        ticketId: String,
+        ticketNumber: String,
+        wardNumber: Int,
+        categoryTitle: String,
+        citizenName: String = "",
+        citizenPhone: String = ""
+    ) {
+        if (!hasNotificationPermission(context)) return
+
+        val notifId = (ticketId + "_overdue").hashCode()
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notifId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
+        val cleanPhone = citizenPhone.trim()
+
+        val title = "⚠️ [वार्ड $wardNumber] समय सीमा पार (SLA Overdue)!"
+        val collapsedText = if (cleanPhone.isNotBlank()) {
+            "⏳ समाधान सीमा समाप्त • 👤 $citizenDisplayName"
+        } else {
+            "⏳ निर्धारित समाधान समय सीमा समाप्त"
+        }
+
+        val expandedCardText = buildString {
+            append("⏳ 24h/48h समाधान समय सीमा समाप्त हो चुकी है!\n")
+            append("📋 विषय: ").append(categoryTitle).append("\n")
+            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
+            append("📞 संपर्क: ").append(if (cleanPhone.isNotBlank()) cleanPhone else "उपलब्ध नहीं").append("\n")
+            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • संबंधित JEN को तत्काल कार्रवाई अपेक्षित")
+        }
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_SLA_OVERDUE_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSubText("गढ़-सेवा • $ticketNumber")
+            .setContentTitle(title)
+            .setContentText(collapsedText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedCardText))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setVibrate(longArrayOf(0, 250, 150, 250))
+            .setContentIntent(pendingIntent)
+            .setColor(0xFFDC2626.toInt()) // Alert Red
+
+        buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
+        builder.addAction(buildViewAction(context, ticketId, ticketNumber, "🚨 त्वरित संज्ञान लें"))
 
         NotificationManagerCompat.from(context).notify(notifId, builder.build())
     }
