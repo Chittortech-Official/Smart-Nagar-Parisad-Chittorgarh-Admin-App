@@ -23,22 +23,6 @@ object SnpNotificationManager {
     const val CHANNEL_NEW_COMPLAINTS_ID = "snp_new_complaints_alerts"
     const val CHANNEL_STATUS_UPDATES_ID = "snp_status_updates_alerts"
 
-    private const val PREFS_NAME = "snp_notification_dedup_prefs"
-    private const val KEY_NOTIFIED_KEYS = "notified_keys"
-
-    fun isAlreadyNotified(context: Context, key: String): Boolean {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val set = prefs.getStringSet(KEY_NOTIFIED_KEYS, emptySet()) ?: emptySet()
-        return set.contains(key)
-    }
-
-    fun markAsNotified(context: Context, key: String) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val currentSet = prefs.getStringSet(KEY_NOTIFIED_KEYS, emptySet())?.toMutableSet() ?: mutableSetOf()
-        currentSet.add(key)
-        prefs.edit().putStringSet(KEY_NOTIFIED_KEYS, currentSet).apply()
-    }
-
     fun initNotificationChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -69,15 +53,17 @@ object SnpNotificationManager {
                 vibrationPattern = longArrayOf(0, 250, 150, 250)
             }
 
-            // 3. New Citizen Complaints Channel (Default Priority)
+            // 3. New Citizen Complaints Channel (High Priority for instant attention)
             val complaintsChannel = NotificationChannel(
                 CHANNEL_NEW_COMPLAINTS_ID,
                 "नई नागरिक शिकायतें (New Citizen Grievances)",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "नागरिक द्वारा हेल्पलाइन अथवा ऐप से दर्ज नई शिकायतों का लाइव नोटिफिकेशन"
                 enableLights(true)
                 lightColor = Color.BLUE
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 250, 150, 250)
             }
 
             // 4. Status & Resolution Channel (High Priority)
@@ -99,6 +85,7 @@ object SnpNotificationManager {
 
     fun showNewComplaintAlert(
         context: Context,
+        ticketId: String,
         ticketNumber: String,
         wardNumber: Int,
         categoryTitle: String,
@@ -110,10 +97,12 @@ object SnpNotificationManager {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
         }
+        val notifId = (ticketId + "_new").hashCode()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            (ticketNumber + "_new").hashCode(),
+            notifId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -136,15 +125,17 @@ object SnpNotificationManager {
             .setPriority(if (isEmergency) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
+            .setVibrate(if (isEmergency) longArrayOf(0, 300, 200, 300, 200, 500) else longArrayOf(0, 250, 150, 250))
             .setContentIntent(pendingIntent)
             .setColor(if (isEmergency) Color.RED else 0xFF0D47A1.toInt())
             .build()
 
-        NotificationManagerCompat.from(context).notify((ticketNumber + "_new").hashCode(), notification)
+        NotificationManagerCompat.from(context).notify(notifId, notification)
     }
 
     fun showOverdueAlert(
         context: Context,
+        ticketId: String,
         ticketNumber: String,
         wardNumber: Int,
         categoryTitle: String
@@ -154,10 +145,12 @@ object SnpNotificationManager {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
         }
+        val notifId = (ticketId + "_overdue").hashCode()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            (ticketNumber + "_overdue").hashCode(),
+            notifId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -175,15 +168,17 @@ object SnpNotificationManager {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
+            .setVibrate(longArrayOf(0, 250, 150, 250))
             .setContentIntent(pendingIntent)
             .setColor(0xFFDC2626.toInt())
             .build()
 
-        NotificationManagerCompat.from(context).notify((ticketNumber + "_overdue").hashCode(), notification)
+        NotificationManagerCompat.from(context).notify(notifId, notification)
     }
 
     fun showStatusChangeAlert(
         context: Context,
+        ticketId: String,
         ticketNumber: String,
         wardNumber: Int,
         categoryTitle: String,
@@ -194,10 +189,12 @@ object SnpNotificationManager {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
         }
+        val notifId = (ticketId + "_status").hashCode()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            (ticketNumber + "_status").hashCode(),
+            notifId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -224,15 +221,17 @@ object SnpNotificationManager {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
+            .setVibrate(longArrayOf(0, 200, 100, 200))
             .setContentIntent(pendingIntent)
             .setColor(0xFFD97706.toInt()) // Warm Amber
             .build()
 
-        NotificationManagerCompat.from(context).notify((ticketNumber + "_status").hashCode(), notification)
+        NotificationManagerCompat.from(context).notify(notifId, notification)
     }
 
     fun showResolvedAlert(
         context: Context,
+        ticketId: String,
         ticketNumber: String,
         wardNumber: Int,
         categoryTitle: String
@@ -242,10 +241,12 @@ object SnpNotificationManager {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
         }
+        val notifId = (ticketId + "_resolved").hashCode()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            (ticketNumber + "_resolved").hashCode(),
+            notifId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -263,11 +264,12 @@ object SnpNotificationManager {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
+            .setVibrate(longArrayOf(0, 200, 100, 200))
             .setContentIntent(pendingIntent)
             .setColor(0xFF16A34A.toInt()) // Fresh Green
             .build()
 
-        NotificationManagerCompat.from(context).notify((ticketNumber + "_resolved").hashCode(), notification)
+        NotificationManagerCompat.from(context).notify(notifId, notification)
     }
 
     private fun hasNotificationPermission(context: Context): Boolean {

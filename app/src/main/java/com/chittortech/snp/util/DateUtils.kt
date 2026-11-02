@@ -97,6 +97,13 @@ object DateUtils {
         return currentCal.get(Calendar.YEAR) == itemCal.get(Calendar.YEAR)
     }
 
+    fun isRecent(dateString: String?, minutes: Int = 30): Boolean {
+        if (dateString.isNullOrBlank()) return false
+        val itemDate = parseIsoDate(dateString) ?: return false
+        val diffMs = System.currentTimeMillis() - itemDate.time
+        return diffMs in 0..(minutes * 60 * 1000L)
+    }
+
     fun calculateHoursRemaining(deadlineIso: String?): Long {
         if (deadlineIso.isNullOrBlank()) return 0L
         val date = parseIsoDate(deadlineIso) ?: return 0L

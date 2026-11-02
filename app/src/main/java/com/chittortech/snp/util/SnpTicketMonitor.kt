@@ -27,7 +27,7 @@ object SnpTicketMonitor {
         val appContext = context.applicationContext
 
         monitorScope.launch {
-            Log.d(TAG, "Starting SnpTicketMonitor background service...")
+            Log.d(TAG, "Starting SnpTicketMonitor background engine...")
             // 1. Initial snapshot & sync
             syncTickets(appContext)
 
@@ -36,7 +36,7 @@ object SnpTicketMonitor {
                 startRealtimeSubscription(appContext)
             }
 
-            // 3. Continuous background polling loop (every 10 seconds)
+            // 3. Continuous background polling loop (every 5 seconds)
             launch {
                 startPollingLoop(appContext)
             }
@@ -62,28 +62,47 @@ object SnpTicketMonitor {
         val editor = prefs.edit()
 
         if (!isInitialized) {
-            // First run baseline: Record current state of all existing tickets
-            // This prevents old historical tickets from spamming the user on initial boot
+            // First run baseline: Record current state of historical tickets
             for (ticket in tickets) {
-                editor.putString(KEY_LAST_STATUS_PREFIX + ticket.ticketNumber, ticket.status)
+                val statusKey = KEY_LAST_STATUS_PREFIX + ticket.id
+                editor.putString(statusKey, ticket.status)
                 if (ticket.isOverdue || ticket.status.equals("OVERDUE", ignoreCase = true)) {
-                    editor.putBoolean(KEY_OVERDUE_PREFIX + ticket.ticketNumber, true)
+                    editor.putBoolean(KEY_OVERDUE_PREFIX + ticket.id, true)
+                }
+
+                // If a ticket was registered recently (within last 60 minutes), alert immediately!
+                if (DateUtils.isRecent(ticket.registrationTime, minutes = 60)) {
+                    Log.d(TAG, "🔔 Found recent live ticket during baseline initialization: ${ticket.ticketNumber}")
+                    val desc = ticket.problemDescription
+                    val isEmerg = desc.contains("आग") || desc.contains("मृत") || desc.contains("दमकल") ||
+                            desc.contains("दुर्घटना") || desc.contains("धंस") || desc.contains("गंभीर") ||
+                            ticket.forwardingOption.contains("EMERGENCY", ignoreCase = true)
+
+                    SnpNotificationManager.showNewComplaintAlert(
+                        context = context,
+                        ticketId = ticket.id,
+                        ticketNumber = ticket.ticketNumber,
+                        wardNumber = ticket.wardNumber,
+                        categoryTitle = desc,
+                        citizenName = ticket.citizenName,
+                        isEmergency = isEmerg
+                    )
                 }
             }
             editor.putBoolean(KEY_INITIALIZED, true)
             editor.apply()
-            Log.d(TAG, "Monitor baseline initialized with ${tickets.size} tickets. Ready for live events.")
+            Log.d(TAG, "Monitor baseline initialized with ${tickets.size} tickets. Live tracking active.")
             return
         }
 
         // Live diff processing: detect new complaints, status updates, resolutions, and overdues
         for (ticket in tickets) {
-            val statusKey = KEY_LAST_STATUS_PREFIX + ticket.ticketNumber
+            val statusKey = KEY_LAST_STATUS_PREFIX + ticket.id
             val previousStatus = prefs.getString(statusKey, null)
 
             if (previousStatus == null) {
                 // 1. BRAND NEW COMPLAINT!
-                Log.d(TAG, "🔔 Live new complaint detected: ${ticket.ticketNumber} | status: ${ticket.status}")
+                Log.d(TAG, "🔔 Live new complaint detected: ${ticket.ticketNumber} (${ticket.id}) | status: ${ticket.status}")
                 val desc = ticket.problemDescription
                 val isEmerg = desc.contains("आग") || desc.contains("मृत") || desc.contains("दमकल") ||
                         desc.contains("दुर्घटना") || desc.contains("धंस") || desc.contains("गंभीर") ||
@@ -91,6 +110,7 @@ object SnpTicketMonitor {
 
                 SnpNotificationManager.showNewComplaintAlert(
                     context = context,
+                    ticketId = ticket.id,
                     ticketNumber = ticket.ticketNumber,
                     wardNumber = ticket.wardNumber,
                     categoryTitle = desc,
@@ -105,6 +125,7 @@ object SnpTicketMonitor {
                 if (newStatus == "CLOSED" || newStatus.contains("RESOLVED")) {
                     SnpNotificationManager.showResolvedAlert(
                         context = context,
+                        ticketId = ticket.id,
                         ticketNumber = ticket.ticketNumber,
                         wardNumber = ticket.wardNumber,
                         categoryTitle = ticket.problemDescription
@@ -112,6 +133,7 @@ object SnpTicketMonitor {
                 } else {
                     SnpNotificationManager.showStatusChangeAlert(
                         context = context,
+                        ticketId = ticket.id,
                         ticketNumber = ticket.ticketNumber,
                         wardNumber = ticket.wardNumber,
                         categoryTitle = ticket.problemDescription,
@@ -122,12 +144,13 @@ object SnpTicketMonitor {
             }
 
             // 3. SLA OVERDUE ESCALATION!
-            val overdueKey = KEY_OVERDUE_PREFIX + ticket.ticketNumber
+            val overdueKey = KEY_OVERDUE_PREFIX + ticket.id
             val wasOverdueNotified = prefs.getBoolean(overdueKey, false)
             if ((ticket.isOverdue || ticket.status.equals("OVERDUE", ignoreCase = true)) && !wasOverdueNotified) {
                 Log.d(TAG, "🔔 Live SLA Overdue breach detected: ${ticket.ticketNumber}")
                 SnpNotificationManager.showOverdueAlert(
                     context = context,
+                    ticketId = ticket.id,
                     ticketNumber = ticket.ticketNumber,
                     wardNumber = ticket.wardNumber,
                     categoryTitle = ticket.problemDescription
@@ -142,13 +165,13 @@ object SnpTicketMonitor {
     private suspend fun startPollingLoop(context: Context) {
         while (true) {
             try {
-                delay(10_000) // Poll every 10 seconds
+                delay(5_000) // Fast 5-second polling loop
                 syncTickets(context)
             } catch (e: CancellationException) {
                 break
             } catch (e: Exception) {
                 Log.e(TAG, "Error in polling loop: ${e.message}")
-                delay(15_000)
+                delay(10_000)
             }
         }
     }
