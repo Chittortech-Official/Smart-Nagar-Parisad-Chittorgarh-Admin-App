@@ -146,7 +146,11 @@ class MainActivity : ComponentActivity() {
 
                 val deptStats = remember(departments, tickets) {
                     departments.map { dept ->
-                        val deptTickets = tickets.filter { it.departmentId == dept.id }
+                        val deptTickets = tickets.filter { ticket ->
+                            ticket.departmentId == dept.id ||
+                            ticket.problemDescription.contains(dept.name, ignoreCase = true) ||
+                            ticket.problemDescription.contains(dept.code, ignoreCase = true)
+                        }
                         val dTotal = deptTickets.size
                         val dPending = deptTickets.count { it.status == "REGISTERED" }
                         val dInProg = deptTickets.count { it.status == "IN_PROGRESS" }

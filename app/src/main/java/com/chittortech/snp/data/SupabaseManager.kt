@@ -42,7 +42,7 @@ object SupabaseManager {
     }
 
     suspend fun getDepartments(): List<Department> {
-        return try {
+        val serverList = try {
             val list = client.postgrest["departments"]
                 .select()
                 .decodeList<Department>()
@@ -50,28 +50,25 @@ object SupabaseManager {
             list.filter { dept ->
                 val code = dept.code.trim().uppercase()
                 val name = dept.name.trim()
-                val officer = dept.headOfficerName.orEmpty()
                 !name.contains("hh", ignoreCase = true) &&
                 !name.contains("ccc", ignoreCase = true) &&
-                !name.contains("[[") &&
-                !name.contains("''") &&
-                !officer.contains("[[") &&
-                name.length >= 3 &&
-                code != "HH" && code != "CC" && code != "'"
+                name.length >= 3 && code.length >= 2
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
+        return if (serverList.isNotEmpty()) serverList else OfficialDepartmentsDirectory.list
     }
 
     suspend fun getWards(): List<Ward> {
-        return try {
+        val serverList = try {
             client.postgrest["wards"]
                 .select()
                 .decodeList<Ward>()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
+        return if (serverList.isNotEmpty()) serverList else OfficialParshadDirectory.asWardsList()
     }
 
     suspend fun getUserProfileByEmail(email: String): UserProfile? {

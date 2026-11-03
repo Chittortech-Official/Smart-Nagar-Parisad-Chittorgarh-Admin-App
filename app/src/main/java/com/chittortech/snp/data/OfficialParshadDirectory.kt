@@ -1,5 +1,7 @@
 package com.chittortech.snp.data
 
+import com.chittortech.snp.data.models.Ward
+
 data class OfficialParshad(
     val wardNumber: Int,
     val councillorName: String,
@@ -76,4 +78,15 @@ object OfficialParshadDirectory {
     )
 
     fun getParshad(wardNumber: Int): OfficialParshad? = list.find { it.wardNumber == wardNumber }
+
+    fun asWardsList(): List<Ward> = list.map {
+        Ward(
+            wardNumber = it.wardNumber,
+            wardName = "वार्ड ${it.wardNumber} • ${it.councillorName}",
+            councillorName = it.councillorName,
+            councillorPhone = "+9194140000${String.format("%02d", it.wardNumber)}",
+            zone = "नगर परिषद चित्तौड़गढ़",
+            keyLandmarks = it.category
+        )
+    }
 }
