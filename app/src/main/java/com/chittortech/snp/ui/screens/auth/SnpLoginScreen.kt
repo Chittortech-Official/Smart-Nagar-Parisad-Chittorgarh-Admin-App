@@ -59,7 +59,7 @@ fun SnpLoginScreen(
                     onLoginSuccess(user.email, user.role, user.fullName)
                 }.onFailure { err ->
                     isLoading = false
-                    errorMessage = err.message ?: "Invalid email or password. Access restricted to authorized Nagar Parishad executive authorities."
+                    errorMessage = err.message ?: "Invalid official email or password. Please try again."
                 }
             }
         }
@@ -158,13 +158,16 @@ fun SnpLoginScreen(
                         placeholder = { Text("e.g. sabhapati@gmail.com") },
                         leadingIcon = { Icon(Icons.Default.Email, null, tint = SnpPrimary) },
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White, RoundedCornerShape(12.dp)),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
                             disabledContainerColor = Color.White,
+                            errorContainerColor = Color.White,
                             focusedBorderColor = SnpPrimary,
                             unfocusedBorderColor = SnpBorder
                         )
@@ -190,12 +193,15 @@ fun SnpLoginScreen(
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { handleSignIn() }),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White, RoundedCornerShape(12.dp)),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
                             disabledContainerColor = Color.White,
+                            errorContainerColor = Color.White,
                             focusedBorderColor = SnpPrimary,
                             unfocusedBorderColor = SnpBorder
                         )

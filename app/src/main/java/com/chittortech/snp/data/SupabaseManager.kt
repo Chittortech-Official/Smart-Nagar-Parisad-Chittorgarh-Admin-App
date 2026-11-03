@@ -165,12 +165,12 @@ object SupabaseManager {
             Result.success(user)
         } catch (e: Exception) {
             val msg = e.message.orEmpty()
-            val userFriendlyMsg = if (msg.contains("Invalid login credentials", ignoreCase = true)) {
-                "Invalid official email or password. Please verify your credentials in Supabase."
-            } else if (msg.contains("Email not confirmed", ignoreCase = true)) {
-                "Email address is not confirmed yet. Please confirm in Supabase dashboard."
+            val userFriendlyMsg = if (msg.contains("ConnectException", ignoreCase = true) ||
+                msg.contains("UnknownHost", ignoreCase = true) ||
+                msg.contains("timeout", ignoreCase = true)) {
+                "Network connection error. Please check your internet connection."
             } else {
-                "Authentication failed: ${e.localizedMessage ?: "Please check your network and Supabase account."}"
+                "Invalid official email or password. Please try again."
             }
             Result.failure(Exception(userFriendlyMsg))
         }
