@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.BuildConfig
 import com.chittortech.snp.R
 import com.chittortech.snp.ui.theme.*
 
@@ -49,10 +50,12 @@ fun SnpLoginScreen(
         } else {
             isLoading = true
             errorMessage = null
-            if (cleanEmail == "chairman@chittorgarh.gov.in" && (cleanPassword == "Chittorgarh@2026" || cleanPassword == "Chairman@2026")) {
-                onLoginSuccess("chairman@chittorgarh.gov.in", "CHAIRMAN", "Anil Inani")
-            } else if (cleanEmail == "vicechairman@chittorgarh.gov.in" && (cleanPassword == "Chittorgarh@2026" || cleanPassword == "ViceChairman@2026")) {
-                onLoginSuccess("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Sudarshan Rampuria")
+            if (cleanEmail == BuildConfig.CHAIRMAN_EMAIL &&
+                (cleanPassword == BuildConfig.CHAIRMAN_PWD || cleanPassword == BuildConfig.CHAIRMAN_PWD2)) {
+                onLoginSuccess(BuildConfig.CHAIRMAN_EMAIL, "CHAIRMAN", "Anil Inani")
+            } else if (cleanEmail == BuildConfig.VC_EMAIL &&
+                (cleanPassword == BuildConfig.VC_PWD || cleanPassword == BuildConfig.VC_PWD2)) {
+                onLoginSuccess(BuildConfig.VC_EMAIL, "VICE_CHAIRMAN", "Sudarshan Rampuria")
             } else {
                 errorMessage = "Invalid credentials. Access restricted to authorized Nagar Parishad executive authorities."
                 isLoading = false

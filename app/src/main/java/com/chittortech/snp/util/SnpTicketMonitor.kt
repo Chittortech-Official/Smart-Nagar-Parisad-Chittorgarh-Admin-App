@@ -1,7 +1,10 @@
 package com.chittortech.snp.util
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.chittortech.snp.data.SupabaseManager
 import com.chittortech.snp.data.models.Ticket
 import kotlinx.coroutines.*
@@ -11,7 +14,25 @@ import kotlinx.coroutines.sync.withLock
 
 object SnpTicketMonitor {
     private const val TAG = "SnpTicketMonitor"
-    private const val PREFS_NAME = "snp_ticket_monitor_state"
+    private const val PREFS_NAME = "snp_ticket_monitor_state_v2"
+
+    // Encrypted prefs so ticket UUIDs/status are not readable on rooted devices
+    private fun getPrefs(context: Context): SharedPreferences {
+        return try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (_: Exception) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        }
+    }
     private const val KEY_INITIALIZED = "is_monitor_initialized"
     private const val KEY_LAST_STATUS_PREFIX = "ticket_status_"
     private const val KEY_OVERDUE_PREFIX = "ticket_overdue_"
@@ -60,7 +81,7 @@ object SnpTicketMonitor {
     }
 
     private fun processTicketBatch(context: Context, tickets: List<Ticket>) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = getPrefs(context)
         val isInitialized = prefs.getBoolean(KEY_INITIALIZED, false)
         val editor = prefs.edit()
 

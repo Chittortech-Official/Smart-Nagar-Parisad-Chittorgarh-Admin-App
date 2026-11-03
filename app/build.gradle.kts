@@ -27,6 +27,21 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
+
+        // Credentials injected from local.properties — never committed to source control
+        val chairmanEmail: String = localProperties.getProperty("CHAIRMAN_EMAIL") ?: "chairman@chittorgarh.gov.in"
+        val chairmanPwd: String = localProperties.getProperty("CHAIRMAN_PWD") ?: ""
+        val chairmanPwd2: String = localProperties.getProperty("CHAIRMAN_PWD2") ?: ""
+        val vcEmail: String = localProperties.getProperty("VC_EMAIL") ?: "vicechairman@chittorgarh.gov.in"
+        val vcPwd: String = localProperties.getProperty("VC_PWD") ?: ""
+        val vcPwd2: String = localProperties.getProperty("VC_PWD2") ?: ""
+
+        buildConfigField("String", "CHAIRMAN_EMAIL", "\"$chairmanEmail\"")
+        buildConfigField("String", "CHAIRMAN_PWD", "\"$chairmanPwd\"")
+        buildConfigField("String", "CHAIRMAN_PWD2", "\"$chairmanPwd2\"")
+        buildConfigField("String", "VC_EMAIL", "\"$vcEmail\"")
+        buildConfigField("String", "VC_PWD", "\"$vcPwd\"")
+        buildConfigField("String", "VC_PWD2", "\"$vcPwd2\"")
     }
 
     signingConfigs {
@@ -42,7 +57,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true       // R8 obfuscation — hides class names, credential strings, API paths
+            isShrinkResources = true     // Remove unused resources from APK
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

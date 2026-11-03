@@ -226,7 +226,9 @@ class MainActivity : ComponentActivity() {
     private fun extractTicketIntent(incomingIntent: android.content.Intent?) {
         val tNumber = incomingIntent?.getStringExtra("EXTRA_TICKET_NUMBER")
         val tId = incomingIntent?.getStringExtra("EXTRA_TICKET_ID")
-        val target = tNumber?.takeIf { it.isNotBlank() } ?: tId?.takeIf { it.isNotBlank() }
+        // Length-cap: reject any malformed/oversized extras (prevents state corruption)
+        val target = tNumber?.takeIf { it.isNotBlank() && it.length < 100 }
+            ?: tId?.takeIf { it.isNotBlank() && it.length < 100 }
         if (!target.isNullOrBlank()) {
             targetTicketState.value = target
         }
