@@ -47,7 +47,7 @@ class SnpLiveMonitoringService : Service() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .setContentIntent(pendingIntent)
-            .setColor(0xFF0D47A1.toInt())
+            .setColor(0xFFE65100.toInt())
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

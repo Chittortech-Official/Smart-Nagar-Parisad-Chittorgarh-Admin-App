@@ -137,11 +137,11 @@ fun HomeScreen(
                         value = "${stats.todayRegistered}",
                         subtitle = "New Complaints",
                         icon = Icons.Default.FiberNew,
-                        cardBg = Color(0xFFEFF6FF), // Soft Rich Blue
-                        borderColor = Color(0xFFBFDBFE),
-                        iconBg = Color(0xFFDBEAFE),
-                        iconTint = Color(0xFF1D4ED8),
-                        valueColor = Color(0xFF1E40AF),
+                        cardBg = Color(0xFFFFF3E0), // Soft Kesariya / Bhagwa
+                        borderColor = Color(0xFFFFCC80),
+                        iconBg = Color(0xFFFFE0B2),
+                        iconTint = Color(0xFFE65100),
+                        valueColor = Color(0xFFD84315),
                         modifier = Modifier.weight(1f)
                     )
                     KpiCard(

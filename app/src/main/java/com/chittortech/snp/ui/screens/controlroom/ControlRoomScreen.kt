@@ -61,11 +61,11 @@ fun ControlRoomScreen(
             phoneNumber = "01472240212",
             formattedPhone = "01472-240212",
             serviceBadge = "24x7 HELPLINE",
-            badgeBg = Color(0xFFEFF6FF),
-            badgeFg = Color(0xFF1E40AF),
+            badgeBg = Color(0xFFFFF3E0),
+            badgeFg = Color(0xFFE65100),
             icon = Icons.Default.SupportAgent,
-            iconBg = Color(0xFFDBEAFE),
-            iconTint = Color(0xFF1D4ED8),
+            iconBg = Color(0xFFFFE0B2),
+            iconTint = Color(0xFFE65100),
             timing = "Round-the-clock Municipal Dispatch"
         ),
         ControlRoomContact(
@@ -194,8 +194,8 @@ fun ControlRoomScreen(
             item {
                 Surface(
                     shape = RoundedCornerShape(14.dp),
-                    color = Color(0xFFEFF6FF),
-                    border = BorderStroke(1.dp, Color(0xFFBFDBFE)),
+                    color = Color(0xFFFFF3E0),
+                    border = BorderStroke(1.dp, Color(0xFFFFCC80)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -206,13 +206,13 @@ fun ControlRoomScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFFDBEAFE)),
+                                .background(Color(0xFFFFE0B2)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.ContactPhone,
                                 contentDescription = null,
-                                tint = Color(0xFF1D4ED8),
+                                tint = Color(0xFFE65100),
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -222,7 +222,7 @@ fun ControlRoomScreen(
                                 text = "Emergency & Official Hotlines",
                                 fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E40AF)
+                                color = Color(0xFFD84315)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(

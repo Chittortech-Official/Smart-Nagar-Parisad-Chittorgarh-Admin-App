@@ -49,7 +49,7 @@ sealed class BottomTab(
     val selectedColor: Color,
     val unselectedColor: Color
 ) {
-    object Home : BottomTab("home", "Home", Icons.Default.Dashboard, Color(0xFF1E40AF), Color(0xFF3B82F6))
+    object Home : BottomTab("home", "Home", Icons.Default.Dashboard, Color(0xFFE65100), Color(0xFFF97316))
     object Complaints : BottomTab("complaints", "Complaints", Icons.AutoMirrored.Filled.Assignment, Color(0xFFDC2626), Color(0xFFEF4444))
     object Parshads : BottomTab("parshads", "Parshads", Icons.Default.People, Color(0xFF047857), Color(0xFF10B981))
     object Departments : BottomTab("departments", "Depts", Icons.Default.Apartment, Color(0xFF7C3AED), Color(0xFF8B5CF6))

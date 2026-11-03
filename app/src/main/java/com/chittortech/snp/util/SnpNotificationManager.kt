@@ -197,7 +197,7 @@ object SnpNotificationManager {
             .setSound(defaultSoundUri)
             .setVibrate(if (isEmergency) longArrayOf(0, 300, 200, 300, 200, 500) else longArrayOf(0, 250, 150, 250))
             .setContentIntent(pendingIntent)
-            .setColor(if (isEmergency) Color.RED else 0xFF0D47A1.toInt())
+            .setColor(if (isEmergency) Color.RED else 0xFFE65100.toInt())
 
         buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
         builder.addAction(buildViewAction(context, ticketId, ticketNumber, "👁️ शिकायत देखें"))

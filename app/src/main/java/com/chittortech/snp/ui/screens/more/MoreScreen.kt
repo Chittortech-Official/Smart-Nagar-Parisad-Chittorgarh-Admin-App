@@ -124,7 +124,7 @@ fun MoreScreen(
                 Column {
                     SettingsMenuItem(
                         icon = Icons.Default.ContactPhone,
-                        iconTint = Color(0xFF2563EB),
+                        iconTint = SnpPrimary,
                         title = "City Control Room Directory",
                         subtitle = "Landline, Fire Brigade & AEN/JEN Hotlines",
                         onClick = onNavigateToControlRoom

@@ -227,9 +227,9 @@ fun DepartmentsScreen(
                             DeptStatItem(
                                 label = "कुल दर्ज",
                                 value = "${ds.total}",
-                                textColor = Color(0xFF1E40AF),
-                                bgColor = Color(0xFFEFF6FF),
-                                borderColor = Color(0xFFBFDBFE),
+                                textColor = Color(0xFFE65100),
+                                bgColor = Color(0xFFFFF3E0),
+                                borderColor = Color(0xFFFFCC80),
                                 modifier = Modifier.weight(1f)
                             )
                             DeptStatItem(
