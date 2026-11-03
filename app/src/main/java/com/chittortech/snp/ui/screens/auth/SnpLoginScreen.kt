@@ -144,7 +144,7 @@ fun SnpLoginScreen(
                         color = TextPrimary
                     )
                     Text(
-                        text = "Exclusive access for Chairman & Vice Chairman",
+                        text = "Exclusive access for authorized executive authorities",
                         fontSize = 12.sp,
                         color = TextSecondary
                     )
@@ -155,7 +155,7 @@ fun SnpLoginScreen(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Official Email") },
-                        placeholder = { Text("e.g. sabhapati@gmail.com") },
+                        placeholder = { Text("e.g. administrator@gmail.com") },
                         leadingIcon = { Icon(Icons.Default.Email, null, tint = SnpPrimary) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
