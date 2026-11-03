@@ -82,7 +82,7 @@ fun SnpLoginScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(SnpGradStart, SnpGradEnd)))
+                    .background(Brush.verticalGradient(listOf(ChittorTechGradStart, ChittorTechGradEnd)))
                     .padding(top = 36.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -155,7 +155,7 @@ fun SnpLoginScreen(
                         onValueChange = { email = it },
                         label = { Text("Official Email") },
                         placeholder = { Text("e.g. administrator@gmail.com") },
-                        leadingIcon = { Icon(Icons.Default.Email, null, tint = SnpPrimary) },
+                        leadingIcon = { Icon(Icons.Default.Email, null, tint = ChittorTechBlue) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
                         modifier = Modifier
@@ -167,7 +167,7 @@ fun SnpLoginScreen(
                             unfocusedContainerColor = Color.White,
                             disabledContainerColor = Color.White,
                             errorContainerColor = Color.White,
-                            focusedBorderColor = SnpPrimary,
+                            focusedBorderColor = ChittorTechBlue,
                             unfocusedBorderColor = SnpBorder
                         )
                     )
@@ -179,7 +179,7 @@ fun SnpLoginScreen(
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         placeholder = { Text("••••••••") },
-                        leadingIcon = { Icon(Icons.Default.Lock, null, tint = SnpPrimary) },
+                        leadingIcon = { Icon(Icons.Default.Lock, null, tint = ChittorTechBlue) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
@@ -201,7 +201,7 @@ fun SnpLoginScreen(
                             unfocusedContainerColor = Color.White,
                             disabledContainerColor = Color.White,
                             errorContainerColor = Color.White,
-                            focusedBorderColor = SnpPrimary,
+                            focusedBorderColor = ChittorTechBlue,
                             unfocusedBorderColor = SnpBorder
                         )
                     )
@@ -216,7 +216,7 @@ fun SnpLoginScreen(
                     Button(
                         onClick = { handleSignIn() },
                         enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(containerColor = SnpPrimary),
+                        colors = ButtonDefaults.buttonColors(containerColor = ChittorTechBlue),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .fillMaxWidth()

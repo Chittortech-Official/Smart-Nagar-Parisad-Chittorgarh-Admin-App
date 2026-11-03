@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.R
+import com.chittortech.snp.ui.theme.ChittorTechBlue
 import com.chittortech.snp.ui.theme.SnpPrimary
 import kotlinx.coroutines.delay
 
@@ -89,7 +90,7 @@ fun SnpSplashScreen(
                 text = "गढ़-सेवा (GarhSeva)",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = SnpPrimary,
+                color = ChittorTechBlue,
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.5.sp
             )

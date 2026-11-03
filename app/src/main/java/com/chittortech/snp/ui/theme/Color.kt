@@ -2,6 +2,13 @@ package com.chittortech.snp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// ─── ChittorTech Corporate Executive Blue (Login / Splash External Screen) ────
+val ChittorTechBlue         = Color(0xFF0F5DA1) // Original ChittorTech Municipal Executive Blue
+val ChittorTechBlueDark     = Color(0xFF0A3E6D)
+val ChittorTechBlueLight    = Color(0xFFE8F0FB)
+val ChittorTechGradStart    = Color(0xFF0F5DA1)
+val ChittorTechGradEnd      = Color(0xFF1E70BF)
+
 // ─── Smart Nagar Parishad Brand Palette (Official Kesariya / Bhagwa) ───────────
 val SnpPrimary        = Color(0xFFE65100) // Official Deep Kesariya / Bhagwa (BJP Saffron)
 val SnpPrimaryDark    = Color(0xFFBF360C) // Deep Royal Kesariya
