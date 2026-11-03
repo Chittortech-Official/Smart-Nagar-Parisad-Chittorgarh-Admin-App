@@ -41,17 +41,20 @@ fun SnpLoginScreen(
 
     val handleSignIn = {
         val cleanEmail = email.trim().lowercase()
-        if (cleanEmail.isBlank() || password.isBlank()) {
+        val cleanPassword = password.trim()
+        if (cleanEmail.isBlank() || cleanPassword.isBlank()) {
             errorMessage = "Please enter your official email and password."
+        } else if (cleanPassword.length < 6) {
+            errorMessage = "Password must be at least 6 characters."
         } else {
             isLoading = true
             errorMessage = null
-            if (cleanEmail == "chairman@chittorgarh.gov.in") {
+            if (cleanEmail == "chairman@chittorgarh.gov.in" && (cleanPassword == "Chittorgarh@2026" || cleanPassword == "Chairman@2026")) {
                 onLoginSuccess("chairman@chittorgarh.gov.in", "CHAIRMAN", "Anil Inani")
-            } else if (cleanEmail == "vicechairman@chittorgarh.gov.in") {
+            } else if (cleanEmail == "vicechairman@chittorgarh.gov.in" && (cleanPassword == "Chittorgarh@2026" || cleanPassword == "ViceChairman@2026")) {
                 onLoginSuccess("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Sudarshan Rampuria")
             } else {
-                errorMessage = "Access restricted. Only Chairman & Vice Chairman credentials authorized."
+                errorMessage = "Invalid credentials. Access restricted to authorized Nagar Parishad executive authorities."
                 isLoading = false
             }
         }
@@ -202,43 +205,30 @@ fun SnpLoginScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Quick access demo buttons for both authorities
-                    Text(
-                        text = "QUICK SECURE ACCESS",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextMuted,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF1F5F9))
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        OutlinedButton(
-                            onClick = {
-                                onDirectDemoLogin("chairman@chittorgarh.gov.in", "CHAIRMAN", "Anil Inani")
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Chairman", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpPrimary)
-                        }
-
-                        OutlinedButton(
-                            onClick = {
-                                onDirectDemoLogin("vicechairman@chittorgarh.gov.in", "VICE_CHAIRMAN", "Sudarshan Rampuria")
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Vice Chairman", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SnpGold)
-                        }
+                        Icon(
+                            Icons.Default.Shield,
+                            contentDescription = "Secured",
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "सुरक्षित प्रशासनिक एक्सेस • अधिकृत अधिकारी केवल",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF475569)
+                        )
                     }
                 }
             }

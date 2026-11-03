@@ -173,13 +173,13 @@ object SnpTicketMonitor {
     private suspend fun startPollingLoop(context: Context) {
         while (true) {
             try {
-                delay(5_000) // Fast 5-second polling loop
+                delay(60_000) // Efficient 60-second polling fallback; real-time updates are handled instantly via WebSocket
                 syncTickets(context)
             } catch (e: CancellationException) {
                 break
             } catch (e: Exception) {
                 Log.e(TAG, "Error in polling loop: ${e.message}")
-                delay(10_000)
+                delay(30_000)
             }
         }
     }

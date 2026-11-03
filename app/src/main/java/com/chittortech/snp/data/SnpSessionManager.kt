@@ -2,6 +2,8 @@ package com.chittortech.snp.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 
 sealed class SnpSessionResult {
     data class Valid(val email: String, val role: String, val fullName: String) : SnpSessionResult()
@@ -11,7 +13,7 @@ sealed class SnpSessionResult {
 
 object SnpSessionManager {
 
-    private const val PREFS_NAME = "snp_authority_session_prefs"
+    private const val PREFS_NAME = "snp_authority_session_secure_prefs"
     private const val KEY_LOGIN_TIMESTAMP = "snp_login_timestamp"
     private const val KEY_LAST_ACTIVE_TIMESTAMP = "snp_last_active_timestamp"
     private const val KEY_EMAIL = "snp_authority_email"
@@ -25,7 +27,20 @@ object SnpSessionManager {
     const val MAX_SESSION_LIFETIME_MS: Long = 7L * 24 * 60 * 60 * 1000L
 
     private fun getPrefs(context: Context): SharedPreferences {
-        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (_: Exception) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        }
     }
 
     fun saveSession(context: Context, email: String, role: String, fullName: String) {
