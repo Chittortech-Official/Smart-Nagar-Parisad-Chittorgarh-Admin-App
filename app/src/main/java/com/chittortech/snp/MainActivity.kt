@@ -176,11 +176,6 @@ class MainActivity : ComponentActivity() {
                                 SnpSessionManager.saveSession(this@MainActivity, email, role, name)
                                 currentUser = Triple(email, role, name)
                                 refreshData()
-                            },
-                            onDirectDemoLogin = { email, role, name ->
-                                SnpSessionManager.saveSession(this@MainActivity, email, role, name)
-                                currentUser = Triple(email, role, name)
-                                refreshData()
                             }
                         )
                     }

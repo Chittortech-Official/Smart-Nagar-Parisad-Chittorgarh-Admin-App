@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun SnpLoginScreen(
     onLoginSuccess: (email: String, role: String, fullName: String) -> Unit,
-    onDirectDemoLogin: (email: String, role: String, fullName: String) -> Unit = { _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
