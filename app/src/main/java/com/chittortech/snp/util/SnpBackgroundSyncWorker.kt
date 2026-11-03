@@ -33,8 +33,8 @@ class SnpBackgroundSyncWorker(
                 .build()
 
             val periodicRequest = PeriodicWorkRequestBuilder<SnpBackgroundSyncWorker>(
-                15, TimeUnit.MINUTES,
-                5, TimeUnit.MINUTES // 5 min flex window
+                1, TimeUnit.HOURS,
+                15, TimeUnit.MINUTES // 15 min flex window
             )
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
@@ -61,7 +61,7 @@ class SnpBackgroundSyncWorker(
 
             val oneTimeRequest = OneTimeWorkRequestBuilder<SnpBackgroundSyncWorker>()
                 .setConstraints(constraints)
-                .setInitialDelay(10, TimeUnit.MINUTES)
+                .setInitialDelay(30, TimeUnit.MINUTES)
                 .build()
 
             WorkManager.getInstance(context).enqueueUniqueWork(
