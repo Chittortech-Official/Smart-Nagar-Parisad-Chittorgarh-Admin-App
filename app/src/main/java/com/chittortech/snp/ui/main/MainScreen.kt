@@ -34,7 +34,6 @@ import com.chittortech.snp.ui.screens.complaints.ComplaintDetailScreen
 import com.chittortech.snp.ui.screens.complaints.ComplaintsScreen
 import com.chittortech.snp.ui.screens.contact.ContactDeveloperScreen
 import com.chittortech.snp.ui.screens.controlroom.ControlRoomScreen
-import com.chittortech.snp.ui.screens.departments.DepartmentsScreen
 import com.chittortech.snp.ui.screens.home.HomeScreen
 import com.chittortech.snp.ui.screens.more.MoreScreen
 import com.chittortech.snp.ui.screens.notifications.NotificationsScreen
@@ -52,7 +51,6 @@ sealed class BottomTab(
     object Home : BottomTab("home", "Home", Icons.Default.Dashboard, Color(0xFFE65100), Color(0xFFF97316))
     object Complaints : BottomTab("complaints", "Complaints", Icons.AutoMirrored.Filled.Assignment, Color(0xFFDC2626), Color(0xFFEF4444))
     object Parshads : BottomTab("parshads", "Parshads", Icons.Default.People, Color(0xFF047857), Color(0xFF10B981))
-    object Departments : BottomTab("departments", "Depts", Icons.Default.Apartment, Color(0xFF7C3AED), Color(0xFF8B5CF6))
     object Settings : BottomTab("settings", "Settings", Icons.Default.Settings, Color(0xFFD97706), Color(0xFFF59E0B))
 }
 
@@ -63,10 +61,10 @@ fun MainScreen(
     authorityName: String,
     tickets: List<Ticket>,
     wards: List<Ward>,
-    departments: List<Department>,
+    departments: List<Department> = emptyList(),
     notifications: List<NotificationLog>,
     stats: DashboardStats,
-    deptStats: List<DepartmentStats>,
+    deptStats: List<DepartmentStats> = emptyList(),
     isRefreshing: Boolean = false,
     targetTicketNumber: String? = null,
     onTargetTicketHandled: () -> Unit = {},
@@ -210,7 +208,6 @@ fun MainScreen(
                         BottomTab.Home,
                         BottomTab.Complaints,
                         BottomTab.Parshads,
-                        BottomTab.Departments,
                         BottomTab.Settings
                     )
                     tabs.forEach { tab ->
@@ -322,14 +319,6 @@ fun MainScreen(
                         BottomTab.Parshads -> {
                             ParshadsScreen(
                                 wards = wards,
-                                isRefreshing = isRefreshing,
-                                onNotificationClick = { showNotifications = true },
-                                onRefreshClick = onRefresh
-                            )
-                        }
-                        BottomTab.Departments -> {
-                            DepartmentsScreen(
-                                departments = deptStats,
                                 isRefreshing = isRefreshing,
                                 onNotificationClick = { showNotifications = true },
                                 onRefreshClick = onRefresh

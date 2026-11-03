@@ -16,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.chittortech.snp.data.SnpSessionManager
 import com.chittortech.snp.data.SnpSessionResult
 import com.chittortech.snp.data.SupabaseManager
@@ -63,12 +66,21 @@ class MainActivity : ComponentActivity() {
                         } else if (tickets.isEmpty()) {
                             isInitialLoading = true
                         }
-                        tickets = SupabaseManager.getTickets()
-                        wards = SupabaseManager.getWards()
-                        departments = SupabaseManager.getDepartments()
-                        notifications = SupabaseManager.getNotifications()
-                        isInitialLoading = false
-                        isRefreshing = false
+                        try {
+                            val newTickets = SupabaseManager.getTickets()
+                            val newWards = SupabaseManager.getWards()
+                            val newDepartments = SupabaseManager.getDepartments()
+                            val newNotifications = SupabaseManager.getNotifications()
+
+                            tickets = newTickets
+                            wards = newWards
+                            departments = newDepartments
+                            notifications = newNotifications
+                        } catch (_: Exception) {
+                        } finally {
+                            isInitialLoading = false
+                            isRefreshing = false
+                        }
                         SnpTicketMonitor.syncTickets(this@MainActivity)
                     }
                 }
@@ -79,6 +91,29 @@ class MainActivity : ComponentActivity() {
                     if (sessionResult is SnpSessionResult.Valid) {
                         currentUser = Triple(sessionResult.email, sessionResult.role, sessionResult.fullName)
                         refreshData()
+                    }
+                }
+
+                // Auto-refresh live data whenever app is opened or brought to foreground
+                val lifecycleOwner = LocalLifecycleOwner.current
+                DisposableEffect(lifecycleOwner) {
+                    val observer = LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_RESUME) {
+                            if (currentUser != null) {
+                                refreshData(isManual = false)
+                            }
+                        }
+                    }
+                    lifecycleOwner.lifecycle.addObserver(observer)
+                    onDispose {
+                        lifecycleOwner.lifecycle.removeObserver(observer)
+                    }
+                }
+
+                // Auto-refresh when splash finishes
+                LaunchedEffect(isSplashShowing) {
+                    if (!isSplashShowing && currentUser != null) {
+                        refreshData(isManual = false)
                     }
                 }
 
@@ -144,32 +179,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                val deptStats = remember(departments, tickets) {
-                    departments.map { dept ->
-                        val deptTickets = tickets.filter { ticket ->
-                            ticket.departmentId == dept.id ||
-                            ticket.problemDescription.contains(dept.name, ignoreCase = true) ||
-                            ticket.problemDescription.contains(dept.code, ignoreCase = true)
-                        }
-                        val dTotal = deptTickets.size
-                        val dPending = deptTickets.count { it.status == "REGISTERED" }
-                        val dInProg = deptTickets.count { it.status == "IN_PROGRESS" }
-                        val dClosed = deptTickets.count { it.status == "CLOSED" }
-                        val dOverdue = deptTickets.count { it.isOverdue || it.status == "OVERDUE" }
-                        val dRate = if (dTotal > 0) ((dClosed * 100) / dTotal) else 0
-
-                        DepartmentStats(
-                            department = dept,
-                            total = dTotal,
-                            pending = dPending,
-                            inProgress = dInProg,
-                            closed = dClosed,
-                            overdue = dOverdue,
-                            resolutionRatePercent = dRate
-                        )
-                    }
-                }
-
                 when {
                     isSplashShowing -> {
                         SnpSplashScreen(onSplashFinished = { isSplashShowing = false })
@@ -197,7 +206,6 @@ class MainActivity : ComponentActivity() {
                             departments = departments,
                             notifications = notifications,
                             stats = dashboardStats,
-                            deptStats = deptStats,
                             isRefreshing = isRefreshing,
                             targetTicketNumber = targetTicket,
                             onTargetTicketHandled = { targetTicketState.value = null },

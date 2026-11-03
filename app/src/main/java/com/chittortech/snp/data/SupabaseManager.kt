@@ -42,7 +42,7 @@ object SupabaseManager {
     }
 
     suspend fun getDepartments(): List<Department> {
-        val serverList = try {
+        return try {
             val list = client.postgrest["departments"]
                 .select()
                 .decodeList<Department>()
@@ -57,7 +57,6 @@ object SupabaseManager {
         } catch (_: Exception) {
             emptyList()
         }
-        return if (serverList.isNotEmpty()) serverList else OfficialDepartmentsDirectory.list
     }
 
     suspend fun getWards(): List<Ward> {
