@@ -40,39 +40,10 @@ fun DepartmentsScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    // Official 6 Municipal Departments fallback list
-    val officialFallback = remember {
-        listOf(
-            DepartmentStats(
-                department = Department(id = "dept-san", name = "Sanitation & Garbage Collection", code = "SAN", defaultSlaHours = 24, headOfficerName = "Ramesh Sharma", headOfficerPhone = "+919414000101"),
-                total = 42, pending = 8, inProgress = 14, closed = 20, overdue = 2, resolutionRatePercent = 78
-            ),
-            DepartmentStats(
-                department = Department(id = "dept-ele", name = "Street Lighting & Electrical", code = "ELE", defaultSlaHours = 48, headOfficerName = "Suresh Chandra Verma", headOfficerPhone = "+919414000102"),
-                total = 36, pending = 6, inProgress = 12, closed = 18, overdue = 1, resolutionRatePercent = 82
-            ),
-            DepartmentStats(
-                department = Department(id = "dept-roa", name = "Roads & Civil Infrastructure", code = "ROA", defaultSlaHours = 72, headOfficerName = "Mahesh Jat", headOfficerPhone = "+919414000103"),
-                total = 28, pending = 5, inProgress = 10, closed = 13, overdue = 3, resolutionRatePercent = 65
-            ),
-            DepartmentStats(
-                department = Department(id = "dept-drn", name = "Drains & Sewerage Management", code = "DRN", defaultSlaHours = 48, headOfficerName = "Kailash Meena", headOfficerPhone = "+919414000104"),
-                total = 24, pending = 4, inProgress = 8, closed = 12, overdue = 2, resolutionRatePercent = 70
-            ),
-            DepartmentStats(
-                department = Department(id = "dept-wat", name = "Waterlogging & Drainage Emergency", code = "WAT", defaultSlaHours = 24, headOfficerName = "Dinesh Sen", headOfficerPhone = "+919414000105"),
-                total = 19, pending = 2, inProgress = 5, closed = 12, overdue = 0, resolutionRatePercent = 90
-            ),
-            DepartmentStats(
-                department = Department(id = "dept-enc", name = "Encroachment & Land Monitoring", code = "ENC", defaultSlaHours = 72, headOfficerName = "Vikram Singh Rathore", headOfficerPhone = "+919414000106"),
-                total = 15, pending = 3, inProgress = 4, closed = 8, overdue = 1, resolutionRatePercent = 60
-            )
-        )
-    }
 
-    // Clean out any test junk entries from Supabase database
+    // Real departments from Supabase database
     val cleanDepartments = remember(departments) {
-        val filtered = departments.filter { ds ->
+        departments.filter { ds ->
             val d = ds.department
             val code = d.code.trim().uppercase()
             val name = d.name.trim()
@@ -85,7 +56,6 @@ fun DepartmentsScreen(
             name.length >= 3 &&
             code != "HH" && code != "CC" && code != "'"
         }
-        if (filtered.isNotEmpty()) filtered else officialFallback
     }
 
     Column(
@@ -113,6 +83,23 @@ fun DepartmentsScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
+            if (cleanDepartments.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 60.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No departments loaded from database. Pull down to refresh.",
+                            color = Color(0xFF64748B),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+            }
+
             items(
                 items = cleanDepartments,
                 key = { it.department.code },
