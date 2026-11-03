@@ -178,11 +178,11 @@ object SupabaseManager {
 
     private fun resolveAuthorityUser(email: String): AuthorityUser {
         return when (email) {
-            "kushsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "Kush Sharma")
-            "lavsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "Lav Sharma")
-            "sabhapati@gmail.com", "chairman@chittorgarh.gov.in" -> AuthorityUser(email, "CHAIRMAN", "Anil Inani")
-            "upsabhapati@gmail.com", "vicechairman@chittorgarh.gov.in" -> AuthorityUser(email, "VICE_CHAIRMAN", "Sudarshan Rampuria")
-            "ravivirani@gmail.com" -> AuthorityUser(email, "OFFICER", "Ravi Virani")
+            "kushsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "कुश शर्मा")
+            "lavsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "लव शर्मा")
+            "sabhapati@gmail.com", "chairman@chittorgarh.gov.in" -> AuthorityUser(email, "CHAIRMAN", "अनिल इनाणी")
+            "upsabhapati@gmail.com", "vicechairman@chittorgarh.gov.in" -> AuthorityUser(email, "VICE_CHAIRMAN", "सुदर्शन रामपुरा")
+            "ravivirani@gmail.com" -> AuthorityUser(email, "PORTAL_ADMIN", "रवि विरानी")
             else -> {
                 val derivedName = email.substringBefore("@")
                     .split(".", "_")

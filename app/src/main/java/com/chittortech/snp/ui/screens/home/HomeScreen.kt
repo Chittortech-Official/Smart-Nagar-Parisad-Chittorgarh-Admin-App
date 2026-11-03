@@ -68,10 +68,11 @@ fun HomeScreen(
         SnpTopBar(
             title = authorityName,
             subtitle = when (authorityRole.uppercase()) {
-                "CHAIRMAN" -> "Chairman • Nagar Parishad Chittorgarh"
-                "VICE_CHAIRMAN" -> "Vice Chairman • Nagar Parishad Chittorgarh"
-                "SUPER_ADMIN" -> "System Administrator • ChittorTech"
-                else -> "Executive Officer • Nagar Parishad Chittorgarh"
+                "CHAIRMAN" -> "सभापति • नगर परिषद चित्तौड़गढ़"
+                "VICE_CHAIRMAN" -> "उपसभापति • नगर परिषद चित्तौड़गढ़"
+                "SUPER_ADMIN" -> "सिस्टम एडमिनिस्ट्रेटर • चित्तौड़टेक"
+                "PORTAL_ADMIN" -> "पोर्टल एडमिनिस्ट्रेटर • नगर परिषद चित्तौड़गढ़"
+                else -> "अधिशाषी अधिकारी • नगर परिषद चित्तौड़गढ़"
             },
             onNotificationClick = onNotificationClick,
             onRefreshClick = onRefreshClick,

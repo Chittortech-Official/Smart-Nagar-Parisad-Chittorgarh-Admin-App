@@ -93,10 +93,11 @@ fun MoreScreen(
                         )
                         Text(
                             text = when (authorityRole.uppercase()) {
-                                "CHAIRMAN" -> "Hon. Chairman • सभापति"
-                                "VICE_CHAIRMAN" -> "Hon. Vice Chairman • उपसभापति"
-                                "SUPER_ADMIN" -> "System Administrator • ChittorTech"
-                                else -> "Executive Officer • नगर परिषद"
+                                "CHAIRMAN" -> "सभापति • नगर परिषद चित्तौड़गढ़"
+                                "VICE_CHAIRMAN" -> "उपसभापति • नगर परिषद चित्तौड़गढ़"
+                                "SUPER_ADMIN" -> "सिस्टम एडमिनिस्ट्रेटर • चित्तौड़टेक"
+                                "PORTAL_ADMIN" -> "पोर्टल एडमिनिस्ट्रेटर • नगर परिषद चित्तौड़गढ़"
+                                else -> "अधिशाषी अधिकारी • नगर परिषद"
                             },
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,

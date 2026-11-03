@@ -130,18 +130,20 @@ fun MainScreen(
     }
 
     val greetingTitle = when {
-        authorityRole.equals("CHAIRMAN", ignoreCase = true) || authorityName.contains("Anil", ignoreCase = true) -> "🙏 नमस्ते सभापति जी!"
-        authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) || authorityName.contains("Sudarshan", ignoreCase = true) -> "🙏 नमस्ते उपसभापति जी!"
+        authorityRole.equals("CHAIRMAN", ignoreCase = true) || authorityName.contains("अनिल") || authorityName.contains("Anil", ignoreCase = true) -> "🙏 नमस्ते सभापति जी!"
+        authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) || authorityName.contains("सुदर्शन") || authorityName.contains("Sudarshan", ignoreCase = true) -> "🙏 नमस्ते उपसभापति जी!"
         else -> "🙏 नमस्ते $authorityName!"
     }
 
     val greetingSubtitle = when {
-        authorityRole.equals("CHAIRMAN", ignoreCase = true) || authorityName.contains("Anil", ignoreCase = true) ->
+        authorityRole.equals("CHAIRMAN", ignoreCase = true) || authorityName.contains("अनिल") || authorityName.contains("Anil", ignoreCase = true) ->
             "माननीय सभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
-        authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) || authorityName.contains("Sudarshan", ignoreCase = true) ->
+        authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) || authorityName.contains("सुदर्शन") || authorityName.contains("Sudarshan", ignoreCase = true) ->
             "माननीय उपसभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
         authorityRole.equals("SUPER_ADMIN", ignoreCase = true) ->
             "सिस्टम एडमिनिस्ट्रेटर • गढ़-सेवा कमांड सेंटर में आपका स्वागत है"
+        authorityRole.equals("PORTAL_ADMIN", ignoreCase = true) || authorityName.contains("रवि") ->
+            "पोर्टल एडमिनिस्ट्रेटर • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
         else ->
             "गढ़-सेवा • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
     }
