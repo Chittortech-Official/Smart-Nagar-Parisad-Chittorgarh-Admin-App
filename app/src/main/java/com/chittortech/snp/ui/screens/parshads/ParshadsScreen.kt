@@ -32,6 +32,7 @@ import com.chittortech.snp.R
 import com.chittortech.snp.data.OfficialParshadDirectory
 import com.chittortech.snp.data.models.Ward
 import com.chittortech.snp.ui.components.EmptyState
+import com.chittortech.snp.ui.components.SnpSearchBar
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.theme.*
 
@@ -131,6 +132,70 @@ fun ParshadsScreen(
             onRefreshClick = onRefreshClick
         )
 
+        // Unified Search Bar (Matches Complaints Central Exactly)
+        SnpSearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            placeholder = "Search by Parshad Name, Ward, Party..."
+        )
+
+        // Party Filter Strip with Official Symbols
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                Triple("All", "All (60)", null),
+                Triple("भाजपा", "भाजपा (33)", R.drawable.ic_party_bjp),
+                Triple("कांग्रेस", "कांग्रेस (23)", R.drawable.ic_party_inc),
+                Triple("निर्दलीय", "निर्दलीय (4)", R.drawable.ic_party_ind)
+            ).forEach { (key, label, logoRes) ->
+                val isSelected = selectedPartyFilter == key
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { selectedPartyFilter = key },
+                    shape = SnpSquareShape,
+                    leadingIcon = logoRes?.let { res ->
+                        {
+                            Image(
+                                painter = painterResource(res),
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                    },
+                    label = {
+                        Text(
+                            label,
+                            fontSize = 11.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = when (key) {
+                            "भाजपा" -> Color(0xFFE65100)
+                            "कांग्रेस" -> Color(0xFF0277BD)
+                            "निर्दलीय" -> Color(0xFF475569)
+                            else -> SnpPrimary
+                        },
+                        selectedLabelColor = Color.White,
+                        containerColor = Color.White,
+                        labelColor = TextSecondary
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderColor = if (isSelected) Color.Transparent else SnpBorder,
+                        enabled = true,
+                        selected = isSelected
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { onRefreshClick?.invoke() },
@@ -142,126 +207,6 @@ fun ParshadsScreen(
                     .background(SnpBackground),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-            // Party Filter Strip with Official Symbols (Scrolls naturally, NOT sticky)
-            item(key = "party_filters") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    listOf(
-                        Triple("All", "All (60)", null),
-                        Triple("भाजपा", "भाजपा (33)", R.drawable.ic_party_bjp),
-                        Triple("कांग्रेस", "कांग्रेस (23)", R.drawable.ic_party_inc),
-                        Triple("निर्दलीय", "निर्दलीय (4)", R.drawable.ic_party_ind)
-                    ).forEach { (key, label, logoRes) ->
-                        val isSelected = selectedPartyFilter == key
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { selectedPartyFilter = key },
-                            shape = SnpSquareShape,
-                            leadingIcon = logoRes?.let { res ->
-                                {
-                                    Image(
-                                        painter = painterResource(res),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                }
-                            },
-                            label = {
-                                Text(
-                                    label,
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                )
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = when (key) {
-                                    "भाजपा" -> Color(0xFFE65100)
-                                    "कांग्रेस" -> Color(0xFF0277BD)
-                                    "निर्दलीय" -> Color(0xFF475569)
-                                    else -> SnpPrimary
-                                },
-                                selectedLabelColor = Color.White,
-                                containerColor = Color.White,
-                                labelColor = TextSecondary
-                            ),
-                            border = FilterChipDefaults.filterChipBorder(
-                                borderColor = if (isSelected) Color.Transparent else SnpBorder,
-                                enabled = true,
-                                selected = isSelected
-                            )
-                        )
-                    }
-                }
-            }
-
-            // Compact Single-Line Search Bar (Scrolls naturally, NOT sticky)
-            item(key = "search_bar") {
-                Surface(
-                    shape = SnpSquareShape,
-                    color = Color.White,
-                    border = BorderStroke(1.dp, SnpBorder),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .height(38.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = SnpPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        BasicTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                fontSize = 12.sp,
-                                color = TextPrimary,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.weight(1f),
-                            decorationBox = { innerTextField ->
-                                if (searchQuery.isEmpty()) {
-                                    Text(
-                                        text = "Search in Hindi or English (उदा. अनिल / Anil / Ward 15)...",
-                                        fontSize = 12.sp,
-                                        color = TextMuted
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        )
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(
-                                onClick = { searchQuery = "" },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Clear",
-                                    tint = TextMuted,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-
             if (displayList.isEmpty()) {
                 item(key = "empty_state") {
                     EmptyState(message = "No councillor found matching your search.")

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.OfficialCategoriesDirectory
 import com.chittortech.snp.data.models.Ticket
 import com.chittortech.snp.ui.components.EmptyState
+import com.chittortech.snp.ui.components.SnpSearchBar
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.components.StatusBadge
 import com.chittortech.snp.ui.theme.*
@@ -82,33 +83,15 @@ fun ComplaintsScreen(
             onNotificationClick = onNotificationClick,
             onRefreshClick = onRefreshClick
         )
-            // Search Bar
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text("Search by Ticket ID, Ward, Citizen Name...", fontSize = 13.sp) },
-                leadingIcon = { Icon(Icons.Default.Search, null, tint = SnpPrimary) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, null, tint = TextMuted)
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = SnpSquareShape,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = SnpPrimary,
-                    unfocusedBorderColor = SnpBorder
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            )
 
-            // Date Filter Strip (Today, Yesterday, Last 5 Days)
+        // Unified Search Bar
+        SnpSearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            placeholder = "Search by Ticket ID, Ward, Citizen Name..."
+        )
+
+        // Date Filter Strip (Today, Yesterday, Last 5 Days)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
