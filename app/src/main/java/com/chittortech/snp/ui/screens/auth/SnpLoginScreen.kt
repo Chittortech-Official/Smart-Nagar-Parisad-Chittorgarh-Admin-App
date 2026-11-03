@@ -24,9 +24,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.chittortech.snp.BuildConfig
 import com.chittortech.snp.R
+import com.chittortech.snp.data.SupabaseManager
 import com.chittortech.snp.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun SnpLoginScreen(
@@ -39,6 +40,7 @@ fun SnpLoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     val handleSignIn = {
         val cleanEmail = email.trim().lowercase()
@@ -50,15 +52,15 @@ fun SnpLoginScreen(
         } else {
             isLoading = true
             errorMessage = null
-            if (cleanEmail == BuildConfig.CHAIRMAN_EMAIL &&
-                (cleanPassword == BuildConfig.CHAIRMAN_PWD || cleanPassword == BuildConfig.CHAIRMAN_PWD2)) {
-                onLoginSuccess(BuildConfig.CHAIRMAN_EMAIL, "CHAIRMAN", "Anil Inani")
-            } else if (cleanEmail == BuildConfig.VC_EMAIL &&
-                (cleanPassword == BuildConfig.VC_PWD || cleanPassword == BuildConfig.VC_PWD2)) {
-                onLoginSuccess(BuildConfig.VC_EMAIL, "VICE_CHAIRMAN", "Sudarshan Rampuria")
-            } else {
-                errorMessage = "Invalid credentials. Access restricted to authorized Nagar Parishad executive authorities."
-                isLoading = false
+            scope.launch {
+                val result = SupabaseManager.signInAuthority(cleanEmail, cleanPassword)
+                result.onSuccess { user ->
+                    isLoading = false
+                    onLoginSuccess(user.email, user.role, user.fullName)
+                }.onFailure { err ->
+                    isLoading = false
+                    errorMessage = err.message ?: "Invalid email or password. Access restricted to authorized Nagar Parishad executive authorities."
+                }
             }
         }
     }
@@ -153,12 +155,19 @@ fun SnpLoginScreen(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Official Email") },
-                        placeholder = { Text("e.g. chairman@chittorgarh.gov.in") },
+                        placeholder = { Text("e.g. sabhapati@gmail.com") },
                         leadingIcon = { Icon(Icons.Default.Email, null, tint = SnpPrimary) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            disabledContainerColor = Color.White,
+                            focusedBorderColor = SnpPrimary,
+                            unfocusedBorderColor = SnpBorder
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -182,7 +191,14 @@ fun SnpLoginScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { handleSignIn() }),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            disabledContainerColor = Color.White,
+                            focusedBorderColor = SnpPrimary,
+                            unfocusedBorderColor = SnpBorder
+                        )
                     )
 
                     errorMessage?.let {

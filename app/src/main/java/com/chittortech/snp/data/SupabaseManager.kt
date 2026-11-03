@@ -2,6 +2,9 @@ package com.chittortech.snp.data
 
 import com.chittortech.snp.data.models.*
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
@@ -24,6 +27,7 @@ object SupabaseManager {
     ) {
         install(Postgrest)
         install(Realtime)
+        install(Auth)
     }
 
     suspend fun getTickets(): List<Ticket> {
@@ -145,5 +149,54 @@ object SupabaseManager {
             // Log/handle fallback
         }
     }
+
+    suspend fun signInAuthority(emailInput: String, passwordInput: String): Result<AuthorityUser> {
+        val cleanEmail = emailInput.trim().lowercase()
+        val cleanPassword = passwordInput.trim()
+
+        // Strict Supabase Auth only: verifies against Supabase auth.users
+        return try {
+            client.auth.signInWith(Email) {
+                this.email = cleanEmail
+                this.password = cleanPassword
+            }
+            // Supabase verified credentials successfully!
+            val user = resolveAuthorityUser(cleanEmail)
+            Result.success(user)
+        } catch (e: Exception) {
+            val msg = e.message.orEmpty()
+            val userFriendlyMsg = if (msg.contains("Invalid login credentials", ignoreCase = true)) {
+                "Invalid official email or password. Please verify your credentials in Supabase."
+            } else if (msg.contains("Email not confirmed", ignoreCase = true)) {
+                "Email address is not confirmed yet. Please confirm in Supabase dashboard."
+            } else {
+                "Authentication failed: ${e.localizedMessage ?: "Please check your network and Supabase account."}"
+            }
+            Result.failure(Exception(userFriendlyMsg))
+        }
+    }
+
+    private fun resolveAuthorityUser(email: String): AuthorityUser {
+        return when (email) {
+            "kushsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "Kush Sharma")
+            "lavsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "Lav Sharma")
+            "sabhapati@gmail.com", "chairman@chittorgarh.gov.in" -> AuthorityUser(email, "CHAIRMAN", "Hon. Anil Inani (Chairman)")
+            "upsabhapati@gmail.com", "vicechairman@chittorgarh.gov.in" -> AuthorityUser(email, "VICE_CHAIRMAN", "Hon. Sudarshan Rampuria (Vice Chairman)")
+            "ravivirani@gmail.com" -> AuthorityUser(email, "OFFICER", "Ravi Virani")
+            else -> {
+                val derivedName = email.substringBefore("@")
+                    .split(".", "_")
+                    .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+                AuthorityUser(email, "OFFICER", derivedName)
+            }
+        }
+    }
 }
+
+data class AuthorityUser(
+    val email: String,
+    val role: String,
+    val fullName: String
+)
+
 
