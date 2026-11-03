@@ -37,8 +37,8 @@ object SnpTicketMonitor {
     private const val KEY_LAST_STATUS_PREFIX = "ticket_status_"
     private const val KEY_OVERDUE_PREFIX = "ticket_overdue_"
 
-    // 1-Hour battery-saver fallback (WebSocket handles live push instantly; reload button does manual sync)
-    private const val FALLBACK_POLLING_INTERVAL_MS = 60 * 60 * 1000L
+    // Active background monitoring: check every 10 seconds so status updates are caught immediately
+    private const val FALLBACK_POLLING_INTERVAL_MS = 10 * 1000L
 
     private val monitorScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val syncMutex = Mutex()
@@ -191,7 +191,7 @@ object SnpTicketMonitor {
             }
         }
 
-        editor.apply()
+        editor.commit()
     }
 
     private suspend fun startPollingLoop(context: Context) {
@@ -203,7 +203,7 @@ object SnpTicketMonitor {
                 break
             } catch (e: Exception) {
                 Log.e(TAG, "Error in polling loop: ${e.message}")
-                delay(60_000)
+                delay(10_000)
             }
         }
     }
