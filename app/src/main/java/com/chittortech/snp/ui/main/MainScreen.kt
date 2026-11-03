@@ -130,15 +130,20 @@ fun MainScreen(
     }
 
     val greetingTitle = when {
-        authorityName.contains("Anil", ignoreCase = true) || authorityRole.equals("CHAIRMAN", ignoreCase = true) -> "🙏 नमस्ते अनिल जी!"
-        authorityName.contains("Sudarshan", ignoreCase = true) || authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) -> "🙏 नमस्ते सुदर्शन जी!"
-        else -> "🙏 नमस्ते $authorityName जी!"
+        authorityRole.equals("CHAIRMAN", ignoreCase = true) || authorityName.contains("Anil", ignoreCase = true) -> "🙏 नमस्ते सभापति जी!"
+        authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) || authorityName.contains("Sudarshan", ignoreCase = true) -> "🙏 नमस्ते उपसभापति जी!"
+        else -> "🙏 नमस्ते $authorityName!"
     }
 
-    val greetingSubtitle = if (authorityRole.equals("CHAIRMAN", ignoreCase = true)) {
-        "माननीय सभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
-    } else {
-        "माननीय उपसभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
+    val greetingSubtitle = when {
+        authorityRole.equals("CHAIRMAN", ignoreCase = true) || authorityName.contains("Anil", ignoreCase = true) ->
+            "माननीय सभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
+        authorityRole.equals("VICE_CHAIRMAN", ignoreCase = true) || authorityName.contains("Sudarshan", ignoreCase = true) ->
+            "माननीय उपसभापति • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
+        authorityRole.equals("SUPER_ADMIN", ignoreCase = true) ->
+            "सिस्टम एडमिनिस्ट्रेटर • गढ़-सेवा कमांड सेंटर में आपका स्वागत है"
+        else ->
+            "गढ़-सेवा • नगर परिषद चित्तौड़गढ़ कमांड सेंटर में आपका स्वागत है"
     }
 
     fun navigateToTab(tab: BottomTab) {

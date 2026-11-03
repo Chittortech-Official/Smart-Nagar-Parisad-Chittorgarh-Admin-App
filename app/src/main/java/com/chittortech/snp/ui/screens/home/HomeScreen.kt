@@ -67,7 +67,12 @@ fun HomeScreen(
     ) {
         SnpTopBar(
             title = authorityName,
-            subtitle = if (authorityRole == "CHAIRMAN") "Chairman • Nagar Parishad Chittorgarh" else "Vice Chairman • Nagar Parishad Chittorgarh",
+            subtitle = when (authorityRole.uppercase()) {
+                "CHAIRMAN" -> "Chairman • Nagar Parishad Chittorgarh"
+                "VICE_CHAIRMAN" -> "Vice Chairman • Nagar Parishad Chittorgarh"
+                "SUPER_ADMIN" -> "System Administrator • ChittorTech"
+                else -> "Executive Officer • Nagar Parishad Chittorgarh"
+            },
             onNotificationClick = onNotificationClick,
             onRefreshClick = onRefreshClick,
             onTitleClick = onHeaderClick

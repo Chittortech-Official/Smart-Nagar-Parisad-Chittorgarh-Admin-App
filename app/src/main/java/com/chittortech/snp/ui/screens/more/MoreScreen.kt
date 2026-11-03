@@ -92,10 +92,11 @@ fun MoreScreen(
                             color = TextPrimary
                         )
                         Text(
-                            text = if (authorityRole.equals("CHAIRMAN", ignoreCase = true)) {
-                                "Hon. Chairman • सभापति"
-                            } else {
-                                "Hon. Vice Chairman • उपसभापति"
+                            text = when (authorityRole.uppercase()) {
+                                "CHAIRMAN" -> "Hon. Chairman • सभापति"
+                                "VICE_CHAIRMAN" -> "Hon. Vice Chairman • उपसभापति"
+                                "SUPER_ADMIN" -> "System Administrator • ChittorTech"
+                                else -> "Executive Officer • नगर परिषद"
                             },
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,

@@ -180,8 +180,8 @@ object SupabaseManager {
         return when (email) {
             "kushsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "Kush Sharma")
             "lavsharma.cor@gmail.com" -> AuthorityUser(email, "SUPER_ADMIN", "Lav Sharma")
-            "sabhapati@gmail.com", "chairman@chittorgarh.gov.in" -> AuthorityUser(email, "CHAIRMAN", "Hon. Anil Inani (Chairman)")
-            "upsabhapati@gmail.com", "vicechairman@chittorgarh.gov.in" -> AuthorityUser(email, "VICE_CHAIRMAN", "Hon. Sudarshan Rampuria (Vice Chairman)")
+            "sabhapati@gmail.com", "chairman@chittorgarh.gov.in" -> AuthorityUser(email, "CHAIRMAN", "Anil Inani")
+            "upsabhapati@gmail.com", "vicechairman@chittorgarh.gov.in" -> AuthorityUser(email, "VICE_CHAIRMAN", "Sudarshan Rampuria")
             "ravivirani@gmail.com" -> AuthorityUser(email, "OFFICER", "Ravi Virani")
             else -> {
                 val derivedName = email.substringBefore("@")
