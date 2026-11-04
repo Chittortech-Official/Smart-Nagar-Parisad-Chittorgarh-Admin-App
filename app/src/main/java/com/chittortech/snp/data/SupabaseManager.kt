@@ -1,10 +1,13 @@
 package com.chittortech.snp.data
 
+import android.content.Context
+import android.util.Log
 import com.chittortech.snp.data.models.*
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
@@ -15,6 +18,7 @@ import io.github.jan.supabase.realtime.realtime
 import io.github.jan.supabase.realtime.PostgresAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.Json
 
 object SupabaseManager {
 
@@ -30,7 +34,24 @@ object SupabaseManager {
         install(Auth)
     }
 
-    suspend fun getTickets(): List<Ticket> {
+    suspend fun restoreSessionIfAvailable(context: Context): Boolean {
+        if (client.auth.currentSessionOrNull() != null) return true
+        val sessionJson = SnpSessionManager.getSavedSupabaseSessionJson(context) ?: return false
+        return try {
+            val session = Json.decodeFromString<UserSession>(sessionJson)
+            client.auth.importSession(session)
+            Log.d("SupabaseManager", "Restored authenticated Supabase session from encrypted storage.")
+            true
+        } catch (e: Exception) {
+            Log.e("SupabaseManager", "Error restoring session: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun getTickets(context: Context? = null): List<Ticket> {
+        if (context != null) {
+            restoreSessionIfAvailable(context)
+        }
         return try {
             client.postgrest["tickets"]
                 .select()
@@ -146,7 +167,7 @@ object SupabaseManager {
         }
     }
 
-    suspend fun signInAuthority(emailInput: String, passwordInput: String): Result<AuthorityUser> {
+    suspend fun signInAuthority(emailInput: String, passwordInput: String, context: Context? = null): Result<AuthorityUser> {
         val cleanEmail = emailInput.trim().lowercase()
         val cleanPassword = passwordInput.trim()
 
@@ -157,6 +178,16 @@ object SupabaseManager {
                 this.password = cleanPassword
             }
             // Supabase verified credentials successfully!
+            val currentSession = client.auth.currentSessionOrNull()
+            if (context != null && currentSession != null) {
+                try {
+                    val sessionJson = Json.encodeToString(currentSession)
+                    SnpSessionManager.saveSupabaseSessionJson(context, sessionJson)
+                    Log.d("SupabaseManager", "Saved authenticated Supabase session to encrypted storage.")
+                } catch (e: Exception) {
+                    Log.e("SupabaseManager", "Error saving session: ${e.message}")
+                }
+            }
             val user = resolveAuthorityUser(cleanEmail)
             Result.success(user)
         } catch (e: Exception) {

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -40,6 +41,7 @@ fun SnpLoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val handleSignIn = {
         val cleanEmail = email.trim().lowercase()
@@ -52,7 +54,7 @@ fun SnpLoginScreen(
             isLoading = true
             errorMessage = null
             scope.launch {
-                val result = SupabaseManager.signInAuthority(cleanEmail, cleanPassword)
+                val result = SupabaseManager.signInAuthority(cleanEmail, cleanPassword, context)
                 result.onSuccess { user ->
                     isLoading = false
                     onLoginSuccess(user.email, user.role, user.fullName)

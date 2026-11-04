@@ -19,6 +19,7 @@ object SnpSessionManager {
     private const val KEY_EMAIL = "snp_authority_email"
     private const val KEY_ROLE = "snp_authority_role"
     private const val KEY_FULL_NAME = "snp_authority_name"
+    private const val KEY_SUPABASE_SESSION_JSON = "snp_supabase_session_json"
 
     // 5 Days Inactivity Timeout
     const val INACTIVITY_TIMEOUT_MS: Long = 5L * 24 * 60 * 60 * 1000L
@@ -43,15 +44,28 @@ object SnpSessionManager {
         }
     }
 
-    fun saveSession(context: Context, email: String, role: String, fullName: String) {
+    fun saveSession(context: Context, email: String, role: String, fullName: String, sessionJson: String? = null) {
         val now = System.currentTimeMillis()
-        getPrefs(context).edit()
+        val editor = getPrefs(context).edit()
             .putLong(KEY_LOGIN_TIMESTAMP, now)
             .putLong(KEY_LAST_ACTIVE_TIMESTAMP, now)
             .putString(KEY_EMAIL, email.trim().lowercase())
             .putString(KEY_ROLE, role.trim().uppercase())
             .putString(KEY_FULL_NAME, fullName.trim())
+        if (!sessionJson.isNullOrBlank()) {
+            editor.putString(KEY_SUPABASE_SESSION_JSON, sessionJson)
+        }
+        editor.apply()
+    }
+
+    fun saveSupabaseSessionJson(context: Context, sessionJson: String) {
+        getPrefs(context).edit()
+            .putString(KEY_SUPABASE_SESSION_JSON, sessionJson)
             .apply()
+    }
+
+    fun getSavedSupabaseSessionJson(context: Context): String? {
+        return getPrefs(context).getString(KEY_SUPABASE_SESSION_JSON, null)
     }
 
     fun updateLastActive(context: Context) {

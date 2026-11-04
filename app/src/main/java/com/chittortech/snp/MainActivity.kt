@@ -67,7 +67,8 @@ class MainActivity : ComponentActivity() {
                             isInitialLoading = true
                         }
                         try {
-                            val newTickets = SupabaseManager.getTickets()
+                            SupabaseManager.restoreSessionIfAvailable(this@MainActivity)
+                            val newTickets = SupabaseManager.getTickets(this@MainActivity)
                             val newWards = SupabaseManager.getWards()
                             val newDepartments = SupabaseManager.getDepartments()
                             val newNotifications = SupabaseManager.getNotifications()
@@ -89,6 +90,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     val sessionResult = SnpSessionManager.validateSession(this@MainActivity)
                     if (sessionResult is SnpSessionResult.Valid) {
+                        SupabaseManager.restoreSessionIfAvailable(this@MainActivity)
                         currentUser = Triple(sessionResult.email, sessionResult.role, sessionResult.fullName)
                         refreshData()
                     }

@@ -52,6 +52,7 @@ object SnpTicketMonitor {
 
         monitorScope.launch {
             Log.d(TAG, "Starting SnpTicketMonitor background engine...")
+            SupabaseManager.restoreSessionIfAvailable(appContext)
             // 1. Initial snapshot & sync
             syncTickets(appContext)
 
@@ -70,7 +71,8 @@ object SnpTicketMonitor {
     suspend fun syncTickets(context: Context) = withContext(Dispatchers.IO) {
         syncMutex.withLock {
             try {
-                val tickets = SupabaseManager.getTickets()
+                SupabaseManager.restoreSessionIfAvailable(context)
+                val tickets = SupabaseManager.getTickets(context)
                 if (tickets.isNotEmpty()) {
                     processTicketBatch(context, tickets)
                 }
@@ -211,6 +213,7 @@ object SnpTicketMonitor {
     private suspend fun startRealtimeSubscription(context: Context) {
         while (true) {
             try {
+                SupabaseManager.restoreSessionIfAvailable(context)
                 SupabaseManager.subscribeToTicketUpdates()
                     .catch { e ->
                         Log.e(TAG, "Realtime subscription exception: ${e.message}")
