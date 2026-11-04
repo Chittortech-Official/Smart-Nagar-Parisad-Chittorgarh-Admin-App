@@ -31,3 +31,18 @@
 # Android Compose & Coroutines
 -dontwarn kotlinx.coroutines.**
 
+# Google ErrorProne annotations (not needed at runtime — suppress R8 missing class warning)
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn javax.annotation.**
+-dontwarn javax.lang.model.**
+-dontwarn org.checkerframework.**
+
+# OkHttp / Okio (used internally by Ktor / Supabase)
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn org.slf4j.**
+
+# Kotlin metadata & reflect
+-dontwarn kotlin.reflect.**
+-dontwarn kotlin.Unit
+
