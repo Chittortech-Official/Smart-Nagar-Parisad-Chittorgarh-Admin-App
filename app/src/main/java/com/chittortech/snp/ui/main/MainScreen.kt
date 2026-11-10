@@ -110,19 +110,6 @@ fun MainScreen(
 
     LaunchedEffect(hasShownWelcomeNotification) {
         if (!hasShownWelcomeNotification) {
-            // Settle HomeScreen for 400ms
-            kotlinx.coroutines.delay(400)
-            showWelcomeNotification = true
-            // Expand fluidly like Apple Dynamic Island
-            kotlinx.coroutines.delay(350)
-            isIslandExpanded = true
-            // Stay expanded for 8.5 seconds
-            kotlinx.coroutines.delay(8500)
-            // Morph smoothly back into compact notch pill
-            isIslandExpanded = false
-            // After 3.5 seconds in compact pill, slide smoothly into notch
-            kotlinx.coroutines.delay(3500)
-            showWelcomeNotification = false
             onWelcomeDismissed()
         }
     }
