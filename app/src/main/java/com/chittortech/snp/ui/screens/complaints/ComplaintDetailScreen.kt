@@ -48,6 +48,7 @@ fun ComplaintDetailScreen(
 
     val isClosed = ticket.status.equals("CLOSED", ignoreCase = true)
     val isResolved = isClosed || ticket.status.contains("RESOLVED", ignoreCase = true)
+    val isRejected = ticket.status.contains("REJECT", ignoreCase = true) || ticket.status.equals("CANCELLED", ignoreCase = true)
 
     // Load confirmations from Supabase if ticket id exists
     LaunchedEffect(ticket.id) {
@@ -211,155 +212,240 @@ fun ComplaintDetailScreen(
                 }
             }
 
-            // ── MANDATORY TWO-STEP CLOSURE VERIFICATION (TRANSPARENCY BOX) ───────
-            Surface(
-                shape = SnpCardShape,
-                color = SnpCardWhite,
-                shadowElevation = 2.dp,
-                border = BorderStroke(1.dp, if (isClosed) SnpGreen.copy(alpha = 0.5f) else SnpBorder),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = if (isClosed) SnpGreen else SnpPrimary, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Mandatory Two-Step Closure Audit",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = "Every complaint requires independent Field Officer verification and direct Citizen satisfaction before closure.",
-                        fontSize = 11.sp,
-                        color = TextMuted,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-                    )
-
-                    // Step 1: Authority Confirmation
-                    val officerOk = authorityConfirmation?.officerConfirmed ?: isResolved
-                    val officerNotes = authorityConfirmation?.verificationNotes
-                        ?: if (isResolved) "Field supervisor confirmed resolution on-site." else "Awaiting field team inspection."
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(SnpBadgeShape)
-                            .background(if (officerOk) SnpGreenLight.copy(alpha = 0.5f) else SnpSurfaceVariant)
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Icon(
-                            imageVector = if (officerOk) Icons.Default.CheckCircle else Icons.Default.HourglassTop,
-                            contentDescription = null,
-                            tint = if (officerOk) SnpGreen else SnpAmber,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column(modifier = Modifier.weight(1f)) {
+            // ── REJECTION AUDIT OR MANDATORY TWO-STEP CLOSURE VERIFICATION ───────
+            if (isRejected) {
+                Surface(
+                    shape = SnpCardShape,
+                    color = Color(0xFFFEF2F2),
+                    shadowElevation = 2.dp,
+                    border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f, fill = false)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = null,
+                                    tint = SnpRed,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "शिकायत निरस्त विवरण (Rejection Audit)",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF991B1B)
+                                )
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = Color(0xFFFEE2E2),
+                                border = BorderStroke(0.5.dp, Color(0xFFFCA5A5))
                             ) {
                                 Text(
-                                    text = "Step 1: Field Verification",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextPrimary,
-                                    modifier = Modifier.weight(1f, fill = false)
+                                    text = "REJECTED",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFDC2626),
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = if (officerOk) SnpGreenLight else SnpAmberLight
-                                ) {
-                                    Text(
-                                        text = if (officerOk) "CONFIRMED" else "PENDING",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (officerOk) SnpGreen else SnpAmber,
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
                             }
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = officerNotes,
-                                fontSize = 11.sp,
-                                color = TextSecondary
-                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "यह शिकायत विभागीय समीक्षा उपरांत सक्षम स्तर पर निरस्त (Rejected) कर दी गई है। इसके लिए कोई फील्ड निस्तारण अथवा नागरिक सत्यापन अपेक्षित नहीं है।",
+                            fontSize = 12.sp,
+                            color = Color(0xFF7F1D1D),
+                            lineHeight = 17.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFFCA5A5).copy(alpha = 0.5f)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = "निरस्तीकरण स्थिति (Audit Status):",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF991B1B)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                val reason = authorityConfirmation?.verificationNotes
+                                    ?: if (!ticket.resolutionTime.isNullOrBlank()) "प्रशासनिक कारणों से फाइल निरस्त।" else "सक्षम प्राधिकारी द्वारा शिकायत निरस्त व बंद।"
+                                Text(
+                                    text = "कारण / टिप्पणी: $reason",
+                                    fontSize = 11.5.sp,
+                                    color = TextPrimary
+                                )
+                            }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    // Step 2: Citizen Confirmation
-                    val citizenOk = citizenConfirmation?.citizenSatisfied ?: isClosed
-                    val citizenRating = citizenConfirmation?.satisfactionRating ?: if (isClosed) 5 else 0
-                    val citizenFeedback = citizenConfirmation?.citizenFeedback
-                        ?: if (isClosed) "Citizen confirmed work completed to satisfaction via follow-up call." else "Citizen follow-up call pending."
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(SnpBadgeShape)
-                            .background(if (citizenOk) SnpGreenLight.copy(alpha = 0.5f) else SnpSurfaceVariant)
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Icon(
-                            imageVector = if (citizenOk) Icons.Default.ThumbUp else Icons.AutoMirrored.Filled.PhoneCallback,
-                            contentDescription = null,
-                            tint = if (citizenOk) SnpGreen else TextMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                }
+            } else {
+                Surface(
+                    shape = SnpCardShape,
+                    color = SnpCardWhite,
+                    shadowElevation = 2.dp,
+                    border = BorderStroke(1.dp, if (isClosed) SnpGreen.copy(alpha = 0.5f) else SnpBorder),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = if (isClosed) SnpGreen else SnpPrimary, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Step 2: Citizen Confirmation",
-                                    fontSize = 12.sp,
+                                    text = "Mandatory Two-Step Closure Audit",
+                                    fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimary,
-                                    modifier = Modifier.weight(1f, fill = false)
+                                    color = TextPrimary
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = if (citizenOk) SnpGreenLight else SnpSurfaceVariant
+                            }
+                        }
+
+                        Text(
+                            text = "Every complaint requires independent Field Officer verification and direct Citizen satisfaction before closure.",
+                            fontSize = 11.sp,
+                            color = TextMuted,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                        )
+
+                        // Step 1: Authority Confirmation
+                        val officerOk = authorityConfirmation?.officerConfirmed ?: isResolved
+                        val officerNotes = authorityConfirmation?.verificationNotes
+                            ?: if (isResolved) "Field supervisor confirmed resolution on-site." else "Awaiting field team inspection."
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(SnpBadgeShape)
+                                .background(if (officerOk) SnpGreenLight.copy(alpha = 0.5f) else SnpSurfaceVariant)
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Icon(
+                                imageVector = if (officerOk) Icons.Default.CheckCircle else Icons.Default.HourglassTop,
+                                contentDescription = null,
+                                tint = if (officerOk) SnpGreen else SnpAmber,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = if (citizenOk) "VERIFIED (${citizenRating}★)" else "AWAITING CALL",
-                                        fontSize = 10.sp,
+                                        text = "Step 1: Field Verification",
+                                        fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (citizenOk) SnpGreen else TextMuted,
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        color = TextPrimary,
+                                        modifier = Modifier.weight(1f, fill = false)
                                     )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = if (officerOk) SnpGreenLight else SnpAmberLight
+                                    ) {
+                                        Text(
+                                            text = if (officerOk) "CONFIRMED" else "PENDING",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (officerOk) SnpGreen else SnpAmber,
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
                                 }
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = officerNotes,
+                                    fontSize = 11.sp,
+                                    color = TextSecondary
+                                )
                             }
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = citizenFeedback,
-                                fontSize = 11.sp,
-                                color = TextSecondary
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Step 2: Citizen Confirmation
+                        val citizenOk = citizenConfirmation?.citizenSatisfied ?: isClosed
+                        val citizenRating = citizenConfirmation?.satisfactionRating ?: if (isClosed) 5 else 0
+                        val citizenFeedback = citizenConfirmation?.citizenFeedback
+                            ?: if (isClosed) "Citizen confirmed work completed to satisfaction via follow-up call." else "Citizen follow-up call pending."
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(SnpBadgeShape)
+                                .background(if (citizenOk) SnpGreenLight.copy(alpha = 0.5f) else SnpSurfaceVariant)
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Icon(
+                                imageVector = if (citizenOk) Icons.Default.ThumbUp else Icons.AutoMirrored.Filled.PhoneCallback,
+                                contentDescription = null,
+                                tint = if (citizenOk) SnpGreen else TextMuted,
+                                modifier = Modifier.size(20.dp)
                             )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Step 2: Citizen Confirmation",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextPrimary,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = if (citizenOk) SnpGreenLight else SnpSurfaceVariant
+                                    ) {
+                                        Text(
+                                            text = if (citizenOk) "VERIFIED (${citizenRating}★)" else "AWAITING CALL",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (citizenOk) SnpGreen else TextMuted,
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = citizenFeedback,
+                                    fontSize = 11.sp,
+                                    color = TextSecondary
+                                )
+                            }
                         }
                     }
                 }

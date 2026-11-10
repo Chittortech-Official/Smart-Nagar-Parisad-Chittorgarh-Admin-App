@@ -166,10 +166,12 @@ data class NotificationLog(
 
 data class DashboardStats(
     val todayRegistered: Int = 0,
+    val todayRunning: Int = 0,
+    val todayClosed: Int = 0,
+    val todayRejected: Int = 0,
     val totalComplaints: Int = 0,
     val pendingComplaints: Int = 0,
     val inProgressComplaints: Int = 0,
-    val todayClosed: Int = 0,
     val monthClosed: Int = 0,
     val yearClosed: Int = 0,
     val overdueComplaints: Int = 0,

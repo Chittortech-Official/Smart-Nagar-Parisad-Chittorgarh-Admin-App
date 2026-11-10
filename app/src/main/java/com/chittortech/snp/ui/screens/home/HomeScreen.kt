@@ -135,9 +135,9 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     KpiCard(
-                        title = "Total Registered",
-                        value = "${stats.totalRegistered}",
-                        subtitle = "New Complaints",
+                        title = "Today's Registered",
+                        value = "${stats.todayRegistered}",
+                        subtitle = "New Today",
                         icon = Icons.Default.FiberNew,
                         cardBg = Color(0xFFFFF3E0), // Soft Kesariya / Bhagwa
                         borderColor = Color(0xFFFFCC80),
@@ -147,8 +147,8 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f)
                     )
                     KpiCard(
-                        title = "Total Running",
-                        value = "${stats.totalRunning}",
+                        title = "Today's Running",
+                        value = "${stats.todayRunning}",
                         subtitle = "In Progress / Active",
                         icon = Icons.Default.Engineering,
                         cardBg = Color(0xFFF5F3FF), // Soft Regal Purple
@@ -165,8 +165,8 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     KpiCard(
-                        title = "Total Completed",
-                        value = "${stats.totalCompleted}",
+                        title = "Today's Completed",
+                        value = "${stats.todayClosed}",
                         subtitle = "Resolved & Closed",
                         icon = Icons.Default.TaskAlt,
                         cardBg = Color(0xFFF0FDF4), // Soft Mint Green
@@ -177,9 +177,9 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f)
                     )
                     KpiCard(
-                        title = "Total Rejected",
-                        value = "${stats.totalRejected}",
-                        subtitle = "Rejected / Cancelled",
+                        title = "Today's Rejected",
+                        value = "${stats.todayRejected}",
+                        subtitle = "Rejected Today",
                         icon = Icons.Default.Cancel,
                         cardBg = Color(0xFFFEF2F2), // Soft Light Red
                         borderColor = Color(0xFFFECACA),

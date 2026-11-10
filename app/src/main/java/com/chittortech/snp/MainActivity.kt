@@ -158,30 +158,40 @@ class MainActivity : ComponentActivity() {
 
                 // Calculate Stats strictly focusing on Today's Live Monitoring
                 val dashboardStats = remember(tickets) {
-                    val totalReg = tickets.size
-                    val totalInProg = tickets.count { it.status == "IN_PROGRESS" || it.status == "REGISTERED" }
-                    val totalCl = tickets.count { it.status == "CLOSED" || it.status.contains("RESOLVED", ignoreCase = true) }
-                    val totalRej = tickets.count { it.status.contains("REJECT", ignoreCase = true) }
-
                     val todayTickets = tickets.filter { DateUtils.isToday(it.registrationTime) }
                     val todayReg = todayTickets.size
+                    val todayRunning = todayTickets.count { it.status == "IN_PROGRESS" || it.status == "REGISTERED" }
+                    val todayCl = tickets.count {
+                        (it.status == "CLOSED" || it.status.contains("RESOLVED", ignoreCase = true)) &&
+                                (DateUtils.isToday(it.closedAt) || DateUtils.isToday(it.resolutionTime) || DateUtils.isToday(it.registrationTime))
+                    }
+                    val todayRej = tickets.count {
+                        it.status.contains("REJECT", ignoreCase = true) &&
+                                (DateUtils.isToday(it.closedAt) || DateUtils.isToday(it.resolutionTime) || DateUtils.isToday(it.registrationTime))
+                    }
+
                     val pending = todayTickets.count { it.status == "REGISTERED" }
                     val inProg = todayTickets.count { it.status == "IN_PROGRESS" }
-                    val todayCl = todayTickets.count { it.status == "CLOSED" || it.status.contains("RESOLVED", ignoreCase = true) }
-                    val todayRej = todayTickets.count { it.status.contains("REJECT", ignoreCase = true) }
                     val monthCl = tickets.count { it.status == "CLOSED" && DateUtils.isThisMonth(it.closedAt) }
                     val yearCl = tickets.count { it.status == "CLOSED" && DateUtils.isThisYear(it.closedAt) }
                     val overdue = tickets.count { it.isOverdue || it.status == "OVERDUE" }
                     val escalated = tickets.count { it.isEscalated }
                     val total = tickets.size
-                    val rate = if (total > 0) (((totalCl) * 100) / total) else 100
+                    val rate = if (todayReg > 0) (((todayCl) * 100) / todayReg) else 100
+
+                    val totalReg = tickets.size
+                    val totalInProg = tickets.count { it.status == "IN_PROGRESS" || it.status == "REGISTERED" }
+                    val totalClosedCount = tickets.count { it.status == "CLOSED" || it.status.contains("RESOLVED", ignoreCase = true) }
+                    val totalRejCount = tickets.count { it.status.contains("REJECT", ignoreCase = true) }
 
                     DashboardStats(
                         todayRegistered = todayReg,
+                        todayRunning = todayRunning,
+                        todayClosed = todayCl,
+                        todayRejected = todayRej,
                         totalComplaints = total,
                         pendingComplaints = pending,
                         inProgressComplaints = inProg,
-                        todayClosed = todayCl,
                         monthClosed = monthCl,
                         yearClosed = yearCl,
                         overdueComplaints = overdue,
@@ -189,8 +199,8 @@ class MainActivity : ComponentActivity() {
                         resolutionRatePercent = rate,
                         totalRegistered = totalReg,
                         totalRunning = totalInProg,
-                        totalCompleted = totalCl,
-                        totalRejected = totalRej
+                        totalCompleted = totalClosedCount,
+                        totalRejected = totalRejCount
                     )
                 }
 
