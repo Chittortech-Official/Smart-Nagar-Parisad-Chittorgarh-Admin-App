@@ -321,14 +321,14 @@ fun SnpOfficialFooter(modifier: Modifier = Modifier) {
             color = Color.White,
             border = BorderStroke(1.dp, SnpBorder),
             shadowElevation = 1.5.dp,
-            modifier = Modifier.size(42.dp)
+            modifier = Modifier.size(44.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.rajasthan_logo),
-                contentDescription = "Nagar Parishad Emblem",
+                painter = painterResource(id = R.drawable.chittorgarh_emblem),
+                contentDescription = "Garh-Seva Official Seal",
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp)
+                    .padding(3.dp)
                     .clip(CircleShape)
             )
         }
