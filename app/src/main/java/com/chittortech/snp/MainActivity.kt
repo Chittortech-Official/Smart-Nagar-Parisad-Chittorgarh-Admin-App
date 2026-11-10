@@ -58,8 +58,10 @@ class MainActivity : ComponentActivity() {
                 var isInitialLoading by remember { mutableStateOf(false) }
                 var isRefreshing by remember { mutableStateOf(false) }
                 var hasShownWelcomeNotification by remember { mutableStateOf(false) }
+                var isInitialFetchDone by remember { mutableStateOf(false) }
 
                 fun refreshData(isManual: Boolean = false) {
+                    if (isRefreshing) return
                     scope.launch {
                         if (isManual) {
                             isRefreshing = true
@@ -86,22 +88,23 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                // Check stored session
+                // Check stored session & load data once in background
                 LaunchedEffect(Unit) {
                     val sessionResult = SnpSessionManager.validateSession(this@MainActivity)
                     if (sessionResult is SnpSessionResult.Valid) {
                         SupabaseManager.restoreSessionIfAvailable(this@MainActivity)
                         currentUser = Triple(sessionResult.email, sessionResult.role, sessionResult.fullName)
                         refreshData()
+                        isInitialFetchDone = true
                     }
                 }
 
-                // Auto-refresh live data whenever app is opened or brought to foreground
+                // Auto-refresh only when returning to foreground after initial load (NOT on cold start)
                 val lifecycleOwner = LocalLifecycleOwner.current
                 DisposableEffect(lifecycleOwner) {
                     val observer = LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) {
-                            if (currentUser != null) {
+                            if (currentUser != null && isInitialFetchDone && !isSplashShowing) {
                                 refreshData(isManual = false)
                             }
                         }
@@ -109,13 +112,6 @@ class MainActivity : ComponentActivity() {
                     lifecycleOwner.lifecycle.addObserver(observer)
                     onDispose {
                         lifecycleOwner.lifecycle.removeObserver(observer)
-                    }
-                }
-
-                // Auto-refresh when splash finishes
-                LaunchedEffect(isSplashShowing) {
-                    if (!isSplashShowing && currentUser != null) {
-                        refreshData(isManual = false)
                     }
                 }
 
