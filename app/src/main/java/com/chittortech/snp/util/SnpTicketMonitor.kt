@@ -160,6 +160,16 @@ object SnpTicketMonitor {
                         citizenName = ticket.citizenName,
                         citizenPhone = ticket.citizenPhone
                     )
+                } else if (newStatus.contains("REJECT")) {
+                    SnpNotificationManager.showRejectedAlert(
+                        context = context,
+                        ticketId = ticket.id,
+                        ticketNumber = ticket.ticketNumber,
+                        wardNumber = ticket.wardNumber,
+                        categoryTitle = ticket.problemDescription,
+                        citizenName = ticket.citizenName,
+                        citizenPhone = ticket.citizenPhone
+                    )
                 } else {
                     SnpNotificationManager.showStatusChangeAlert(
                         context = context,

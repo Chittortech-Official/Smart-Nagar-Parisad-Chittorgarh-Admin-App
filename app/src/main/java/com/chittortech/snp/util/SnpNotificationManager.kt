@@ -333,6 +333,70 @@ object SnpNotificationManager {
         NotificationManagerCompat.from(context).notify(notifId, builder.build())
     }
 
+    fun showRejectedAlert(
+        context: Context,
+        ticketId: String,
+        ticketNumber: String,
+        wardNumber: Int,
+        categoryTitle: String,
+        citizenName: String = "",
+        citizenPhone: String = ""
+    ) {
+        if (!hasNotificationPermission(context)) return
+
+        val notifId = (ticketId + "_rejected").hashCode()
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notifId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
+        val cleanPhone = citizenPhone.trim()
+
+        val title = "🔴 [वार्ड $wardNumber] शिकायत निरस्त (Rejected)!"
+        val collapsedText = if (cleanPhone.isNotBlank()) {
+            "🔴 निरस्त (Rejected) • 👤 $citizenDisplayName ($cleanPhone)"
+        } else {
+            "🔴 शिकायत निरस्त • 👤 $citizenDisplayName"
+        }
+
+        val expandedCardText = buildString {
+            append("⚡ अद्यतन स्थिति: 🔴 निरस्त (REJECTED)\n")
+            append("📋 विषय: ").append(categoryTitle).append("\n")
+            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
+            append("📞 संपर्क: ").append(if (cleanPhone.isNotBlank()) cleanPhone else "उपलब्ध नहीं").append("\n")
+            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • नगर परिषद चित्तौड़गढ़\n")
+            append("ℹ️ स्थिति: नियमानुसार जांच उपरांत निरस्त")
+        }
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSubText("गढ़-सेवा • $ticketNumber")
+            .setContentTitle(title)
+            .setContentText(collapsedText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedCardText))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setVibrate(longArrayOf(0, 250, 150, 250))
+            .setContentIntent(pendingIntent)
+            .setColor(0xFFDC2626.toInt()) // Red
+
+        buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
+        builder.addAction(buildViewAction(context, ticketId, ticketNumber, "👁️ कारण देखें"))
+
+        NotificationManagerCompat.from(context).notify(notifId, builder.build())
+    }
+
     fun showOverdueAlert(
         context: Context,
         ticketId: String,
