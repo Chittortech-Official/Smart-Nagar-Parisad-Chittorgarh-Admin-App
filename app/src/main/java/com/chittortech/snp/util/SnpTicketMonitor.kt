@@ -99,20 +99,14 @@ object SnpTicketMonitor {
                 // If a ticket was registered recently (within last 60 minutes), alert immediately!
                 if (DateUtils.isRecent(ticket.registrationTime, minutes = 60)) {
                     Log.d(TAG, "🔔 Found recent live ticket during baseline initialization: ${ticket.ticketNumber}")
-                    val desc = ticket.problemDescription
-                    val isEmerg = desc.contains("आग") || desc.contains("मृत") || desc.contains("दमकल") ||
-                            desc.contains("दुर्घटना") || desc.contains("धंस") || desc.contains("गंभीर") ||
-                            ticket.forwardingOption.contains("EMERGENCY", ignoreCase = true)
-
                     SnpNotificationManager.showNewComplaintAlert(
                         context = context,
                         ticketId = ticket.id,
                         ticketNumber = ticket.ticketNumber,
                         wardNumber = ticket.wardNumber,
-                        categoryTitle = desc,
+                        categoryTitle = ticket.problemDescription,
                         citizenName = ticket.citizenName,
-                        citizenPhone = ticket.citizenPhone,
-                        isEmergency = isEmerg
+                        citizenPhone = ticket.citizenPhone
                     )
                 }
             }
@@ -130,20 +124,14 @@ object SnpTicketMonitor {
             if (previousStatus == null) {
                 // 1. BRAND NEW COMPLAINT!
                 Log.d(TAG, "🔔 Live new complaint detected: ${ticket.ticketNumber} (${ticket.id}) | status: ${ticket.status}")
-                val desc = ticket.problemDescription
-                val isEmerg = desc.contains("आग") || desc.contains("मृत") || desc.contains("दमकल") ||
-                        desc.contains("दुर्घटना") || desc.contains("धंस") || desc.contains("गंभीर") ||
-                        ticket.forwardingOption.contains("EMERGENCY", ignoreCase = true)
-
                 SnpNotificationManager.showNewComplaintAlert(
                     context = context,
                     ticketId = ticket.id,
                     ticketNumber = ticket.ticketNumber,
                     wardNumber = ticket.wardNumber,
-                    categoryTitle = desc,
+                    categoryTitle = ticket.problemDescription,
                     citizenName = ticket.citizenName,
-                    citizenPhone = ticket.citizenPhone,
-                    isEmergency = isEmerg
+                    citizenPhone = ticket.citizenPhone
                 )
                 editor.putString(statusKey, ticket.status)
             } else if (!previousStatus.equals(ticket.status, ignoreCase = true)) {

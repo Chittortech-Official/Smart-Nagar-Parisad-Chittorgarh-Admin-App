@@ -142,8 +142,7 @@ object SnpNotificationManager {
         wardNumber: Int,
         categoryTitle: String,
         citizenName: String,
-        citizenPhone: String = "",
-        isEmergency: Boolean = false
+        citizenPhone: String = ""
     ) {
         if (!hasNotificationPermission(context)) return
 
@@ -160,12 +159,8 @@ object SnpNotificationManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val channelId = if (isEmergency) CHANNEL_EMERGENCY_ID else CHANNEL_NEW_COMPLAINTS_ID
-        val title = if (isEmergency) {
-            "🚨 [वार्ड $wardNumber] आपातकालीन शिकायत दर्ज!"
-        } else {
-            "📝 [वार्ड $wardNumber] नई नागरिक शिकायत दर्ज"
-        }
+        val channelId = CHANNEL_NEW_COMPLAINTS_ID
+        val title = "📝 [वार्ड $wardNumber] नई नागरिक शिकायत दर्ज"
 
         val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
         val cleanPhone = citizenPhone.trim()
@@ -192,12 +187,12 @@ object SnpNotificationManager {
             .setContentTitle(title)
             .setContentText(collapsedText)
             .setStyle(NotificationCompat.BigTextStyle().bigText(expandedCardText))
-            .setPriority(if (isEmergency) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
-            .setVibrate(if (isEmergency) longArrayOf(0, 300, 200, 300, 200, 500) else longArrayOf(0, 250, 150, 250))
+            .setVibrate(longArrayOf(0, 250, 150, 250))
             .setContentIntent(pendingIntent)
-            .setColor(if (isEmergency) Color.RED else 0xFFE65100.toInt())
+            .setColor(0xFFE65100.toInt())
 
         buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
         builder.addAction(buildViewAction(context, ticketId, ticketNumber, "👁️ शिकायत देखें"))
