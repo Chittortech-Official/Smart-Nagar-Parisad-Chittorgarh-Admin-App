@@ -138,37 +138,54 @@ object SnpTicketMonitor {
                 // 2. STATUS CHANGED!
                 Log.d(TAG, "🔔 Live status transition detected for ${ticket.ticketNumber}: $previousStatus -> ${ticket.status}")
                 val newStatus = ticket.status.trim().uppercase()
-                if (newStatus == "CLOSED" || newStatus.contains("RESOLVED")) {
-                    SnpNotificationManager.showResolvedAlert(
-                        context = context,
-                        ticketId = ticket.id,
-                        ticketNumber = ticket.ticketNumber,
-                        wardNumber = ticket.wardNumber,
-                        categoryTitle = ticket.problemDescription,
-                        citizenName = ticket.citizenName,
-                        citizenPhone = ticket.citizenPhone
-                    )
-                } else if (newStatus.contains("REJECT")) {
-                    SnpNotificationManager.showRejectedAlert(
-                        context = context,
-                        ticketId = ticket.id,
-                        ticketNumber = ticket.ticketNumber,
-                        wardNumber = ticket.wardNumber,
-                        categoryTitle = ticket.problemDescription,
-                        citizenName = ticket.citizenName,
-                        citizenPhone = ticket.citizenPhone
-                    )
-                } else {
-                    SnpNotificationManager.showStatusChangeAlert(
-                        context = context,
-                        ticketId = ticket.id,
-                        ticketNumber = ticket.ticketNumber,
-                        wardNumber = ticket.wardNumber,
-                        categoryTitle = ticket.problemDescription,
-                        newStatus = ticket.status,
-                        citizenName = ticket.citizenName,
-                        citizenPhone = ticket.citizenPhone
-                    )
+                when {
+                    newStatus == "CLOSED" -> {
+                        // Step 2: Final 2-Step complete closure with citizen satisfaction
+                        SnpNotificationManager.showFinalClosedAlert(
+                            context = context,
+                            ticketId = ticket.id,
+                            ticketNumber = ticket.ticketNumber,
+                            wardNumber = ticket.wardNumber,
+                            categoryTitle = ticket.problemDescription,
+                            citizenName = ticket.citizenName,
+                            citizenPhone = ticket.citizenPhone
+                        )
+                    }
+                    newStatus.contains("RESOLVED") -> {
+                        // Step 1: Officer field resolution done, citizen call pending
+                        SnpNotificationManager.showOfficerResolvedAlert(
+                            context = context,
+                            ticketId = ticket.id,
+                            ticketNumber = ticket.ticketNumber,
+                            wardNumber = ticket.wardNumber,
+                            categoryTitle = ticket.problemDescription,
+                            citizenName = ticket.citizenName,
+                            citizenPhone = ticket.citizenPhone
+                        )
+                    }
+                    newStatus.contains("REJECT") -> {
+                        SnpNotificationManager.showRejectedAlert(
+                            context = context,
+                            ticketId = ticket.id,
+                            ticketNumber = ticket.ticketNumber,
+                            wardNumber = ticket.wardNumber,
+                            categoryTitle = ticket.problemDescription,
+                            citizenName = ticket.citizenName,
+                            citizenPhone = ticket.citizenPhone
+                        )
+                    }
+                    else -> {
+                        SnpNotificationManager.showStatusChangeAlert(
+                            context = context,
+                            ticketId = ticket.id,
+                            ticketNumber = ticket.ticketNumber,
+                            wardNumber = ticket.wardNumber,
+                            categoryTitle = ticket.problemDescription,
+                            newStatus = ticket.status,
+                            citizenName = ticket.citizenName,
+                            citizenPhone = ticket.citizenPhone
+                        )
+                    }
                 }
                 editor.putString(statusKey, ticket.status)
             }

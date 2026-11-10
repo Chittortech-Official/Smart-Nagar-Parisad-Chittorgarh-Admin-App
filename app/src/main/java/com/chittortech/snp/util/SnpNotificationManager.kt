@@ -89,8 +89,8 @@ object SnpNotificationManager {
             "IN_PROGRESS" -> Pair("🟡 प्रक्रियाधीन (In Progress)", 0xFFD97706.toInt())
             "PENDING", "REGISTERED" -> Pair("🔵 दर्ज / लंबित (Registered)", 0xFF0D47A1.toInt())
             "ASSIGNED" -> Pair("🟣 वार्ड टीम को आवंटित (Assigned)", 0xFF7C3AED.toInt())
-            "RESOLVED", "RESOLVED_AWAITING_CITIZEN" -> Pair("🟢 समाधान सत्यापित (Resolved)", 0xFF16A34A.toInt())
-            "CLOSED" -> Pair("✅ सफल निस्तारण पूर्ण (Closed)", 0xFF16A34A.toInt())
+            "RESOLVED", "RESOLVED_AWAITING_CITIZEN" -> Pair("🟡 स्टेप 1: अधिकारी समाधान (Citizen Call Pending)", 0xFFD97706.toInt())
+            "CLOSED" -> Pair("🟢 स्टेप 2: 2-स्टेप समाधान पूर्ण (Closed)", 0xFF16A34A.toInt())
             "REJECTED" -> Pair("🔴 निरस्त (Rejected)", 0xFFDC2626.toInt())
             "OVERDUE" -> Pair("⚠️ समय सीमा पार (Overdue)", 0xFFDC2626.toInt())
             else -> Pair("⚪ ${status.replace("_", " ")}", 0xFF475569.toInt())
@@ -265,7 +265,8 @@ object SnpNotificationManager {
         NotificationManagerCompat.from(context).notify(notifId, builder.build())
     }
 
-    fun showResolvedAlert(
+    // ── STEP 1: Officer Verification & Field Resolution Complete (Awaiting Citizen Call) ──
+    fun showOfficerResolvedAlert(
         context: Context,
         ticketId: String,
         ticketNumber: String,
@@ -276,7 +277,7 @@ object SnpNotificationManager {
     ) {
         if (!hasNotificationPermission(context)) return
 
-        val notifId = (ticketId + "_resolved").hashCode()
+        val notifId = (ticketId + "_officer_resolved").hashCode()
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
@@ -292,19 +293,84 @@ object SnpNotificationManager {
         val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
         val cleanPhone = citizenPhone.trim()
 
-        val title = "✅ [वार्ड $wardNumber] शिकायत समाधान पूर्ण!"
+        val title = "🔧 [वार्ड $wardNumber] स्टेप 1: अधिकारी द्वारा कार्य समाधान"
         val collapsedText = if (cleanPhone.isNotBlank()) {
-            "🎉 समाधान पूर्ण • 👤 $citizenDisplayName ($cleanPhone)"
+            "🟡 फील्ड कार्य पूर्ण • 👤 $citizenDisplayName (कॉल लंबित)"
         } else {
-            "🎉 समाधान पूर्ण • 👤 $citizenDisplayName"
+            "🟡 फील्ड कार्य पूर्ण • नागरिक फीडबैक कॉल लंबित"
         }
 
         val expandedCardText = buildString {
-            append("🎉 समाधान सत्यापित: कार्य गुणवत्तापूर्वक निस्तारित\n")
+            append("⚡ स्टेप 1 पूर्ण: फील्ड अधिकारी द्वारा कार्य गुणवत्तापूर्वक निस्तारित\n")
             append("📋 विषय: ").append(categoryTitle).append("\n")
             append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
             append("📞 संपर्क: ").append(if (cleanPhone.isNotBlank()) cleanPhone else "उपलब्ध नहीं").append("\n")
-            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • नागरिक संतुष्टि सत्यापित")
+            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • नगर परिषद चित्तौड़गढ़\n")
+            append("⏳ आगामी कार्रवाई: स्टेप 2 नागरिक संतुष्टि सत्यापन कॉल लंबित")
+        }
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSubText("गढ़-सेवा • $ticketNumber")
+            .setContentTitle(title)
+            .setContentText(collapsedText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(expandedCardText))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setVibrate(longArrayOf(0, 200, 100, 200))
+            .setContentIntent(pendingIntent)
+            .setColor(0xFFD97706.toInt()) // Amber
+
+        buildCallAction(context, ticketId, cleanPhone)?.let { builder.addAction(it) }
+        builder.addAction(buildViewAction(context, ticketId, ticketNumber, "👁️ सत्यापन देखें"))
+
+        NotificationManagerCompat.from(context).notify(notifId, builder.build())
+    }
+
+    // ── STEP 2: Citizen Confirmation & Two-Step Verification Complete (FINAL CLOSURE) ──
+    fun showFinalClosedAlert(
+        context: Context,
+        ticketId: String,
+        ticketNumber: String,
+        wardNumber: Int,
+        categoryTitle: String,
+        citizenName: String = "",
+        citizenPhone: String = ""
+    ) {
+        if (!hasNotificationPermission(context)) return
+
+        val notifId = (ticketId + "_final_closed").hashCode()
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("EXTRA_TICKET_NUMBER", ticketNumber)
+            putExtra("EXTRA_TICKET_ID", ticketId)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notifId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val citizenDisplayName = if (citizenName.isNotBlank()) citizenName.trim() else "नागरिक"
+        val cleanPhone = citizenPhone.trim()
+
+        val title = "✅ [वार्ड $wardNumber] 2-स्टेप समाधान पूर्ण (Final Closed)!"
+        val collapsedText = if (cleanPhone.isNotBlank()) {
+            "🎉 2-स्टेप समाधान पूर्ण • 👤 $citizenDisplayName ($cleanPhone)"
+        } else {
+            "🎉 2-स्टेप समाधान पूर्ण • नागरिक संतुष्टि सत्यापित"
+        }
+
+        val expandedCardText = buildString {
+            append("✅ स्टेप 2 पूर्ण: नागरिक संतुष्टि कॉल द्वारा विधिवत सत्यापित\n")
+            append("📋 विषय: ").append(categoryTitle).append("\n")
+            append("👤 नागरिक: ").append(citizenDisplayName).append("\n")
+            append("📞 संपर्क: ").append(if (cleanPhone.isNotBlank()) cleanPhone else "उपलब्ध नहीं").append("\n")
+            append("📍 स्थान: वार्ड नं. ").append(wardNumber).append(" • 2-स्टेप ऑडिट पूर्ण निस्तारण")
         }
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
