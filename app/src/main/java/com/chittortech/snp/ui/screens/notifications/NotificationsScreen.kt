@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -37,61 +38,7 @@ fun NotificationsScreen(
     var selectedFilter by remember { mutableStateOf("All") }
 
     val liveNotificationList = remember(notifications) {
-        if (notifications.isNotEmpty()) notifications
-        else {
-            listOf(
-                NotificationLog(
-                    id = "notif-1",
-                    ticketId = "SNP-2026-0891",
-                    recipientType = "CHAIRMAN_DESK",
-                    recipientPhone = "+919829000001",
-                    channel = "PUSH_ALERT",
-                    messageContent = "CRITICAL ALERT: Complaint #SNP-2026-0891 (Ward 12 Drainage Overflow) has exceeded 48h SLA without resolution. Escalated to Hon. Sabhapati desk.",
-                    status = "DELIVERED",
-                    sentAt = "2026-10-31T18:15:00Z"
-                ),
-                NotificationLog(
-                    id = "notif-2",
-                    ticketId = "SNP-2026-0914",
-                    recipientType = "VICE_CHAIRMAN_DESK",
-                    recipientPhone = "+919829000002",
-                    channel = "PUSH_ALERT",
-                    messageContent = "ESCALATION NOTICE: Ward 22 Streetlight breakdown complaint unresolved > 72h. Municipal electrical engineer notified.",
-                    status = "DELIVERED",
-                    sentAt = "2026-10-31T15:30:00Z"
-                ),
-                NotificationLog(
-                    id = "notif-3",
-                    ticketId = "SNP-2026-0955",
-                    recipientType = "CITIZEN_SMS",
-                    recipientPhone = "+919829444321",
-                    channel = "SMS_GATEWAY",
-                    messageContent = "प्रिय नागरिक, आपकी शिकायत #SNP-2026-0955 (सड़क मरम्मत) पर नगर परिषद टीम द्वारा निरीक्षण किया जा रहा है।",
-                    status = "DELIVERED",
-                    sentAt = "2026-10-31T12:00:00Z"
-                ),
-                NotificationLog(
-                    id = "notif-4",
-                    ticketId = "SYSTEM-DAILY",
-                    recipientType = "EXECUTIVE_SUMMARY",
-                    recipientPhone = "+919829000000",
-                    channel = "SYSTEM",
-                    messageContent = "दैनिक रिपोर्ट: आज चित्तौड़गढ़ नगर परिषद के 60 वार्डों से कुल 18 नई नागरिक शिकायतें दर्ज हुईं। 12 शिकायतों का सफल निस्तारण किया गया।",
-                    status = "DELIVERED",
-                    sentAt = "2026-10-31T09:00:00Z"
-                ),
-                NotificationLog(
-                    id = "notif-5",
-                    ticketId = "SYSTEM-COUNCIL",
-                    recipientType = "COUNCIL_SYNC",
-                    recipientPhone = "+919829000000",
-                    channel = "DATABASE_SYNC",
-                    messageContent = "चित्तौड़गढ़ नगर परिषद: सभी 60 वार्डों के निर्वाचित पार्षदों (भाजपा 33, कांग्रेस 23, निर्दलीय 4) का डायरेक्टरी डेटा सफलतापूर्वक सिंक किया गया।",
-                    status = "DELIVERED",
-                    sentAt = "2026-10-30T20:45:00Z"
-                )
-            )
-        }
+        notifications
     }
 
     val filteredList = remember(liveNotificationList, selectedFilter) {
@@ -166,7 +113,17 @@ fun NotificationsScreen(
             }
 
             if (filteredList.isEmpty()) {
-                EmptyState(icon = Icons.Default.NotificationsActive, message = "No notifications found.")
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(40.dp))
+                    EmptyState(icon = Icons.Default.NotificationsActive, message = "कोई नई सूचना या अलर्ट उपलब्ध नहीं है।")
+                    Spacer(modifier = Modifier.weight(1f))
+                    SnpOfficialFooter()
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier

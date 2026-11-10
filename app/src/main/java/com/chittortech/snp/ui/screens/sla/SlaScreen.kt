@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -38,69 +39,8 @@ fun SlaScreen(
 ) {
     var selectedFilter by remember { mutableStateOf("All") }
 
-    // If no tickets in DB are marked overdue, dynamically synthesize/filter open tickets
     val activeBreaches = remember(overdueTickets) {
-        if (overdueTickets.isNotEmpty()) overdueTickets
-        else {
-            listOf(
-                Ticket(
-                    id = "sla-1",
-                    ticketNumber = "SNP-2026-0891",
-                    citizenName = "राजेश जीनगर",
-                    citizenPhone = "+919829123456",
-                    wardNumber = 12,
-                    problemDescription = "मेन रोड पर 4 दिनों से ड्रेनेज ओवरफ्लो और गंदा पानी सड़क पर भरा हुआ है। दुर्गंध और आवागमन बाधित।",
-                    status = "IN_PROGRESS",
-                    isOverdue = true,
-                    isEscalated = true,
-                    escalationNotes = "Exceeded 48h SLA for drainage complaints without resolution.",
-                    registrationTime = "2026-10-27T10:30:00Z",
-                    slaDeadline = "2026-10-29T10:30:00Z"
-                ),
-                Ticket(
-                    id = "sla-2",
-                    ticketNumber = "SNP-2026-0914",
-                    citizenName = "सुरेश कुमार शर्मा",
-                    citizenPhone = "+919414098765",
-                    wardNumber = 22,
-                    problemDescription = "कॉलोनी की 8 स्ट्रीटलाइट्स पिछले 5 दिनों से पूरी तरह बंद हैं। रात्रि में सुरक्षा का गंभीर खतरा।",
-                    status = "REGISTERED",
-                    isOverdue = true,
-                    isEscalated = true,
-                    escalationNotes = "Unassigned ticket past municipal electrical SLA deadline.",
-                    registrationTime = "2026-10-26T14:15:00Z",
-                    slaDeadline = "2026-10-28T14:15:00Z"
-                ),
-                Ticket(
-                    id = "sla-3",
-                    ticketNumber = "SNP-2026-0932",
-                    citizenName = "श्रीमती कमला देवी",
-                    citizenPhone = "+919828555123",
-                    wardNumber = 7,
-                    problemDescription = "कचरा संग्रहण गाड़ी पिछले 4 दिनों से गली में नहीं आ रही है। सार्वजनिक स्थल पर कचरे का ढेर लगा है।",
-                    status = "IN_PROGRESS",
-                    isOverdue = true,
-                    isEscalated = false,
-                    escalationNotes = "Sanitation SLA breached > 24 hours.",
-                    registrationTime = "2026-10-28T08:00:00Z",
-                    slaDeadline = "2026-10-29T18:00:00Z"
-                ),
-                Ticket(
-                    id = "sla-4",
-                    ticketNumber = "SNP-2026-0955",
-                    citizenName = "महेंद्र सिंह राठौड़",
-                    citizenPhone = "+919829444321",
-                    wardNumber = 31,
-                    problemDescription = "सड़क के बीच गहरा गड्ढा होने से दोपहिया वाहन गिर रहे हैं। तत्काल डामरीकरण आवश्यक।",
-                    status = "REGISTERED",
-                    isOverdue = true,
-                    isEscalated = true,
-                    escalationNotes = "High risk public safety hazard pending review.",
-                    registrationTime = "2026-10-27T16:45:00Z",
-                    slaDeadline = "2026-10-29T16:45:00Z"
-                )
-            )
-        }
+        overdueTickets
     }
 
     val filteredList = remember(activeBreaches, selectedFilter) {
@@ -206,7 +146,17 @@ fun SlaScreen(
             }
 
             if (filteredList.isEmpty()) {
-                EmptyState(icon = Icons.Default.HourglassEmpty, message = "No SLA breaches in this filter.")
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(40.dp))
+                    EmptyState(icon = Icons.Default.HourglassEmpty, message = "कोई एसएलए उल्लंघन (SLA Breach) लंबित नहीं है।")
+                    Spacer(modifier = Modifier.weight(1f))
+                    SnpOfficialFooter()
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier

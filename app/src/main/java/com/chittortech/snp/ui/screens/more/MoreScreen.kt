@@ -30,7 +30,7 @@ fun MoreScreen(
     authorityName: String,
     authorityRole: String,
     authorityEmail: String,
-    onNavigateToSla: () -> Unit,
+    onNavigateToSla: () -> Unit = {},
     onNavigateToNotifications: () -> Unit = {},
     onNavigateToAbout: () -> Unit,
     onNavigateToContact: () -> Unit,
@@ -129,14 +129,6 @@ fun MoreScreen(
                         title = "City Control Room Directory",
                         subtitle = "Landline, Fire Brigade & AEN/JEN Hotlines",
                         onClick = onNavigateToControlRoom
-                    )
-                    HorizontalDivider(color = SnpBorder.copy(alpha = 0.6f))
-                    SettingsMenuItem(
-                        icon = Icons.Default.WarningAmber,
-                        iconTint = Color(0xFFDC2626),
-                        title = "SLA & Escalation Monitor",
-                        subtitle = "11 categories & overdue escalation rules",
-                        onClick = onNavigateToSla
                     )
                     HorizontalDivider(color = SnpBorder.copy(alpha = 0.6f))
                     SettingsMenuItem(
