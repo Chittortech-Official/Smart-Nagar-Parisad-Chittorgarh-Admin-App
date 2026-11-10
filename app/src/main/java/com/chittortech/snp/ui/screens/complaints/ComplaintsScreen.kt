@@ -295,13 +295,16 @@ fun ComplaintsScreen(
                                 ) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.weight(1f, fill = false)
                                     ) {
                                         Text(
                                             text = ticket.ticketNumber,
                                             fontSize = 12.5.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = SnpPrimary
+                                            color = SnpPrimary,
+                                            maxLines = 1,
+                                            softWrap = false
                                         )
                                         Surface(
                                             shape = RoundedCornerShape(4.dp),
@@ -359,20 +362,20 @@ fun ComplaintsScreen(
 
                                 Spacer(modifier = Modifier.height(6.dp))
 
-                                // Line 3: Problem Description
+                                // Line 3: Problem Description (two to three lines with ellipsis for long text)
                                 Text(
                                     text = ticket.problemDescription,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = TextPrimary,
-                                    maxLines = 2,
+                                    maxLines = 3,
                                     overflow = TextOverflow.Ellipsis,
                                     lineHeight = 18.sp
                                 )
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                // Line 4: Citizen Name and Time
+                                // Line 4: Citizen Name, Mobile and Time
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -398,6 +401,8 @@ fun ComplaintsScreen(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                     }
+
+                                    Spacer(modifier = Modifier.width(8.dp))
 
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,

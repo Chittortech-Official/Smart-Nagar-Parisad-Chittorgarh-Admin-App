@@ -147,8 +147,17 @@ fun SectionHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(
+            text = title,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary,
+            modifier = Modifier.weight(1f, fill = false),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         if (actionLabel.isNotBlank()) {
+            Spacer(modifier = Modifier.width(8.dp))
             TextButton(onClick = onAction, contentPadding = PaddingValues(0.dp)) {
                 Text(actionLabel, fontSize = 12.sp, color = SnpPrimary, fontWeight = FontWeight.SemiBold)
             }
@@ -184,10 +193,10 @@ fun SnpTopBar(
                     if (onTitleClick != null) Modifier.clickable(onClick = onTitleClick) else Modifier
                 )
         ) {
-            Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
+            Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (subtitle.isNotBlank()) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(subtitle, fontSize = 11.sp, color = Color.White.copy(alpha = 0.85f), maxLines = 1)
+                Text(subtitle, fontSize = 11.sp, color = Color.White.copy(alpha = 0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         if (onRefreshClick != null) {
