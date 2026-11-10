@@ -206,7 +206,7 @@ fun ParshadsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(SnpBackground),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                contentPadding = PaddingValues(bottom = 6.dp)
             ) {
             if (displayList.isEmpty()) {
                 item(key = "empty_state") {

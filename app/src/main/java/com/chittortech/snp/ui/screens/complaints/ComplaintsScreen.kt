@@ -32,6 +32,25 @@ import com.chittortech.snp.ui.components.StatusBadge
 import com.chittortech.snp.ui.theme.*
 import com.chittortech.snp.util.DateUtils
 
+// Helper to normalize Hindi digits (०-९) into standard ASCII digits (0-9)
+private fun normalizeHindiDigits(input: String): String {
+    return input.map { ch ->
+        when (ch) {
+            '०' -> '0'
+            '१' -> '1'
+            '२' -> '2'
+            '३' -> '3'
+            '४' -> '4'
+            '५' -> '5'
+            '६' -> '6'
+            '७' -> '7'
+            '८' -> '8'
+            '९' -> '9'
+            else -> ch
+        }
+    }.joinToString("")
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComplaintsScreen(
@@ -45,28 +64,81 @@ fun ComplaintsScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedStatus by remember { mutableStateOf("ALL") }
 
-    val statusTabs = listOf("ALL", "REGISTERED", "IN_PROGRESS", "CLOSED", "OVERDUE")
+    val statusTabs = listOf(
+        "Total Registered" to "ALL",
+        "Total Running" to "IN_PROGRESS",
+        "Total Completed" to "CLOSED",
+        "Total Rejected" to "REJECTED"
+    )
 
     val todayTicketsTotal = remember(tickets) {
         tickets.count { DateUtils.isToday(it.registrationTime) }
     }
 
     val filteredTickets = remember(tickets, searchQuery, selectedStatus) {
+        val rawQuery = searchQuery.trim()
+        val normQuery = normalizeHindiDigits(rawQuery)
+        val queryAlphaNum = normQuery.filter { it.isLetterOrDigit() }.lowercase()
+        val queryDigits = normQuery.filter { it.isDigit() }
+        val queryTokens = rawQuery.lowercase().split("\\s+".toRegex()).filter { it.isNotBlank() }
+
         tickets.filter { t ->
-            val matchesDate = DateUtils.isToday(t.registrationTime)
+            val matchesSearch = if (rawQuery.isBlank()) {
+                true
+            } else {
+                val catMeta = OfficialCategoriesDirectory.getCategoryMeta(t.categoryId, t.problemDescription)
+                val ticketAlphaNum = t.ticketNumber.filter { it.isLetterOrDigit() }.lowercase()
+                val ticketDigits = t.ticketNumber.filter { it.isDigit() }
+                val phoneDigits = t.citizenPhone.filter { it.isDigit() }
 
-            val matchesSearch = searchQuery.isBlank() ||
-                    t.ticketNumber.contains(searchQuery, ignoreCase = true) ||
-                    t.citizenName.contains(searchQuery, ignoreCase = true) ||
-                    t.wardNumber.toString() == searchQuery.trim() ||
-                    t.problemDescription.contains(searchQuery, ignoreCase = true)
+                // 1. Ticket Number match (e.g. "CGR-0015", "0015", "15", "०0१५")
+                val matchesTicketNumber = t.ticketNumber.contains(rawQuery, ignoreCase = true) ||
+                        t.ticketNumber.contains(normQuery, ignoreCase = true) ||
+                        (queryAlphaNum.isNotEmpty() && ticketAlphaNum.contains(queryAlphaNum)) ||
+                        (queryDigits.length >= 2 && ticketDigits.contains(queryDigits)) ||
+                        (queryDigits.isNotEmpty() && ticketDigits.toIntOrNull() != null && ticketDigits.toIntOrNull() == queryDigits.toIntOrNull())
 
-            val matchesStatus = when (selectedStatus) {
-                "ALL" -> true
-                "OVERDUE" -> t.isOverdue
-                else -> t.status.equals(selectedStatus, ignoreCase = true)
+                // 2. Citizen Name / Username match (English & Hindi)
+                val matchesCitizenName = t.citizenName.contains(rawQuery, ignoreCase = true) ||
+                        t.citizenName.contains(normQuery, ignoreCase = true) ||
+                        (queryTokens.isNotEmpty() && queryTokens.all { token -> t.citizenName.contains(token, ignoreCase = true) })
+
+                // 3. Citizen Mobile Number match (English digits, Hindi digits, with/without +91)
+                val matchesPhone = t.citizenPhone.contains(normQuery, ignoreCase = true) ||
+                        (queryDigits.length >= 3 && phoneDigits.contains(queryDigits)) ||
+                        (queryDigits.isNotEmpty() && phoneDigits.endsWith(queryDigits))
+
+                // 4. Ward Number match ("15", "Ward 15", "वार्ड 15", "W15")
+                val matchesWard = (queryDigits.isNotEmpty() && t.wardNumber.toString() == queryDigits) ||
+                        normQuery.equals("ward ${t.wardNumber}", ignoreCase = true) ||
+                        normQuery.equals("w${t.wardNumber}", ignoreCase = true) ||
+                        rawQuery.contains("वार्ड ${t.wardNumber}", ignoreCase = true)
+
+                // 5. Category Name & Problem Description (English and Hindi)
+                val matchesCategoryOrProblem = t.problemDescription.contains(rawQuery, ignoreCase = true) ||
+                        t.problemDescription.contains(normQuery, ignoreCase = true) ||
+                        catMeta.name.contains(rawQuery, ignoreCase = true) ||
+                        catMeta.hindiName.contains(rawQuery, ignoreCase = true) ||
+                        catMeta.departmentCode.contains(rawQuery, ignoreCase = true)
+
+                matchesTicketNumber || matchesCitizenName || matchesPhone || matchesWard || matchesCategoryOrProblem
             }
-            matchesDate && matchesSearch && matchesStatus
+
+            // Status tab filtering:
+            // When searching, match across all statuses so the user finds the complaint regardless of active tab
+            val matchesStatus = if (rawQuery.isNotBlank()) {
+                true
+            } else {
+                when (selectedStatus) {
+                    "ALL" -> true
+                    "IN_PROGRESS" -> t.status.equals("IN_PROGRESS", ignoreCase = true) || t.status.equals("REGISTERED", ignoreCase = true)
+                    "CLOSED" -> t.status.equals("CLOSED", ignoreCase = true) || t.status.contains("RESOLVED", ignoreCase = true)
+                    "REJECTED" -> t.status.contains("REJECT", ignoreCase = true)
+                    else -> true
+                }
+            }
+
+            matchesSearch && matchesStatus
         }.sortedByDescending { it.registrationTime ?: "" }
     }
 
@@ -77,19 +149,19 @@ fun ComplaintsScreen(
     ) {
         SnpTopBar(
             title = "शिकायत निवारण कमान",
-            subtitle = "आज की कुल $todayTicketsTotal शिकायतें (Today's Live Queue)",
+            subtitle = "कुल ${tickets.size} शिकायतें • आज दर्ज: $todayTicketsTotal",
             onNotificationClick = onNotificationClick,
             onRefreshClick = onRefreshClick
         )
 
-        // Unified Search Bar
+        // Unified Search Bar (Bilingual English & Hindi: Ticket ID, Citizen Name, Mobile No, Ward)
         SnpSearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
-            placeholder = "Search by Ticket ID, Ward, Citizen Name..."
+            placeholder = "टिकट ID, नाम, मोबाइल नंबर या वार्ड खोजें..."
         )
 
-        // Status Filter Tabs
+        // 4 Primary Status Filter Tabs: Total Registered, Total Running, Total Completed, Total Rejected
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,13 +169,22 @@ fun ComplaintsScreen(
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            statusTabs.forEach { status ->
-                val isSelected = selectedStatus == status
+            statusTabs.forEach { (label, statusKey) ->
+                val isSelected = selectedStatus == statusKey
+                val count = remember(tickets, statusKey) {
+                    when (statusKey) {
+                        "ALL" -> tickets.size
+                        "IN_PROGRESS" -> tickets.count { it.status == "IN_PROGRESS" || it.status == "REGISTERED" }
+                        "CLOSED" -> tickets.count { it.status == "CLOSED" || it.status.contains("RESOLVED", ignoreCase = true) }
+                        "REJECTED" -> tickets.count { it.status.contains("REJECT", ignoreCase = true) }
+                        else -> tickets.size
+                    }
+                }
                 FilterChip(
                     selected = isSelected,
-                    onClick = { selectedStatus = status },
+                    onClick = { selectedStatus = statusKey },
                     shape = SnpSquareShape,
-                    label = { Text(status.replace("_", " "), fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                    label = { Text("$label ($count)", fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = SnpPrimary,
                         selectedLabelColor = Color.White,
@@ -135,7 +216,12 @@ fun ComplaintsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(30.dp))
-                    EmptyState(message = if (searchQuery.isNotBlank()) "खोज के अनुसार कोई शिकायत नहीं मिली।" else "आज कोई नई शिकायत दर्ज नहीं हुई है।")
+                    EmptyState(
+                        message = if (searchQuery.isNotBlank()) 
+                            "'$searchQuery' के लिए कोई शिकायत नहीं मिली। कृपया टिकट नंबर, नाम या मोबाइल नंबर जांचें।" 
+                        else 
+                            "इस श्रेणी में कोई शिकायत उपलब्ध नहीं है।"
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Official Portal Archive Notice
@@ -165,7 +251,7 @@ fun ComplaintsScreen(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "मोबाइल ऐप में केवल 'आज' (Today) की नागरिक शिकायतें एवं त्वरित कार्रवाई सूची प्रदर्शित होती है। पूर्व की शिकायतों, मासिक प्रगति विवरण एवं संपूर्ण ऑडिट रिकॉर्ड देखने व प्रिंट करने हेतु नगर परिषद वेब पोर्टल अथवा कंट्रोल रूम रिकॉर्ड शाखा (Portal Officer) से डेटा प्राप्त करें।",
+                                    text = "मोबाइल ऐप में नगर परिषद चित्तौड़गढ़ की समस्त पंजीकृत शिकायतें, प्रगति विवरण एवं त्वरित कार्रवाई सूची प्रदर्शित होती है। मासिक ऑडिट रिकॉर्ड व विस्तृत प्रिंट हेतु नगर परिषद वेब पोर्टल अथवा कंट्रोल रूम रिकॉर्ड शाखा से डेटा प्राप्त करें।",
                                     fontSize = 11.sp,
                                     color = TextSecondary,
                                     lineHeight = 15.sp
@@ -175,7 +261,6 @@ fun ComplaintsScreen(
                     }
 
                     SnpOfficialFooter()
-                    Spacer(modifier = Modifier.height(20.dp))
                 }
             } else {
                 LazyColumn(
@@ -183,7 +268,7 @@ fun ComplaintsScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp)
+                    contentPadding = PaddingValues(bottom = 6.dp)
                 ) {
                     items(
                         items = filteredTickets,
@@ -305,7 +390,7 @@ fun ComplaintsScreen(
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
-                                            text = ticket.citizenName,
+                                            text = if (ticket.citizenPhone.isNotBlank()) "${ticket.citizenName} • ${ticket.citizenPhone}" else ticket.citizenName,
                                             fontSize = 11.sp,
                                             color = TextSecondary,
                                             fontWeight = FontWeight.Medium,
@@ -367,7 +452,7 @@ fun ComplaintsScreen(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "मोबाइल ऐप में केवल 'आज' (Today) की नागरिक शिकायतें एवं त्वरित कार्रवाई सूची प्रदर्शित होती है। पूर्व की शिकायतों, मासिक प्रगति विवरण एवं संपूर्ण ऑडिट रिकॉर्ड देखने व प्रिंट करने हेतु नगर परिषद वेब पोर्टल अथवा कंट्रोल रूम रिकॉर्ड शाखा (Portal Officer) से डेटा प्राप्त करें।",
+                                    text = "मोबाइल ऐप में नगर परिषद चित्तौड़गढ़ की समस्त पंजीकृत शिकायतें, प्रगति विवरण एवं त्वरित कार्रवाई सूची प्रदर्शित होती है। मासिक ऑडिट रिकॉर्ड व विस्तृत प्रिंट हेतु नगर परिषद वेब पोर्टल अथवा कंट्रोल रूम रिकॉर्ड शाखा से डेटा प्राप्त करें।",
                                     fontSize = 11.sp,
                                     color = TextSecondary,
                                     lineHeight = 15.sp

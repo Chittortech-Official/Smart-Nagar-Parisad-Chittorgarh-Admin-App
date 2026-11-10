@@ -174,7 +174,11 @@ data class DashboardStats(
     val yearClosed: Int = 0,
     val overdueComplaints: Int = 0,
     val escalatedComplaints: Int = 0,
-    val resolutionRatePercent: Int = 0
+    val resolutionRatePercent: Int = 0,
+    val totalRegistered: Int = 0,
+    val totalRunning: Int = 0,
+    val totalCompleted: Int = 0,
+    val totalRejected: Int = 0
 )
 
 data class DepartmentStats(

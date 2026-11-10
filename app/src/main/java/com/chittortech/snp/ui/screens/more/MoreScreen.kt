@@ -173,8 +173,6 @@ fun MoreScreen(
 
             // Official Nagar Parishad Branded Footer
             SnpOfficialFooter()
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

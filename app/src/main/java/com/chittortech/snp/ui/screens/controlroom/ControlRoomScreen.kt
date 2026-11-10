@@ -189,7 +189,7 @@ fun ControlRoomScreen(
                 .background(SnpBackground)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 20.dp)
+            contentPadding = PaddingValues(bottom = 6.dp)
         ) {
             // Header Info Banner
             item {

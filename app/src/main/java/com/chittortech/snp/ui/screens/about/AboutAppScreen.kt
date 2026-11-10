@@ -431,8 +431,7 @@ fun AboutAppScreen(
             // Official Nagar Parishad Branded Footer
             SnpOfficialFooter()
 
-            // Generous breathing room so card is NEVER cut off
-            Spacer(modifier = Modifier.navigationBarsPadding().height(20.dp))
+            Spacer(modifier = Modifier.navigationBarsPadding())
         }
     }
 }

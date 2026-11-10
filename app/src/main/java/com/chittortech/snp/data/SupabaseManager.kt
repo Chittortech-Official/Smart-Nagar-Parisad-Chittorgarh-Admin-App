@@ -34,6 +34,10 @@ object SupabaseManager {
         install(Auth)
     }
 
+    fun isSessionAuthenticated(): Boolean {
+        return client.auth.currentSessionOrNull() != null
+    }
+
     suspend fun restoreSessionIfAvailable(context: Context): Boolean {
         if (client.auth.currentSessionOrNull() != null) return true
         val sessionJson = SnpSessionManager.getSavedSupabaseSessionJson(context) ?: return false
@@ -41,7 +45,13 @@ object SupabaseManager {
             val session = Json.decodeFromString<UserSession>(sessionJson)
             client.auth.importSession(session)
             Log.d("SupabaseManager", "Restored authenticated Supabase session from encrypted storage.")
-            true
+            val current = client.auth.currentSessionOrNull()
+            if (current == null) {
+                Log.w("SupabaseManager", "Session was cleared/invalidated after import.")
+                false
+            } else {
+                true
+            }
         } catch (e: Exception) {
             Log.e("SupabaseManager", "Error restoring session: ${e.message}")
             false
@@ -52,12 +62,17 @@ object SupabaseManager {
         if (context != null) {
             restoreSessionIfAvailable(context)
         }
+        val session = client.auth.currentSessionOrNull()
+        Log.d("SupabaseManager", "getTickets called. Auth session present: ${session != null}, user: ${session?.user?.email}")
         return try {
-            client.postgrest["tickets"]
+            val list = client.postgrest["tickets"]
                 .select()
                 .decodeList<Ticket>()
                 .sortedByDescending { it.registrationTime ?: "" }
+            Log.d("SupabaseManager", "FETCH TICKETS SUCCESS: ${list.size} tickets returned from Supabase database")
+            list
         } catch (e: Exception) {
+            Log.e("SupabaseManager", "FETCH TICKETS FAILED: ${e.javaClass.simpleName} - ${e.message}", e)
             emptyList()
         }
     }

@@ -135,8 +135,8 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     KpiCard(
-                        title = "Today Registered",
-                        value = "${stats.todayRegistered}",
+                        title = "Total Registered",
+                        value = "${stats.totalRegistered}",
                         subtitle = "New Complaints",
                         icon = Icons.Default.FiberNew,
                         cardBg = Color(0xFFFFF3E0), // Soft Kesariya / Bhagwa
@@ -147,15 +147,15 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f)
                     )
                     KpiCard(
-                        title = "Pending Action",
-                        value = "${stats.pendingComplaints}",
-                        subtitle = "Under Inspection",
-                        icon = Icons.Default.PendingActions,
-                        cardBg = Color(0xFFFFFBEB), // Soft Warm Amber
-                        borderColor = Color(0xFFFDE68A),
-                        iconBg = Color(0xFFFEF3C7),
-                        iconTint = Color(0xFFD97706),
-                        valueColor = Color(0xFFB45309),
+                        title = "Total Running",
+                        value = "${stats.totalRunning}",
+                        subtitle = "In Progress / Active",
+                        icon = Icons.Default.Engineering,
+                        cardBg = Color(0xFFF5F3FF), // Soft Regal Purple
+                        borderColor = Color(0xFFDDD6FE),
+                        iconBg = Color(0xFFEDE9FE),
+                        iconTint = Color(0xFF7C3AED),
+                        valueColor = Color(0xFF6D28D9),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -165,27 +165,27 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     KpiCard(
-                        title = "In Progress",
-                        value = "${stats.inProgressComplaints}",
-                        subtitle = "Assigned to Ward",
-                        icon = Icons.Default.Engineering,
-                        cardBg = Color(0xFFF5F3FF), // Soft Regal Purple
-                        borderColor = Color(0xFFDDD6FE),
-                        iconBg = Color(0xFFEDE9FE),
-                        iconTint = Color(0xFF7C3AED),
-                        valueColor = Color(0xFF6D28D9),
-                        modifier = Modifier.weight(1f)
-                    )
-                    KpiCard(
-                        title = "Closed Today",
-                        value = "${stats.todayClosed}",
-                        subtitle = "Resolved & Verified",
+                        title = "Total Completed",
+                        value = "${stats.totalCompleted}",
+                        subtitle = "Resolved & Closed",
                         icon = Icons.Default.TaskAlt,
                         cardBg = Color(0xFFF0FDF4), // Soft Mint Green
                         borderColor = Color(0xFFBBF7D0),
                         iconBg = Color(0xFFDCFCE7),
                         iconTint = Color(0xFF16A34A),
                         valueColor = Color(0xFF15803D),
+                        modifier = Modifier.weight(1f)
+                    )
+                    KpiCard(
+                        title = "Total Rejected",
+                        value = "${stats.totalRejected}",
+                        subtitle = "Rejected / Cancelled",
+                        icon = Icons.Default.Cancel,
+                        cardBg = Color(0xFFFEF2F2), // Soft Light Red
+                        borderColor = Color(0xFFFECACA),
+                        iconBg = Color(0xFFFEE2E2),
+                        iconTint = Color(0xFFDC2626),
+                        valueColor = Color(0xFFB91C1C),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -559,8 +559,6 @@ fun HomeScreen(
 
             // Official Nagar Parishad Branded Footer
             SnpOfficialFooter()
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

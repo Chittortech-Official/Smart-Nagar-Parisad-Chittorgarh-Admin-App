@@ -420,8 +420,6 @@ fun ComplaintDetailScreen(
 
             // Official Nagar Parishad Branded Footer
             SnpOfficialFooter()
-
-            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

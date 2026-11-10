@@ -313,7 +313,7 @@ fun SnpOfficialFooter(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 22.dp, bottom = 28.dp, start = 16.dp, end = 16.dp),
+            .padding(top = 14.dp, bottom = 4.dp, start = 16.dp, end = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Surface(
