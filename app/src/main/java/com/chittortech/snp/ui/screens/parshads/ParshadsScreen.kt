@@ -32,6 +32,7 @@ import com.chittortech.snp.R
 import com.chittortech.snp.data.OfficialParshadDirectory
 import com.chittortech.snp.data.models.Ward
 import com.chittortech.snp.ui.components.EmptyState
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.components.SnpSearchBar
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.theme.*
@@ -219,6 +220,10 @@ fun ParshadsScreen(
                 ) { item ->
                     ParshadCard(item = item)
                 }
+            }
+
+            item(key = "snp_official_footer") {
+                SnpOfficialFooter()
             }
         }
     }

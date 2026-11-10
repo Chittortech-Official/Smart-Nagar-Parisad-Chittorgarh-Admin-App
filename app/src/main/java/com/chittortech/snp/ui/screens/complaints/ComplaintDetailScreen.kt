@@ -25,6 +25,7 @@ import com.chittortech.snp.data.SupabaseManager
 import com.chittortech.snp.data.models.AuthorityConfirmation
 import com.chittortech.snp.data.models.CitizenConfirmation
 import com.chittortech.snp.data.models.Ticket
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.components.StatusBadge
 import com.chittortech.snp.ui.theme.*
 import com.chittortech.snp.util.DateUtils
@@ -416,6 +417,11 @@ fun ComplaintDetailScreen(
                     }
                 }
             }
+
+            // Official Nagar Parishad Branded Footer
+            SnpOfficialFooter()
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

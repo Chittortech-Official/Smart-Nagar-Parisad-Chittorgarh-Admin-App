@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.R
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -427,8 +428,11 @@ fun AboutAppScreen(
                 }
             }
 
+            // Official Nagar Parishad Branded Footer
+            SnpOfficialFooter()
+
             // Generous breathing room so card is NEVER cut off
-            Spacer(modifier = Modifier.navigationBarsPadding().height(40.dp))
+            Spacer(modifier = Modifier.navigationBarsPadding().height(20.dp))
         }
     }
 }

@@ -1,9 +1,11 @@
 package com.chittortech.snp.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -21,11 +23,14 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.R
 import com.chittortech.snp.ui.theme.*
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -301,4 +306,71 @@ fun SnpSearchBar(
         }
     }
 }
+
+// ─── Branded Official GarhSeva / SNP Footer ─────────────────────────────────
+@Composable
+fun SnpOfficialFooter(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 22.dp, bottom = 28.dp, start = 16.dp, end = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = Color.White,
+            border = BorderStroke(1.dp, SnpBorder),
+            shadowElevation = 1.5.dp,
+            modifier = Modifier.size(42.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.rajasthan_logo),
+                contentDescription = "Nagar Parishad Emblem",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+                    .clip(CircleShape)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "गढ़-सेवा (Garh-Seva) • नगर परिषद चित्तौड़गढ़",
+            fontSize = 13.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = SnpPrimary
+        )
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        Text(
+            text = "स्वायत्त शासन विभाग (DLB) • राजस्थान सरकार",
+            fontSize = 10.5.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextSecondary,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        Text(
+            text = "नागरिक शिकायत निवारण, 60 वार्ड मॉनिटरिंग एवं प्रशासनिक कमान केंद्र",
+            fontSize = 10.sp,
+            color = TextMuted,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = "Designed & Engineered by ChittorTech Software • v2.4",
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Medium,
+            color = TextMuted.copy(alpha = 0.85f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
 

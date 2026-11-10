@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.theme.*
 
@@ -177,6 +178,11 @@ fun MoreScreen(
                     fontSize = 13.5.sp
                 )
             }
+
+            // Official Nagar Parishad Branded Footer
+            SnpOfficialFooter()
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

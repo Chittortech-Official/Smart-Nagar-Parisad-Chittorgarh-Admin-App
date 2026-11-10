@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.models.NotificationLog
 import com.chittortech.snp.ui.components.EmptyState
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.theme.*
 import com.chittortech.snp.util.DateUtils
 
@@ -257,6 +258,10 @@ fun NotificationsScreen(
                                 }
                             }
                         }
+                    }
+
+                    item(key = "snp_official_footer") {
+                        SnpOfficialFooter()
                     }
                 }
             }

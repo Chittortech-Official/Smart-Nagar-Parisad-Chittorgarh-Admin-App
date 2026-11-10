@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.theme.*
 
 data class ControlRoomContact(
@@ -426,6 +427,10 @@ fun ControlRoomScreen(
                         }
                     }
                 }
+            }
+
+            item(key = "snp_official_footer") {
+                SnpOfficialFooter()
             }
         }
     }

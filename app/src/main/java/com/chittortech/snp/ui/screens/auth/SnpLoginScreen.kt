@@ -3,6 +3,7 @@ package com.chittortech.snp.ui.screens.auth
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -91,24 +92,26 @@ fun SnpLoginScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
                         modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(18.dp))
+                            .size(80.dp)
+                            .clip(CircleShape)
                             .background(Color.White)
-                            .padding(8.dp),
+                            .padding(4.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.chittortech_logo),
-                            contentDescription = "ChittorTech Logo",
-                            modifier = Modifier.fillMaxSize()
+                            painter = painterResource(R.drawable.chittorgarh_emblem),
+                            contentDescription = "Official Emblem",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
                         )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = "गढ़-सेवा (GarhSeva)",
-                        fontSize = 24.sp,
+                        text = "GarhSeva",
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White,
                         letterSpacing = 0.5.sp

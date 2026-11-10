@@ -154,18 +154,19 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                // Calculate Stats
+                // Calculate Stats strictly focusing on Today's Live Monitoring
                 val dashboardStats = remember(tickets) {
-                    val todayReg = tickets.count { DateUtils.isToday(it.registrationTime) }
-                    val total = tickets.size
-                    val pending = tickets.count { it.status == "REGISTERED" }
-                    val inProg = tickets.count { it.status == "IN_PROGRESS" }
+                    val todayTickets = tickets.filter { DateUtils.isToday(it.registrationTime) }
+                    val todayReg = todayTickets.size
+                    val pending = todayTickets.count { it.status == "REGISTERED" }
+                    val inProg = todayTickets.count { it.status == "IN_PROGRESS" }
                     val todayCl = tickets.count { it.status == "CLOSED" && DateUtils.isToday(it.closedAt) }
                     val monthCl = tickets.count { it.status == "CLOSED" && DateUtils.isThisMonth(it.closedAt) }
                     val yearCl = tickets.count { it.status == "CLOSED" && DateUtils.isThisYear(it.closedAt) }
-                    val overdue = tickets.count { it.isOverdue || it.status == "OVERDUE" }
-                    val escalated = tickets.count { it.isEscalated }
-                    val rate = if (total > 0) ((monthCl * 100) / total) else 0
+                    val overdue = todayTickets.count { it.isOverdue || it.status == "OVERDUE" }
+                    val escalated = todayTickets.count { it.isEscalated }
+                    val total = todayTickets.size
+                    val rate = if (total > 0) (((todayCl) * 100) / total) else 100
 
                     DashboardStats(
                         todayRegistered = todayReg,

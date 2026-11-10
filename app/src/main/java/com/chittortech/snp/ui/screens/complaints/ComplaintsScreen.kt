@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.chittortech.snp.data.OfficialCategoriesDirectory
 import com.chittortech.snp.data.models.Ticket
 import com.chittortech.snp.ui.components.EmptyState
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.components.SnpSearchBar
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.components.StatusBadge
@@ -43,19 +44,16 @@ fun ComplaintsScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedStatus by remember { mutableStateOf("ALL") }
-    var selectedDateFilter by remember { mutableStateOf("Today") }
 
-    val dateFilterOptions = listOf("Today", "Yesterday", "Last 5 Days")
     val statusTabs = listOf("ALL", "REGISTERED", "IN_PROGRESS", "CLOSED", "OVERDUE")
 
-    val filteredTickets = remember(tickets, searchQuery, selectedStatus, selectedDateFilter) {
+    val todayTicketsTotal = remember(tickets) {
+        tickets.count { DateUtils.isToday(it.registrationTime) }
+    }
+
+    val filteredTickets = remember(tickets, searchQuery, selectedStatus) {
         tickets.filter { t ->
-            val matchesDate = when (selectedDateFilter) {
-                "Today" -> DateUtils.isToday(t.registrationTime)
-                "Yesterday" -> DateUtils.isYesterday(t.registrationTime)
-                "Last 5 Days" -> DateUtils.isLastNDays(t.registrationTime, 5)
-                else -> DateUtils.isToday(t.registrationTime)
-            }
+            val matchesDate = DateUtils.isToday(t.registrationTime)
 
             val matchesSearch = searchQuery.isBlank() ||
                     t.ticketNumber.contains(searchQuery, ignoreCase = true) ||
@@ -78,8 +76,8 @@ fun ComplaintsScreen(
             .background(SnpBackground)
     ) {
         SnpTopBar(
-            title = "Complaints Central",
-            subtitle = "Total ${tickets.size} Registered Tickets",
+            title = "शिकायत निवारण कमान",
+            subtitle = "आज की कुल $todayTicketsTotal शिकायतें (Today's Live Queue)",
             onNotificationClick = onNotificationClick,
             onRefreshClick = onRefreshClick
         )
@@ -91,97 +89,107 @@ fun ComplaintsScreen(
             placeholder = "Search by Ticket ID, Ward, Citizen Name..."
         )
 
-        // Date Filter Strip (Today, Yesterday, Last 5 Days)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                dateFilterOptions.forEach { dateFilter ->
-                    val isSelected = selectedDateFilter == dateFilter
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { selectedDateFilter = dateFilter },
-                        shape = SnpSquareShape,
-                        label = { Text(dateFilter, fontSize = 11.5.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = SnpPrimary,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = TextSecondary
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = if (isSelected) SnpPrimary else SnpBorder,
-                            enabled = true,
-                            selected = isSelected
-                        )
+        // Status Filter Tabs
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            statusTabs.forEach { status ->
+                val isSelected = selectedStatus == status
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { selectedStatus = status },
+                    shape = SnpSquareShape,
+                    label = { Text(status.replace("_", " "), fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = SnpPrimary,
+                        selectedLabelColor = Color.White,
+                        containerColor = Color.White,
+                        labelColor = TextSecondary
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderColor = if (isSelected) SnpPrimary else SnpBorder,
+                        enabled = true,
+                        selected = isSelected
                     )
-                }
+                )
             }
+        }
 
-            Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-            // Status Filter Tabs
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                statusTabs.forEach { status ->
-                    val isSelected = selectedStatus == status
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { selectedStatus = status },
-                        shape = SnpSquareShape,
-                        label = { Text(status.replace("_", " "), fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = SnpPrimary,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = TextSecondary
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = if (isSelected) SnpPrimary else SnpBorder,
-                            enabled = true,
-                            selected = isSelected
-                        )
-                    )
-                }
-            }
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { onRefreshClick?.invoke() },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (filteredTickets.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(30.dp))
+                    EmptyState(message = if (searchQuery.isNotBlank()) "खोज के अनुसार कोई शिकायत नहीं मिली।" else "आज कोई नई शिकायत दर्ज नहीं हुई है।")
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = { onRefreshClick?.invoke() },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (filteredTickets.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
-                        contentAlignment = Alignment.Center
+                    // Official Portal Archive Notice
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFF8FAFC),
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        EmptyState(message = "No complaints found matching criteria.")
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Print,
+                                contentDescription = null,
+                                tint = SnpPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "विभागीय रिकॉर्ड अभिलेखागार (Portal Archive Notice)",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "मोबाइल ऐप में केवल 'आज' (Today) की नागरिक शिकायतें एवं त्वरित कार्रवाई सूची प्रदर्शित होती है। पूर्व की शिकायतों, मासिक प्रगति विवरण एवं संपूर्ण ऑडिट रिकॉर्ड देखने व प्रिंट करने हेतु नगर परिषद वेब पोर्टल अथवा कंट्रोल रूम रिकॉर्ड शाखा (Portal Officer) से डेटा प्राप्त करें।",
+                                    fontSize = 11.sp,
+                                    color = TextSecondary,
+                                    lineHeight = 15.sp
+                                )
+                            }
+                        }
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        items(
-                            items = filteredTickets,
-                            key = { it.id.ifEmpty { it.ticketNumber } },
-                            contentType = { "complaint_ticket" }
-                        ) { ticket ->
+
+                    SnpOfficialFooter()
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(
+                        items = filteredTickets,
+                        key = { it.id.ifEmpty { it.ticketNumber } },
+                        contentType = { "complaint_ticket" }
+                    ) { ticket ->
                         val catMeta = OfficialCategoriesDirectory.getCategoryMeta(ticket.categoryId, ticket.problemDescription)
 
                         Surface(
@@ -352,14 +360,14 @@ fun ComplaintsScreen(
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "विभागीय रिकॉर्ड अभिलेखागार (Portal Archive)",
+                                    text = "विभागीय रिकॉर्ड अभिलेखागार (Portal Archive Notice)",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = TextPrimary
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "ऐप में केवल आज, कल एवं पिछले 5 दिनों की सक्रिय शिकायतें उपलब्ध हैं। 5 दिन से पुराना संपूर्ण रिकॉर्ड नगर परिषद वेब पोर्टल / कंट्रोल रूम रिकॉर्ड शाखा से प्रिंट व विभागीय ऑडिट हेतु उपलब्ध है।",
+                                    text = "मोबाइल ऐप में केवल 'आज' (Today) की नागरिक शिकायतें एवं त्वरित कार्रवाई सूची प्रदर्शित होती है। पूर्व की शिकायतों, मासिक प्रगति विवरण एवं संपूर्ण ऑडिट रिकॉर्ड देखने व प्रिंट करने हेतु नगर परिषद वेब पोर्टल अथवा कंट्रोल रूम रिकॉर्ड शाखा (Portal Officer) से डेटा प्राप्त करें।",
                                     fontSize = 11.sp,
                                     color = TextSecondary,
                                     lineHeight = 15.sp
@@ -367,6 +375,11 @@ fun ComplaintsScreen(
                             }
                         }
                     }
+                }
+
+                // Official Nagar Parishad Branded Footer
+                item(key = "snp_official_footer") {
+                    SnpOfficialFooter()
                 }
             }
         }

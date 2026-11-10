@@ -27,6 +27,7 @@ import com.chittortech.snp.data.models.DashboardStats
 import com.chittortech.snp.data.models.Ticket
 import com.chittortech.snp.ui.components.KpiCard
 import com.chittortech.snp.ui.components.SectionHeader
+import com.chittortech.snp.ui.components.SnpOfficialFooter
 import com.chittortech.snp.ui.components.SnpTopBar
 import com.chittortech.snp.ui.components.StatusBadge
 import com.chittortech.snp.ui.theme.*
@@ -47,17 +48,9 @@ fun HomeScreen(
     onHeaderClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    var selectedFilter by remember { mutableStateOf("Today") }
-    val filterOptions = listOf("Today", "Yesterday", "Last 5 Days")
-
-    val filteredTickets = remember(recentTickets, selectedFilter) {
-        val list = when (selectedFilter) {
-            "Today" -> recentTickets.filter { DateUtils.isToday(it.registrationTime) }
-            "Yesterday" -> recentTickets.filter { DateUtils.isYesterday(it.registrationTime) }
-            "Last 5 Days" -> recentTickets.filter { DateUtils.isLastNDays(it.registrationTime, 5) }
-            else -> recentTickets.filter { DateUtils.isToday(it.registrationTime) }
-        }
-        list.sortedByDescending { it.registrationTime ?: "" }
+    val filteredTickets = remember(recentTickets) {
+        recentTickets.filter { DateUtils.isToday(it.registrationTime) }
+            .sortedByDescending { it.registrationTime ?: "" }
     }
 
     Column(
@@ -91,32 +84,41 @@ fun HomeScreen(
             ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ── Date Filters Strip ─────────────────────────────────────────────
-            Row(
+            // ── Today's Live Command Indicator ────────────────────────────────
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = SnpPrimaryLight.copy(alpha = 0.6f),
+                border = BorderStroke(1.dp, SnpPrimary.copy(alpha = 0.2f)),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                filterOptions.forEach { filter ->
-                    val isSelected = selectedFilter == filter
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { selectedFilter = filter },
-                        shape = SnpSquareShape,
-                        label = { Text(filter, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = SnpPrimary,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = TextSecondary
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = if (isSelected) SnpPrimary else SnpBorder,
-                            enabled = true,
-                            selected = isSelected
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = SnpGreen,
+                            modifier = Modifier.size(8.dp)
+                        ) {}
+                        Text(
+                            text = "आज का दैनिक कमान केंद्र (Today's Live Queue)",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SnpPrimary
                         )
+                    }
+                    Text(
+                        text = "LIVE",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = SnpGreen
                     )
                 }
             }
@@ -317,8 +319,8 @@ fun HomeScreen(
             // ── Recent Complaints Stream ───────────────────────────────────────
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 SectionHeader(
-                    title = if (selectedFilter == "Today") "Today's Citizen Complaints (${filteredTickets.size})" else "Complaints • $selectedFilter (${filteredTickets.size})",
-                    actionLabel = "View All",
+                    title = "आज की नागरिक शिकायतें (${filteredTickets.size})",
+                    actionLabel = "सभी देखें",
                     onAction = onViewAllComplaints
                 )
 
@@ -345,14 +347,14 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                "No complaints found for $selectedFilter",
+                                "आज कोई नई शिकायत दर्ज नहीं हुई है",
                                 fontSize = 13.5.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = TextPrimary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                "Switch filter to 'Yesterday', 'Last 7 Days', or 'All Time' to view other records.",
+                                "पूर्व की शिकायतों एवं अभिलेखों के लिए नगर परिषद वेब पोर्टल / कंट्रोल रूम रिकॉर्ड शाखा से संपर्क करें।",
                                 fontSize = 11.5.sp,
                                 color = TextMuted,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -539,14 +541,14 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "विभागीय रिकॉर्ड अभिलेखागार (Portal Archive)",
+                            text = "विभागीय रिकॉर्ड अभिलेखागार (Portal Archive Notice)",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "ऐप में केवल आज, कल एवं पिछले 5 दिनों की सक्रिय शिकायतें उपलब्ध हैं। 5 दिन से पुराना संपूर्ण रिकॉर्ड नगर परिषद वेब पोर्टल / कंट्रोल रूम रिकॉर्ड शाखा से प्रिंट व विभागीय ऑडिट हेतु उपलब्ध है।",
+                            text = "मोबाइल ऐप में केवल 'आज' (Today) की लाइव नागरिक शिकायतें एवं कमान डेटा प्रदर्शित होता है। पूर्व की शिकायतों, मासिक प्रगति विवरण एवं संपूर्ण ऑडिट रिकॉर्ड देखने व प्रिंट करने हेतु नगर परिषद वेब पोर्टल अथवा कंट्रोल रूम रिकॉर्ड शाखा (Portal Officer) से डेटा प्राप्त करें।",
                             fontSize = 11.sp,
                             color = TextSecondary,
                             lineHeight = 15.sp
@@ -555,7 +557,10 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            // Official Nagar Parishad Branded Footer
+            SnpOfficialFooter()
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
