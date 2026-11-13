@@ -9,10 +9,10 @@ class SnpBootReceiver : BroadcastReceiver() {
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED ||
             intent?.action == "android.intent.action.QUICKBOOT_POWERON"
         ) {
-            SnpNotificationManager.initNotificationChannels(context)
-            SnpLiveMonitoringService.start(context)
-            SnpBackgroundSyncWorker.schedulePeriodicSync(context)
+            try {
+                SnpNotificationManager.initNotificationChannels(context)
+                SnpBackgroundSyncWorker.schedulePeriodicSync(context)
+            } catch (_: Exception) {}
         }
     }
 }
-

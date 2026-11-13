@@ -182,7 +182,7 @@ object SnpNotificationManager {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_snp)
             .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
             .setContentText(collapsedText)
@@ -247,7 +247,7 @@ object SnpNotificationManager {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_snp)
             .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
             .setContentText(collapsedText)
@@ -312,7 +312,7 @@ object SnpNotificationManager {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_snp)
             .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
             .setContentText(collapsedText)
@@ -376,7 +376,7 @@ object SnpNotificationManager {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_snp)
             .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
             .setContentText(collapsedText)
@@ -440,7 +440,7 @@ object SnpNotificationManager {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_STATUS_UPDATES_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_snp)
             .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
             .setContentText(collapsedText)
@@ -503,7 +503,7 @@ object SnpNotificationManager {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_SLA_OVERDUE_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_snp)
             .setSubText("गढ़-सेवा • $ticketNumber")
             .setContentTitle(title)
             .setContentText(collapsedText)

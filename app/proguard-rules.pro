@@ -46,3 +46,23 @@
 -dontwarn kotlin.reflect.**
 -dontwarn kotlin.Unit
 
+# AndroidX WorkManager (Worker reflection instantiations)
+-keep class androidx.work.** { *; }
+-keepclassmembers class androidx.work.** { *; }
+-keep class * extends androidx.work.ListenableWorker { *; }
+-keep class * extends androidx.work.Worker { *; }
+-keep class com.chittortech.snp.util.SnpBackgroundSyncWorker { *; }
+
+# AndroidX Security / EncryptedSharedPreferences / Tink
+-keep class androidx.security.crypto.** { *; }
+-keep class com.google.crypto.tink.** { *; }
+-dontwarn androidx.security.crypto.**
+-dontwarn com.google.crypto.tink.**
+
+# Application & ViewModel classes
+-keep class com.chittortech.snp.SnpApplication { *; }
+-keep class com.chittortech.snp.MainActivity { *; }
+-keep class com.chittortech.snp.viewmodel.** { *; }
+-keepclassmembers class com.chittortech.snp.viewmodel.** { *; }
+
+
